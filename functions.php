@@ -15,56 +15,57 @@ class Ingredient {
 	var $cholesterol;
 	var $others;
 
-	function Ingredient($id, $name, $unit, $qty, $kcal, $carb, $sugar, $fibre, $protein, $fat, $sat_fat, $sodium, $cholesterol, $others) {
-		$this->name = $name;
-		$this->id = $id;
-		$this->unit = $unit;
-		$this->qty = $qty;
-		$this->kcal = $kcal;
-		$this->carb = $carb;
-		$this->sugar = $sugar;
-		$this->fibre = $fibre;
-		$this->protein = $protein;
-		$this->fat = $fat;
-		$this->sat_fat = $sat_fat;
-		$this->sodium = $sodium;
-		$this->cholesterol = $cholesterol;
-		$this->others = $others;
-	}
-
-	function Ingredient($id, $name = '') {
+	function Ingredient($id, $name = '', $new = 0, $unit = '', $qty = 0, $kcal = 0, $carb = 0, $sugar = 0, $fibre = 0, $protein = 0, $fat = 0, $sat_fat = 0, $sodium = 0, $cholesterol = 0, $others = '') {
 		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-		var $result;
+		$result = 0;
 
-		if ($name != '') {
-			/* Get by name */
-			$preparedStatement = $db->prepare('SELECT * FROM ingredients WHERE name LIKE :name');
-			$preparedStatement->execute(array(':name' => $name));
-			$result = $preparedStatement->fetch();	
+		if (!$new) {
+			if ($name != '') {
+				/* Get by name */
+				$preparedStatement = $db->prepare('SELECT * FROM ingredients WHERE name LIKE :name');
+				$preparedStatement->execute(array(':name' => $name));
+				$result = $preparedStatement->fetch();	
+			} else {
+				/* Get by ID */
+				$preparedStatement = $db->prepare("SELECT * FROM ingredients WHERE id=:ingredient_id");
+				$preparedStatement->execute(array(':ingredient_id' => $id));
+				$result = $preparedStatement->fetch();
+			}
+
+			if (!$result) {
+				throw new Exception('Ingredient doesn\'t exist!');
+			}
+			
+			$this->name = $result['name'];
+			$this->id = $result['id'];
+			$this->unit = $result['unit'];
+			$this->qty = $result['qty'];
+			$this->kcal = $result['kcal'];
+			$this->carb = $result['carb'];
+			$this->sugar = $result['sugar'];
+			$this->fibre = $result['fibre'];
+			$this->protein = $result['protein'];
+			$this->fat = $result['fat'];
+			$this->sat_fat = $result['sat_fat'];
+			$this->sodium = $result['sodium'];
+			$this->cholesterol = $result['cholesterol'];
+			$this->others = $result['others'];
 		} else {
-			/* Get by ID */
-			$preparedStatement = $db->prepare("SELECT * FROM ingredients WHERE id=:ingredient_id");
-			$preparedStatement->execute(array(':ingredient_id' => $id));
-			$result = $preparedStatement->fetch();
+			$this->name = $name;
+			$this->id = $id;
+			$this->unit = $unit;
+			$this->qty = $qty;
+			$this->kcal = $kcal;
+			$this->carb = $carb;
+			$this->sugar = $sugar;
+			$this->fibre = $fibre;
+			$this->protein = $protein;
+			$this->fat = $fat;
+			$this->sat_fat = $sat_fat;
+			$this->sodium = $sodium;
+			$this->cholesterol = $cholesterol;
+			$this->others = $others;
 		}
-		if (!$result) {
-			throw new Exception('Ingredient doesn\'t exist!');
-		}
-		
-		$this->name = $result['name'];
-		$this->id = $result['id'];
-		$this->unit = $result['unit'];
-		$this->qty = $result['qty'];
-		$this->kcal = $result['kcal'];
-		$this->carb = $result['carb'];
-		$this->sugar = $result['sugar'];
-		$this->fibre = $result['fibre'];
-		$this->protein = $result['protein'];
-		$this->fat = $result['fat'];
-		$this->sat_fat = $result['sat_fat'];
-		$this->sodium = $result['sodium'];
-		$this->cholesterol = $result['cholesterol'];
-		$this->others = $result['others'];
 	}
 
 	function delete() {
@@ -89,6 +90,7 @@ class Ingredient {
 		if ($update) {
 			$preparedStatement = $db->prepare("SELECT * FROM ingredients WHERE id=:ingredient_id");
 			$preparedStatement->execute(array(':ingredient_id' => $this->id));
+			echo 'ID: '.$this->id;
 			if (!$preparedStatement->fetch()) {
 				throw new Exception('Tried to update ingredient, but ingredient doesn\'t exist');
 				return -1;
@@ -144,7 +146,7 @@ class Ingredient {
 }
 
 function get_all_ingredients() {
-	var $ingredients = array();
+	$ingredients = array();
 	
 	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
 	$result = $db->query('SELECT id FROM ingredients');
@@ -173,66 +175,68 @@ class Recipe {
 	 */
 	var $ingredients;
 
-	function Recipe($id, $name, $description, $instructions, $time_estimate, $ingredients = NULL) {
-		$this->id = $id;
-		$this->name = $name;
-		$this->description = $description;
-		$this->instructions = $instructions;
-		$this->time_estimate = $time_estimate;
-		if ($ingredients == NULL)
-			$this->ingredients = array();
-		else
-			$this->ingredients = $ingredients;
-	}
-
-	function Recipe($id, $name = '') {
+	function Recipe($id, $name = '', $new = 0, $description = '', $instructions = '', $time_estimate = 0, $ingredients = NULL) {
 		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-		var $result;
+		$result = 0;
 
-		if ($name != '') {
-			/* Get by name */
-			$preparedStatement = $db->prepare('SELECT * FROM recipes WHERE name LIKE :name');
-			$preparedStatement->execute(array(':name' => $name));
-			$result = $preparedStatement->fetch();	
-		} else {
-			/* Get by ID */
-			$preparedStatement = $db->prepare("SELECT * FROM recipes WHERE id=:recipe_id");
-			$preparedStatement->execute(array(':recipe_id' => $id));
-			$result = $preparedStatement->fetch();
-		}
-		if (!$result) {
-			throw new Exception('Ingredient doesn\'t exist!');
-		}
-
-		$this->id = $result['id'];	
-		$this->name = $result['name'];
-		$this->description = $result['description'];
-		$this->instructions = $result['instructions'];
-		$this->time_estimate = $result['time_estimate'];
-
-		var $ings = array();
-		var $i = 0;
-
-		$preparedStatement = $db->prepare("SELECT * FROM rec_ing WHERE recipe_id=:recipe_id");
-		$preparedStatement->execute(array(':recipe_id' => $this->id));
-		$result = $preparedStatement->fetchAll();
-		foreach ($result as $row) {
-			var $elem = array();
-
-			$elem['qty'] = $row['ingredient_qty'];
-			$elem['unit'] = $row['ingredient_unit'];
-			$elem['method'] = $row['method'];
-			$elem['Ingredient'] = new Ingredient($row['ingredient_id']);
-			if (!$elem['Ingredient']) {
-				throw new Exception('Problem with ingredient id='.$row['ingredient_id']);
+		if (!$new) {
+			if ($name != '') {
+				/* Get by name */
+				$preparedStatement = $db->prepare('SELECT * FROM recipes WHERE name LIKE :name');
+				$preparedStatement->execute(array(':name' => $name));
+				$result = $preparedStatement->fetch();	
+			} else {
+				/* Get by ID */
+				$preparedStatement = $db->prepare("SELECT * FROM recipes WHERE id=:recipe_id");
+				$preparedStatement->execute(array(':recipe_id' => $id));
+				$result = $preparedStatement->fetch();
 			}
 
-			ings[$i++] = $elem;
+			if (!$result) {
+				throw new Exception('Recipe doesn\'t exist!');
+			}
+
+			$this->id = $result['id'];	
+			$this->name = $result['name'];
+			$this->description = $result['description'];
+			$this->instructions = $result['instructions'];
+			$this->time_estimate = $result['time_estimate'];
+
+			$ings = array();
+			$i = 0;
+
+			$preparedStatement = $db->prepare("SELECT * FROM rec_ing WHERE recipe_id=:recipe_id");
+			$preparedStatement->execute(array(':recipe_id' => $this->id));
+			$result = $preparedStatement->fetchAll();
+			foreach ($result as $row) {
+				$elem = array();
+
+				$elem['qty'] = $row['ingredient_qty'];
+				$elem['unit'] = $row['ingredient_unit'];
+				$elem['method'] = $row['method'];
+				$elem['Ingredient'] = new Ingredient($row['ingredient_id']);
+				if (!$elem['Ingredient']) {
+					throw new Exception('Problem with ingredient id='.$row['ingredient_id']);
+				}
+
+				$ings[$i++] = $elem;
+			}
+			$this->ingredients = $ings;
+		} else {
+			$this->id = $id;
+			$this->name = $name;
+			$this->description = $description;
+			$this->instructions = $instructions;
+			$this->time_estimate = $time_estimate;
+			if ($ingredients == NULL)
+				$this->ingredients = array();
+			else
+				$this->ingredients = $ingredients;
 		}
 	}
 
 	function addIngredient($qty, $unit, $method, $id, $name = '') {
-		var $elem = array();
+		$elem = array();
 		$elem['qty'] = $qty;
 		$elem['unit'] = $unit;
 		$elem['method'] = $method;
@@ -252,11 +256,33 @@ class Recipe {
 		return $n;
 	}
 
+	function getTimeEstimate() {
+		$str = '';
+		$hours = intval($this->time_estimate / 60);
+		$minutes = intval($this->time_estimate % 60);
+		if (($hours != 0) && ($minutes != 0))
+			return sprintf("%dh, %dmin", $hours, $minutes);
+		else if (($hours != 0) && ($minutes == 0))
+			return sprintf("%dh", $hours);
+		else if (($hours == 0) && ($minutes != 0))
+			return sprintf("%dmin", $minutes);
+		else
+			return "No Estimate";
+	}
+
 	function getNutriInfo() {
-		var $nutritional_info = array();
+		$info = array();
+		$info['kcal'] = 0;
+		$info['carb'] = 0;
+		$info['sugar'] = 0;
+		$info['fat'] = 0;
+		$info['sat_fat'] = 0;
+		$info['protein'] = 0;
+		$info['fibre'] = 0;
+		$info['sodium'] = 0;
+		$info['cholesterol'] = 0;
 
 		foreach ($this->ingredients as $elem) {
-			var $info = array();
 			$multiplier = $elem['qty']/$elem['Ingredient']->qty;
 
 			if ($elem['unit'] == $elem['Ingredient']->unit) {
@@ -278,7 +304,7 @@ class Recipe {
 			} else if (($elem['unit'] == 'ml') && ($elem['Ingredient']->unit == 'l')) {
 				$multiplier /= 1000;
 			} else {
-				throw new Exception "unknown unit mismatch, '".$elem['unit']."' vs '".$elem['Ingredient']->unit."'";
+				throw new Exception("unknown unit mismatch, '".$elem['unit']."' vs '".$elem['Ingredient']->unit."'");
 			}
 
 			$info['kcal'] += $elem['Ingredient']->kcal * $multiplier;
@@ -290,10 +316,9 @@ class Recipe {
 			$info['fibre'] += $elem['Ingredient']->fibre * $multiplier;
 			$info['sodium'] += $elem['Ingredient']->sodium * $multiplier;
 			$info['cholesterol'] += $elem['Ingredient']->cholesterol * $multiplier;
-			array_push($nutritional_info, $info);
 		}
 
-		return $nutritional_info;
+		return $info;
 	}
 
 	function save($update = 0) {
@@ -333,7 +358,6 @@ class Recipe {
 			$n += $preparedStatement->rowCount();
 
 			foreach ($this->ingredients as $ing) {
-				$ing['qty'], $ing['unit'], $ing['method'], $ing['Ingredient'];
 				$preparedStatement = $db->prepare("INSERT INTO rec_ing (recipe_id, ingredient_id, ingredient_qty, ingredient_unit, method) ".
 					"VALUES (:recipe_id, :ingredient_id, :ingredient_qty, :ingredient_unit, :method);");
 				$preparedStatement->execute(array(
@@ -368,7 +392,6 @@ class Recipe {
 			}
 
 			foreach ($this->ingredients as $ing) {
-				$ing['qty'], $ing['unit'], $ing['method'], $ing['Ingredient'];
 				$preparedStatement = $db->prepare("INSERT INTO rec_ing (recipe_id, ingredient_id, ingredient_qty, ingredient_unit, method) ".
 					"VALUES (:recipe_id, :ingredient_id, :ingredient_qty, :ingredient_unit, :method);");
 				$preparedStatement->execute(array(
@@ -386,7 +409,7 @@ class Recipe {
 }
 
 function get_all_recipes() {
-	var $recipes = array();
+	$recipes = array();
 	
 	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
 	$result = $db->query('SELECT id FROM recipes');

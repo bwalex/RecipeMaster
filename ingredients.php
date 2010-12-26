@@ -112,6 +112,7 @@
 <body>
 
 <?php
+include('functions.php');
 
 function print_msg($msg) {
 	echo '<div class="ui-widget">
@@ -146,87 +147,41 @@ if ($_POST['ingredient_id'] && $_POST['ingredient_name']) {
 		$ingredient_sodium = $_POST['ingredient_sodium'];
 		$ingredient_cholesterol = $_POST['ingredient_cholesterol'];
 		$ingredient_others = $_POST['ingredient_others'];
+		if (($form_type == "add_ingredient") || ($form_type == "edit_ingredient"))
+			$new = 1;
+		else
+			$new = 0;
 
-		/* http://stackoverflow.com/questions/60174/best-way-to-stop-sql-injection-in-php */
-		//$db = new PDO("sqlite:recipes.db");
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+		$ingredient = new Ingredient($ingredient_id, $ingredient_name, $new,
+		    $ingredient_unit, $ingredient_qty, $ingredient_kcal,
+		    $ingredient_carb, $ingredient_sugar, $ingredient_fibre,
+		    $ingredient_protein, $ingredient_fat, $ingredient_sat_fat,
+		    $ingredient_sodium, $ingredient_cholesterol,
+		    $ingredient_others);
+
 		if ($form_type == "add_ingredient") {
-
-			$preparedStatement = $db->prepare('SELECT * FROM ingredients WHERE name LIKE :name');
-			$preparedStatement->execute(array(':name' => $ingredient_name));
-
-			if ($preparedStatement->fetch()) {
-				print_error('Ingredient '.$ingredient_name.' already exists in the database');
-			} else {
-				$preparedStatement = $db->prepare("INSERT INTO ingredients (name, unit, qty, kcal, carb, sugar, fibre, protein, fat, sat_fat, sodium, cholesterol, others) ".
-					"VALUES (:ingredient_name, :ingredient_unit, :ingredient_qty, :ingredient_kcal, :ingredient_carb, :ingredient_sugar, :ingredient_fibre, :ingredient_protein, :ingredient_fat, :ingredient_sat_fat, :ingredient_sodium,  :ingredient_cholesterol,  :ingredient_others);");
-				$preparedStatement->execute(array(
-					':ingredient_name' => $ingredient_name,
-					':ingredient_unit' => $ingredient_unit,
-					':ingredient_qty' => $ingredient_qty,
-					':ingredient_kcal' => $ingredient_kcal,
-					':ingredient_carb' => $ingredient_carb,
-					':ingredient_sugar' => $ingredient_sugar,
-					':ingredient_fibre' => $ingredient_fibre,
-					':ingredient_protein' => $ingredient_protein,
-					':ingredient_fat' => $ingredient_fat,
-					':ingredient_sat_fat' => $ingredient_sat_fat,
-					':ingredient_sodium' => $ingredient_sodium,
-					':ingredient_cholesterol' => $ingredient_cholesterol,
-					':ingredient_others' => $ingredient_others
-					));
-				$n = $preparedStatement->rowCount();
-				if ($n > 0)
-					print_msg('Successfully added ingredient '.$ingredient_name);
-				print_msg("Rows affected: ".$n."<br/>");
-			}
+			$n = $ingredient->save();
+			
+			if ($n > 0)
+				print_msg('Successfully added ingredient '.$ingredient_name);
+			print_msg("Rows affected: ".$n."<br/>");
 		}
 		else if ($form_type == "edit_ingredient") {
-			$preparedStatement = $db->prepare("SELECT * FROM ingredients WHERE id=:ingredient_id");
-			$preparedStatement->execute(array(':ingredient_id' => $ingredient_id));
-			if ($preparedStatement->fetch()) {
-				$preparedStatement = $db->prepare("UPDATE ingredients SET name=:ingredient_name, unit=:ingredient_unit, qty=:ingredient_qty, kcal=:ingredient_kcal, carb=:ingredient_carb, sugar=:ingredient_sugar, fibre=:ingredient_fibre, protein=:ingredient_protein, fat=:ingredient_fat, sat_fat=:ingredient_sat_fat, sodium=:ingredient_sodium, cholesterol=:ingredient_cholesterol,  others=:ingredient_others WHERE id=:ingredient_id");
-				$preparedStatement->execute(array(
-					':ingredient_name' => $ingredient_name,
-					':ingredient_unit' => $ingredient_unit,
-					':ingredient_qty' => $ingredient_qty,
-					':ingredient_kcal' => $ingredient_kcal,
-					':ingredient_carb' => $ingredient_carb,
-					':ingredient_sugar' => $ingredient_sugar,
-					':ingredient_fibre' => $ingredient_fibre,
-					':ingredient_protein' => $ingredient_protein,
-					':ingredient_fat' => $ingredient_fat,
-					':ingredient_sat_fat' => $ingredient_sat_fat,
-					':ingredient_sodium' => $ingredient_sodium,
-					':ingredient_cholesterol' => $ingredient_cholesterol,
-					':ingredient_others' => $ingredient_others,
-					':ingredient_id' => $ingredient_id
-					));
-				$n = $preparedStatement->rowCount();
-				if ($n > 0)
-					print_msg('Successfully edited ingredient '.$ingredient_name);
-				print_msg("Rows affected: ".$n."<br/>");
-			} else {
-				print_error('Ingredient '.$ingredient_name.' doesn\'t exist');
-			}
+			$n = $ingredient->save(1);
+
+			if ($n > 0)
+				print_msg('Successfully edited ingredient '.$ingredient_name);
+			print_msg("Rows affected: ".$n."<br/>");
 		}
 		else if ($form_type == "delete_ingredient") {
-			$preparedStatement = $db->prepare("SELECT * FROM ingredients WHERE id=:ingredient_id");
-			$preparedStatement->execute(array(':ingredient_id' => $ingredient_id));
-			if ($preparedStatement->fetch()) {
-				$preparedStatement = $db->prepare("DELETE FROM ingredients WHERE id=:ingredient_id");
-				$preparedStatement->execute(array(':ingredient_id' => $ingredient_id));
-				$n = $preparedStatement->rowCount();
-				if ($n > 0)
-					print_msg('Successfully deleted ingredient '.$ingredient_name);
-				print_msg("Rows affected: ".$n."<br/>");
-			} else {
-				print_error('Ingredient '.$ingredient_name.' doesn\'t exist');
-			}
+			$n = $ingredient->delete();
+			if ($n > 0)
+				print_msg('Successfully deleted ingredient '.$ingredient_name);
+			print_msg("Rows affected: ".$n."<br/>");
 		}
 	
-	} catch (PDOException $e) {
-		print 'Exception: '.$e->getMessage();
+	} catch (Exception $e) {
+		print_error('Exception: '.$e->getMessage());
 	}
 }
 /*
@@ -456,11 +411,9 @@ CREATE TABLE  `recipemaster`.`ingredients` (
 	</thead> 
 	<tbody>
     <?php
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-
+		$ingredients = get_all_ingredients();
 		$i = 0;
-		$result = $db->query('SELECT * FROM ingredients');
-		foreach ($result as $row) {
+		foreach ($ingredients as $ing) {
 			$i = !$i;
 			if ($i)
 				echo '<tr class="even">';
@@ -468,39 +421,39 @@ CREATE TABLE  `recipemaster`.`ingredients` (
 				echo '<tr class="odd">';
 
 
-			echo '<td>'.$row['name'].' <a href="#" onclick="
-				document.edit_ingredient.ingredient_name.value=decodeURIComponent(\''.rawurlencode($row['name']).'\');
-				document.edit_ingredient.ingredient_qty.value=decodeURIComponent(\''.rawurlencode($row['qty']).'\');
-				document.edit_ingredient.ingredient_unit.value=decodeURIComponent(\''.rawurlencode($row['unit']).'\');
-				document.edit_ingredient.ingredient_kcal.value=decodeURIComponent(\''.rawurlencode($row['kcal']).'\');
-				document.edit_ingredient.ingredient_carb.value=decodeURIComponent(\''.rawurlencode($row['carb']).'\');
-				document.edit_ingredient.ingredient_sugar.value=decodeURIComponent(\''.rawurlencode($row['sugar']).'\');
-				document.edit_ingredient.ingredient_fat.value=decodeURIComponent(\''.rawurlencode($row['fat']).'\');
-				document.edit_ingredient.ingredient_sat_fat.value=decodeURIComponent(\''.rawurlencode($row['sat_fat']).'\');
-				document.edit_ingredient.ingredient_protein.value=decodeURIComponent(\''.rawurlencode($row['protein']).'\');
-				document.edit_ingredient.ingredient_fibre.value=decodeURIComponent(\''.rawurlencode($row['fibre']).'\');
-				document.edit_ingredient.ingredient_sodium.value=decodeURIComponent(\''.rawurlencode($row['sodium']).'\');
-				document.edit_ingredient.ingredient_cholesterol.value=decodeURIComponent(\''.rawurlencode($row['cholesterol']).'\');
-				document.edit_ingredient.ingredient_others.value=decodeURIComponent(\''.rawurlencode($row['others']).'\');
-				document.edit_ingredient.ingredient_id.value=decodeURIComponent(\''.rawurlencode($row['id']).'\');
+			echo '<td>'.$ing->name.' <a href="#" onclick="
+				document.edit_ingredient.ingredient_name.value=decodeURIComponent(\''.rawurlencode($ing->name).'\');
+				document.edit_ingredient.ingredient_qty.value=decodeURIComponent(\''.rawurlencode($ing->qty).'\');
+				document.edit_ingredient.ingredient_unit.value=decodeURIComponent(\''.rawurlencode($ing->unit).'\');
+				document.edit_ingredient.ingredient_kcal.value=decodeURIComponent(\''.rawurlencode($ing->kcal).'\');
+				document.edit_ingredient.ingredient_carb.value=decodeURIComponent(\''.rawurlencode($ing->carb).'\');
+				document.edit_ingredient.ingredient_sugar.value=decodeURIComponent(\''.rawurlencode($ing->sugar).'\');
+				document.edit_ingredient.ingredient_fat.value=decodeURIComponent(\''.rawurlencode($ing->fat).'\');
+				document.edit_ingredient.ingredient_sat_fat.value=decodeURIComponent(\''.rawurlencode($ing->sat_fat).'\');
+				document.edit_ingredient.ingredient_protein.value=decodeURIComponent(\''.rawurlencode($ing->protein).'\');
+				document.edit_ingredient.ingredient_fibre.value=decodeURIComponent(\''.rawurlencode($ing->fibre).'\');
+				document.edit_ingredient.ingredient_sodium.value=decodeURIComponent(\''.rawurlencode($ing->sodium).'\');
+				document.edit_ingredient.ingredient_cholesterol.value=decodeURIComponent(\''.rawurlencode($ing->cholesterol).'\');
+				document.edit_ingredient.ingredient_others.value=decodeURIComponent(\''.rawurlencode($ing->others).'\');
+				document.edit_ingredient.ingredient_id.value=decodeURIComponent(\''.rawurlencode($ing->id).'\');
 				$(\'#dialog_edit\').dialog(\'open\');
 			">(edit)</a>
 			<a href="#" onclick="
-				document.delete_ingredient.ingredient_name.value=decodeURIComponent(\''.rawurlencode($row['name']).'\');
-				document.delete_ingredient.ingredient_id.value=decodeURIComponent(\''.rawurlencode($row['id']).'\');
+				document.delete_ingredient.ingredient_name.value=decodeURIComponent(\''.rawurlencode($ing->name).'\');
+				document.delete_ingredient.ingredient_id.value=decodeURIComponent(\''.rawurlencode($ing->id).'\');
 				document.delete_ingredient.submit();
 			">(delete)</a></td>';
-			echo '<td class="center">'.$row['qty'].' '.$row['unit'].'</td>';
-			/*echo '<td class="center">'.$row['unit'].'</td>'; */
-			echo '<td class="center">'.$row['kcal'].'</td>';
-			echo '<td class="center">'.$row['carb'].'</td>';
-			echo '<td class="center">'.$row['sugar'].'</td>';
-			echo '<td class="center">'.$row['fibre'].'</td>';
-			echo '<td class="center">'.$row['protein'].'</td>';
-			echo '<td class="center">'.$row['fat'].'</td>';
-			echo '<td class="center">'.$row['sat_fat'].'</td>';
-			echo '<td class="center">'.$row['sodium'].'</td>';
-			echo '<td class="center">'.$row['cholesterol'].'</td>';
+			echo '<td class="center">'.$ing->qty.' '.$ing->unit.'</td>';
+			/*echo '<td class="center">'.$ing->unit.'</td>'; */
+			echo '<td class="center">'.$ing->kcal.'</td>';
+			echo '<td class="center">'.$ing->carb.'</td>';
+			echo '<td class="center">'.$ing->sugar.'</td>';
+			echo '<td class="center">'.$ing->fibre.'</td>';
+			echo '<td class="center">'.$ing->protein.'</td>';
+			echo '<td class="center">'.$ing->fat.'</td>';
+			echo '<td class="center">'.$ing->sat_fat.'</td>';
+			echo '<td class="center">'.$ing->sodium.'</td>';
+			echo '<td class="center">'.$ing->cholesterol.'</td>';
 			echo '</tr>';
 		}
 	?>
