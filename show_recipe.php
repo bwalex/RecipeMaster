@@ -1,4 +1,25 @@
+<?php
+function tidyhtml($input)
+{
+    $config = array(
+           'indent'         => true,
+           'output-xhtml'   => true,
+           'wrap'           => 200);
+
+    $tidy = new tidy();
+    $tidy->parseString($input, $config, 'utf8');
+    $tidy->cleanRepair();
+
+    // Output
+    return $tidy;
+}
+
+ob_start('tidyhtml');
+?>
+
 <!DOCTYPE html>
+TODO: copy recipe<br/>
+TODO: split ingredients into two columns
 
 <html>
 
@@ -11,7 +32,13 @@
 			@import "css/demo_table.css";
 		</style> 
 
-        
+		<script type="text/javascript" src="highslide/highslide-with-gallery.js"></script>
+		<script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8"></script>
+		<link rel="stylesheet" type="text/css" href="highslide/highslide.css" />
+		<!--[if lt IE 7]>
+		<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
+		<![endif]-->
+
 		<link type="text/css" href="css/style.css" rel="stylesheet" />	
 		<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet" />	
 		<script type="text/javascript" src="js/jquery-1.4.4.min.js"></script>
@@ -71,11 +98,24 @@
 			}
 		</script>
 		<script type="text/javascript">
+			//ACCORDION BUTTON ACTION	
+			$(document).ready(function()
+			{
+
+			});
 			$(function(){
+				  //hide the all of the element with class msg_body
+				  $("#acc_content").hide();
+				  //toggle the componenet with class msg_body
+				  $("#acc_head").click(function()
+				  {
+				    $(this).next("#acc_content").slideToggle(100);
+				  });
+  
 				$('#ingredients_data').dataTable();
 				
 				// Accordion
-				$("#accordion").accordion({ header: "h3" });
+				//$("#accordion").accordion({ header: "h3" });
 
 				// Tabs
 				$('#tabs').tabs();
@@ -193,14 +233,18 @@ if ($_GET['recipe_id']) {
 		$info = $recipe->getNutriInfo();
 		echo '<h1>'.$recipe->name.'</h1>';
 		echo '<span style="float:right;">';
-		echo '<img src="nutrilabel.php?carbs='.$info['carb'].'&protein='.$info['protein'].'&fat='.$info['fat'].'&sat_fat='.$info['sat_fat'].'&calories='.$info['kcal'].'&cholesterol='.$info['cholesterol'].'&sodium='.$info['sodium'].'&fibre='.$info['fibre'].'&sugars='.$info['sugar'].'"/>';
+		echo '<img alt="Nutritional Information Label" src="nutrilabel.php?carbs='.$info['carb'].'&protein='.$info['protein'].'&fat='.$info['fat'].'&sat_fat='.$info['sat_fat'].'&calories='.$info['kcal'].'&cholesterol='.$info['cholesterol'].'&sodium='.$info['sodium'].'&fibre='.$info['fibre'].'&sugars='.$info['sugar'].'"/>';
 		echo '</span>';
 		echo '<h2>Ingredients</h2>';
+		
+		//echo '<h2 id="acc_head"><a style="text-decoration: none; color: #000000;" href="#">Ingredients</a></h2>';
+		//echo '<div id ="acc_content">';
 		echo '<ul>';
 		foreach ($recipe->ingredients as $ingredient) {
 			echo '<li>'.$ingredient['qty'].$ingredient['unit'].' '.$ingredient['Ingredient']->name.' ('.$ingredient['method'].')</li>';
 		}
 		echo '</ul>';
+		//echo '</div>';
 		
 		echo '<h2>Preparation</h2>';
 		echo $recipe->instructions;
@@ -252,11 +296,165 @@ CREATE TABLE  `recipemaster`.`rec_ing` (
 
 /* http://www.pengoworks.com/workshop/jquery/autocomplete.htm */
 ?>
-	
 
+
+<h2>Photos</h2>
+<div class="highslide-gallery">
+	<ul>
+	<li>
+	<a href="highslide/sample-images/thumbstrip01.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip01.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	<li>
+	<a href="highslide/sample-images/thumbstrip02.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip02.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	<li>
+	<a href="highslide/sample-images/thumbstrip12.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip12.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	<li>
+	<a href="highslide/sample-images/thumbstrip07.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip07.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	<li>
+	<a href="highslide/sample-images/thumbstrip22.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip22.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	<li>
+	<a href="highslide/sample-images/thumbstrip24.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip24.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	<li>
+	<a href="highslide/sample-images/thumbstrip03.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip03.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	<li>
+	<a href="highslide/sample-images/thumbstrip05.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip05.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	<li>
+	<a href="highslide/sample-images/thumbstrip06.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip06.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	<li>
+	<a href="highslide/sample-images/thumbstrip08.jpg" class="highslide" 
+			title="Caption from the anchor's title attribute" 
+			onclick="return hs.expand(this, config1 )">
+		<img src="highslide/sample-images/thumbstrip08.thumb.jpg"  alt=""/>
+	</a>
+	</li>
+	</ul>
+	<div style="clear:both"></div></div>
+
+
+
+	<A name="detailednutri">.</A>
+	<h4 id="acc_head"><a style="text-decoration: none; color: #000000;" href="#detailednutri">Detailed nutritional analysis</a></h4>
+	<div id ="acc_content">
+	<div id="demo"> 
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="ingredients_data"> 
+	<thead> 
+		<tr> 
+			<th>Ingredient</th> 
+			<th>Quantity</th> 
+			<!--<th>Unit</th> -->
+			<th>kcal</th> 
+			<th>Carbs (g)</th> 
+            <th>Sugars (g)</th> 
+            <th>Fibre (g)</th> 
+            <th>Protein (g)</th> 
+            <th>Total Fat (g)</th> 
+            <th>Sat. Fat (g)</th> 
+            <th>Sodium (g)</th> 
+            <th>Cholesterol (g)</th> 
+		</tr> 
+	</thead>
+	<tfoot> 
+		<tr> 
+			<th>Ingredient</th> 
+			<th>Quantity</th> 
+			<!--<th>Unit</th> -->
+			<th>kcal</th> 
+			<th>Carbs (g)</th> 
+            <th>Sugars (g)</th> 
+            <th>Fibre (g)</th> 
+            <th>Protein (g)</th> 
+            <th>Total Fat (g)</th> 
+            <th>Sat. Fat (g)</th> 
+            <th>Sodium (g)</th> 
+            <th>Cholesterol (g)</th> 
+		</tr> 
+	</tfoot> 
+	<tbody>
+    <?php
+if ($_GET['recipe_id']) {
+	try {
+		$recipe = new Recipe($_GET['recipe_id']);
+		$i = 0;
+		foreach ($recipe->ingredients as $ingredient) {
+			$i = !$i;
+			if ($i)
+				echo '<tr class="even">';
+			else
+				echo '<tr class="odd">';
+			
+			$nutri_info = $ingredient['Ingredient']->getNutriInfo($ingredient['qty'], $ingredient['unit']);
+
+			echo '<td>'.$ingredient['Ingredient']->name.'</td>';
+			echo '<td class="center">'.$ingredient['qty'].' '.$ingredient['unit'].'</td>';
+			/*echo '<td class="center">'.$ing->unit.'</td>'; */
+			echo '<td class="center">'.$nutri_info['kcal'].'</td>';
+			echo '<td class="center">'.$nutri_info['carb'].'</td>';
+			echo '<td class="center">'.$nutri_info['sugar'].'</td>';
+			echo '<td class="center">'.$nutri_info['fibre'].'</td>';
+			echo '<td class="center">'.$nutri_info['protein'].'</td>';
+			echo '<td class="center">'.$nutri_info['fat'].'</td>';
+			echo '<td class="center">'.$nutri_info['sat_fat'].'</td>';
+			echo '<td class="center">'.$nutri_info['sodium'].'</td>';
+			echo '<td class="center">'.$nutri_info['cholesterol'].'</td>';
+			echo '</tr>';
+		}
+	} catch (Exception $e) {
+		print_error('Exception: '.$e->getMessage());
+	}
+}
+	?>
+
+
+	</tbody> 
+</table> 
+	</div>
 </div>
 
-
+</div>
 
 	</body>
 

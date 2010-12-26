@@ -68,6 +68,57 @@ class Ingredient {
 		}
 	}
 
+	function getNutriInfo($qty, $unit) {
+		$info = array();
+		$info['kcal'] = 0;
+		$info['carb'] = 0;
+		$info['sugar'] = 0;
+		$info['fat'] = 0;
+		$info['sat_fat'] = 0;
+		$info['protein'] = 0;
+		$info['fibre'] = 0;
+		$info['sodium'] = 0;
+		$info['cholesterol'] = 0;
+
+		
+		$multiplier = $qty/$this->qty;
+                
+		if ($unit == $this->unit) {
+			$multiplier *= 1;
+		} else if (($unit == 'g') && ($this->unit == 'ml')) {
+			$multiplier *= 1;
+		} else if (($unit == 'ml') && ($this->unit == 'g')) {
+			$multiplier *= 1;
+		} else if (($unit == 'g') && ($this->unit == 'mg')) {
+			$multiplier *= 1000;
+		} else if (($unit == 'mg') && ($this->unit == 'g')) {
+			$multiplier /= 1000;
+		} else if (($unit == 'kg') && ($this->unit == 'g')) {
+			$multiplier *= 1000;
+		} else if (($unit == 'g') && ($this->unit == 'kg')) {
+			$multiplier /= 1000;
+		} else if (($unit == 'l') && ($this->unit == 'ml')) {
+			$multiplier *= 1000;
+		} else if (($unit == 'ml') && ($this->unit == 'l')) {
+			$multiplier /= 1000;
+		} else {
+			throw new Exception("unknown unit mismatch, '".$unit."' vs '".$this->unit."'");
+		}
+                
+		$info['kcal'] += $this->kcal * $multiplier;
+		$info['carb'] += $this->carb * $multiplier;
+		$info['sugar'] += $this->sugar * $multiplier;
+		$info['fat'] += $this->fat * $multiplier;
+		$info['sat_fat'] += $this->sat_fat * $multiplier;
+		$info['protein'] += $this->protein * $multiplier;
+		$info['fibre'] += $this->fibre * $multiplier;
+		$info['sodium'] += $this->sodium * $multiplier;
+		$info['cholesterol'] += $this->cholesterol * $multiplier;
+
+
+		return $info;
+	}
+
 	function delete() {
 		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
 		$preparedStatement = $db->prepare("DELETE FROM ingredients WHERE id=:ingredient_id");
@@ -283,39 +334,17 @@ class Recipe {
 		$info['cholesterol'] = 0;
 
 		foreach ($this->ingredients as $elem) {
-			$multiplier = $elem['qty']/$elem['Ingredient']->qty;
+			$ingredient_info = $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
 
-			if ($elem['unit'] == $elem['Ingredient']->unit) {
-				$multiplier *= 1;
-			} else if (($elem['unit'] == 'g') && ($elem['Ingredient']->unit == 'ml')) {
-				$multiplier *= 1;
-			} else if (($elem['unit'] == 'ml') && ($elem['Ingredient']->unit == 'g')) {
-				$multiplier *= 1;
-			} else if (($elem['unit'] == 'g') && ($elem['Ingredient']->unit == 'mg')) {
-				$multiplier *= 1000;
-			} else if (($elem['unit'] == 'mg') && ($elem['Ingredient']->unit == 'g')) {
-				$multiplier /= 1000;
-			} else if (($elem['unit'] == 'kg') && ($elem['Ingredient']->unit == 'g')) {
-				$multiplier *= 1000;
-			} else if (($elem['unit'] == 'g') && ($elem['Ingredient']->unit == 'kg')) {
-				$multiplier /= 1000;
-			} else if (($elem['unit'] == 'l') && ($elem['Ingredient']->unit == 'ml')) {
-				$multiplier *= 1000;
-			} else if (($elem['unit'] == 'ml') && ($elem['Ingredient']->unit == 'l')) {
-				$multiplier /= 1000;
-			} else {
-				throw new Exception("unknown unit mismatch, '".$elem['unit']."' vs '".$elem['Ingredient']->unit."'");
-			}
-
-			$info['kcal'] += $elem['Ingredient']->kcal * $multiplier;
-			$info['carb'] += $elem['Ingredient']->carb * $multiplier;
-			$info['sugar'] += $elem['Ingredient']->sugar * $multiplier;
-			$info['fat'] += $elem['Ingredient']->fat * $multiplier;
-			$info['sat_fat'] += $elem['Ingredient']->sat_fat * $multiplier;
-			$info['protein'] += $elem['Ingredient']->protein * $multiplier;
-			$info['fibre'] += $elem['Ingredient']->fibre * $multiplier;
-			$info['sodium'] += $elem['Ingredient']->sodium * $multiplier;
-			$info['cholesterol'] += $elem['Ingredient']->cholesterol * $multiplier;
+			$info['kcal'] += $ingredient_info['kcal'];
+			$info['carb'] += $ingredient_info['carb'];
+			$info['sugar'] += $ingredient_info['sugar'];
+			$info['fat'] += $ingredient_info['fat'];
+			$info['sat_fat'] += $ingredient_info['sat_fat'];
+			$info['protein'] += $ingredient_info['protein'];
+			$info['fibre'] += $ingredient_info['fibre'];
+			$info['sodium'] += $ingredient_info['sodium'];
+			$info['cholesterol'] += $ingredient_info['cholesterol'];
 		}
 
 		return $info;

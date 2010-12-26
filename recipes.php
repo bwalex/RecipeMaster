@@ -1,3 +1,22 @@
+<?php
+function tidyhtml($input)
+{
+    $config = array(
+           'indent'         => true,
+           'output-xhtml'   => true,
+           'wrap'           => 200);
+
+    $tidy = new tidy();
+    $tidy->parseString($input, $config, 'utf8');
+    $tidy->cleanRepair();
+
+    // Output
+    return $tidy;
+}
+
+ob_start('tidyhtml');
+?>
+
 <!DOCTYPE html>
 
 <html>
@@ -325,6 +344,22 @@ CREATE TABLE  `recipemaster`.`rec_ing` (
             <th>Cholesterol (mg)</th> 
 		</tr> 
 	</thead> 
+	<tfoot> 
+		<tr> 
+			<th>Recipe</th> 
+			<th>Time Estimate</th> 
+			<!--<th>Unit</th> -->
+			<th>kcal</th> 
+			<th>Carbs (g)</th> 
+            <th>Sugars (g)</th> 
+            <th>Fibre (g)</th> 
+            <th>Protein (g)</th> 
+            <th>Total Fat (g)</th> 
+            <th>Sat. Fat (g)</th> 
+            <th>Sodium (mg)</th> 
+            <th>Cholesterol (mg)</th> 
+		</tr> 
+	</tfoot> 
 	<tbody>
     <?php
 		$i = 0;
@@ -364,22 +399,6 @@ CREATE TABLE  `recipemaster`.`rec_ing` (
 	?>
 
 	</tbody> 
-	<tfoot> 
-		<tr> 
-			<th>Recipe</th> 
-			<th>Time Estimate</th> 
-			<!--<th>Unit</th> -->
-			<th>kcal</th> 
-			<th>Carbs (g)</th> 
-            <th>Sugars (g)</th> 
-            <th>Fibre (g)</th> 
-            <th>Protein (g)</th> 
-            <th>Total Fat (g)</th> 
-            <th>Sat. Fat (g)</th> 
-            <th>Sodium (mg)</th> 
-            <th>Cholesterol (mg)</th> 
-		</tr> 
-	</tfoot> 
 </table> 
 		</div>
 	</div> 

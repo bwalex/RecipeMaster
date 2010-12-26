@@ -1,3 +1,22 @@
+<?php
+function tidyhtml($input)
+{
+    $config = array(
+           'indent'         => true,
+           'output-xhtml'   => true,
+           'wrap'           => 200);
+
+    $tidy = new tidy();
+    $tidy->parseString($input, $config, 'utf8');
+    $tidy->cleanRepair();
+
+    // Output
+    return $tidy;
+}
+
+ob_start('tidyhtml');
+?>
+
 <!DOCTYPE html>
 
 <html>
@@ -286,7 +305,7 @@ CREATE TABLE  `recipemaster`.`ingredients` (
             </div>
             <div class="row">
 		<span class="labelfull">Others (foo=bar, moh=meh):</span>
-                <span class="formfull"><textarea style="width: 90%;" name="ingredient_others"></textarea></span>
+                <span class="formfull"><textarea cols="100" rows="3" style="width: 90%;" name="ingredient_others"></textarea></span>
             </div>
           <input type="hidden" name="ingredient_id" value="-1">
           <input type="hidden" name="form_type" value="add_ingredient">
@@ -372,7 +391,7 @@ CREATE TABLE  `recipemaster`.`ingredients` (
             </div>
             <div class="row">
 		<span class="labelfull">Others (foo=bar, moh=meh):</span>
-                <span class="formfull"><textarea style="width: 90%;" name="ingredient_others"></textarea></span>
+                <span class="formfull"><textarea cols="100" rows="3" style="width: 90%;" name="ingredient_others"></textarea></span>
             </div>
           <input type="hidden" name="form_type" value="edit_ingredient">
           <input type="hidden" name="ingredient_id" value="-1">
@@ -409,6 +428,22 @@ CREATE TABLE  `recipemaster`.`ingredients` (
             <th>Cholesterol (g)</th> 
 		</tr> 
 	</thead> 
+	<tfoot> 
+		<tr> 
+			<th>Ingredient</th> 
+			<th>Quantity</th> 
+			<!--<th>Unit</th> -->
+			<th>kcal</th> 
+			<th>Carbs (g)</th> 
+            <th>Sugars (g)</th> 
+            <th>Fibre (g)</th> 
+            <th>Protein (g)</th> 
+            <th>Total Fat (g)</th> 
+            <th>Sat. Fat (g)</th> 
+            <th>Sodium (g)</th> 
+            <th>Cholesterol (g)</th> 
+		</tr> 
+	</tfoot> 
 	<tbody>
     <?php
 		$ingredients = get_all_ingredients();
@@ -459,22 +494,7 @@ CREATE TABLE  `recipemaster`.`ingredients` (
 	?>
 
 	</tbody> 
-	<tfoot> 
-		<tr> 
-			<th>Ingredient</th> 
-			<th>Quantity</th> 
-			<!--<th>Unit</th> -->
-			<th>kcal</th> 
-			<th>Carbs (g)</th> 
-            <th>Sugars (g)</th> 
-            <th>Fibre (g)</th> 
-            <th>Protein (g)</th> 
-            <th>Total Fat (g)</th> 
-            <th>Sat. Fat (g)</th> 
-            <th>Sodium (g)</th> 
-            <th>Cholesterol (g)</th> 
-		</tr> 
-	</tfoot> 
+
 </table> 
 			</div> 
 
