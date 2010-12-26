@@ -245,7 +245,7 @@ if ($_POST['recipe_id'] && $_POST['recipe_name']) {
 			print_msg("Rows affected: ".$n."<br/>");
 		}
 	} catch (Exception $e) {
-		print 'Exception: '.$e->getMessage();
+		print_error('Exception: '.$e->getMessage());
 	}
 }
 /*
