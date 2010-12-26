@@ -1,0 +1,1 @@
+show_recipe: caloric ratio, nutritional information sticker

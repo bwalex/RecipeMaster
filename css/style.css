@@ -1,0 +1,38 @@
+div.row {
+  clear: both;
+  padding-top: 5px;
+  }
+
+div.row span.label {
+  float: left;
+  width: 40%;
+  text-align: right;
+  }
+
+div.row span.formw {
+  float: right;
+  width: 60%;
+  text-align: left;
+  }
+
+div.row span.labelfull {
+  float: left;
+  width: 20%;
+  text-align: right;
+  }
+  
+div.row span.formfull {
+  float: right;
+  width: 80%;
+  text-align: left;
+  }
+
+div.row span.left {
+  float: left;
+  width: 50%;
+}
+
+div.row span.right {
+  float: right;
+  width: 50%;
+}
