@@ -118,7 +118,6 @@ ob_start('tidyhtml');
 		<style type="text/css">
 
 			/*demo page css*/
-			body{ font: 75.5% "Trebuchet MS", sans-serif; margin: 50px;}
 			.demoHeaders { margin-top: 2em; }
 			#dialog_link {padding: .4em 1em .4em 20px;text-decoration: none;position: relative;}
 			#dialog_link span.ui-icon {margin: 0 5px 0 0;position: absolute;left: .2em;top: 50%;margin-top: -8px;}
@@ -130,6 +129,11 @@ ob_start('tidyhtml');
 	</head>
 <body>
 
+<div id="header">
+<h1>RecipeMaster</h1>
+</div>
+
+<div id="main">
 <?php
 include('functions.php');
 
@@ -500,6 +504,17 @@ CREATE TABLE  `recipemaster`.`ingredients` (
 
 
 
+			
+</div>
+
+<div id="footer">
+<span style="margin-top: 10px; float: left;">
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-xhtml10"
+        alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+  </span>
+	<h4>&copy; 2010, Alex Hornung</h4>
+</div>
 	</body>
 
 </html>

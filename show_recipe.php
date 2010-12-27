@@ -18,15 +18,20 @@ ob_start('tidyhtml');
 ?>
 
 <!DOCTYPE html>
-TODO: copy recipe<br/>
+
+<!--
+TODO: copy recipe
 TODO: split ingredients into two columns
+TODO: http://www.flickr.com/photos/87116893@N00/5292842186/ http://www.flickr.com/photos/87116893@N00/5292842186/sizes/o/in/photostream/
+TODO: add photo stuff
+-->
 
 <html>
 
 	<head>
 
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-		<title>Recipes : RecipeMaster</title>
+		<title>Show Recipe : RecipeMaster</title>
         
 		<style type="text/css" title="currentStyle"> 
 			@import "css/demo_table.css";
@@ -193,9 +198,7 @@ TODO: split ingredients into two columns
 		</script>
 
 		<style type="text/css">
-
 			/*demo page css*/
-			body{ font: 75.5% "Trebuchet MS", sans-serif; margin: 50px;}
 			.demoHeaders { margin-top: 2em; }
 			#dialog_link {padding: .4em 1em .4em 20px;text-decoration: none;position: relative;}
 			#dialog_link span.ui-icon {margin: 0 5px 0 0;position: absolute;left: .2em;top: 50%;margin-top: -8px;}
@@ -207,7 +210,11 @@ TODO: split ingredients into two columns
 	</head>
 <body>
 
-<div style="width:800px;">
+<div id="header">
+<h1>RecipeMaster</h1>
+</div>
+
+<div id="main">
 <?php
 include('functions.php');
 
@@ -239,14 +246,25 @@ if ($_GET['recipe_id']) {
 		
 		//echo '<h2 id="acc_head"><a style="text-decoration: none; color: #000000;" href="#">Ingredients</a></h2>';
 		//echo '<div id ="acc_content">';
-		echo '<ul>';
-		foreach ($recipe->ingredients as $ingredient) {
-			echo '<li>'.$ingredient['qty'].$ingredient['unit'].' '.$ingredient['Ingredient']->name.' ('.$ingredient['method'].')</li>';
-		}
-		echo '</ul>';
-		//echo '</div>';
 		
-		echo '<h2>Preparation</h2>';
+		echo '<div style="width: 520px;">';
+		$i = 0;
+		foreach ($recipe->ingredients as $ingredient) {
+			if ($i % 2 == 0) {
+				echo '<div class="row">';
+				$class = "leftfixed";
+			} else {
+				$class = "rightfixed";
+			}
+			echo '<span class="'.$class.'">'.$ingredient['qty'].$ingredient['unit'].' '.$ingredient['Ingredient']->name.' ('.$ingredient['method'].')</span>';
+			
+			if ($i % 2 != 0)
+				echo '</div>';
+			$i++;
+		}
+		echo '</div>';
+		
+		echo '<h2 style="clear: left; padding-top: 15px;">Preparation</h2>';
 		echo $recipe->instructions;
 		echo 'jieajfoieafjieajfoaifje ifoisajfajpoairjg posargjoirsjg psargjposajgapoisjgrpoaisjgrpaorsigjsa irgpo isarjgpoisajgposajgsapoijgsag sagoisajgoisajgsapoirjggr8wgohgsglirsh goipahaghaoisrpsahgaoghaspoihsg oihsagrhapoishgposahgsap ';
 	} catch (Exception $e) {
@@ -456,6 +474,14 @@ if ($_GET['recipe_id']) {
 
 </div>
 
+<div id="footer">
+<span style="margin-top: 10px; float: left;">
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-xhtml10"
+        alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+  </span>
+	<h4>&copy; 2010, Alex Hornung</h4>
+</div>
 	</body>
 
 </html>

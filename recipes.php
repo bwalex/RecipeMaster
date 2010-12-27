@@ -19,18 +19,20 @@ ob_start('tidyhtml');
 
 <!DOCTYPE html>
 
+<!--
+TODO: ability to remove ingredients from recipe ingredient list
+TODO: add photo stuff
+ -->
+
 <html>
 
 	<head>
-
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 		<title>Recipes : RecipeMaster</title>
-        
-		<style type="text/css" title="currentStyle"> 
+		<style type="text/css" title="currentStyle">
 			@import "css/demo_table.css";
-		</style> 
+		</style>
 
-        
 		<link type="text/css" href="css/style.css" rel="stylesheet" />	
 		<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet" />	
 		<script type="text/javascript" src="js/jquery-1.4.4.min.js"></script>
@@ -38,25 +40,25 @@ ob_start('tidyhtml');
 		<script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script> 
 		<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
 		<script type="text/javascript">
-			var ning = 0;
-			function addingredient()
+			function addingredient(form, id, qty, name, method)
 			{
-				ning = ning+1;
+				ning = Number(document.getElementById(form).ingredient_count.value)+1;
 				var input = document.createElement("input");
 				input.type = "text";
 				input.size = "10";
 				input.name = "ing_qty_"+ ning;
-				input.value = "100g";
+				input.value = qty;
 
-				var elem = document.getElementById("ingredient_inputs");
+				var elem = document.getElementById(id);
 				elem.appendChild(input);
 
 				var input = document.createElement("input");
 				input.type = "text";
 				input.size = "50";
 				input.name = "ing_name_"+ ning;
+				input.value = name;
 
-				var elem = document.getElementById("ingredient_inputs");
+				var elem = document.getElementById(id);
 				elem.appendChild(input);
 
 				$(input).autocomplete({
@@ -77,21 +79,21 @@ ob_start('tidyhtml');
 				input2.type = "text";
 				input2.size = "20";
 				input2.name = "ing_method_"+ ning;
-				input2.value = "diced";
+				input2.value = method;
 
-				var elem = document.getElementById("ingredient_inputs");
+				var elem = document.getElementById(id);
 				elem.appendChild(input2);
 
 				var br = document.createElement("br");
-				var elem = document.getElementById("ingredient_inputs");
+				var elem = document.getElementById(id);
 				elem.appendChild(br);
-				document.add_recipe.ingredient_count.value = ning;
+				document.getElementById(form).ingredient_count.value = ning;
 				input.focus();
 			}
 		</script>
 		<script type="text/javascript">
 			$(function(){
-				$('#ingredients_data').dataTable();
+				$('#recipe_data').dataTable();
 				
 				// Accordion
 				$("#accordion").accordion({ header: "h3" });
@@ -102,10 +104,10 @@ ob_start('tidyhtml');
 				// Dialog			
 				$('#dialog').dialog({
 					autoOpen: false,
-					width: 600,
+					width: 800,
 					buttons: {
-						"Add Ingredient": function() {
-							document.add_ingredient.submit();
+						"Add Recipe": function() {
+							document.add_recipe.submit();
 							$(this).dialog("close");
 						}
 					}
@@ -123,10 +125,10 @@ ob_start('tidyhtml');
 				// Dialog			
 				$('#dialog_edit').dialog({
 					autoOpen: false,
-					width: 600,
+					width: 800,
 					buttons: {
 						"Submit changes": function() {
-							document.edit_ingredient.submit();
+							document.edit_recipe.submit();
 							$(this).dialog("close");
 						}
 					}
@@ -174,7 +176,6 @@ ob_start('tidyhtml');
 		<style type="text/css">
 
 			/*demo page css*/
-			body{ font: 75.5% "Trebuchet MS", sans-serif; margin: 50px;}
 			.demoHeaders { margin-top: 2em; }
 			#dialog_link {padding: .4em 1em .4em 20px;text-decoration: none;position: relative;}
 			#dialog_link span.ui-icon {margin: 0 5px 0 0;position: absolute;left: .2em;top: 50%;margin-top: -8px;}
@@ -185,6 +186,11 @@ ob_start('tidyhtml');
 
 	</head>
 <body>
+<div id="header">
+<h1>RecipeMaster</h1>
+</div>
+
+<div id="main">
 
 <?php
 include('functions.php');
@@ -308,26 +314,134 @@ CREATE TABLE  `recipemaster`.`rec_ing` (
 
 /* http://www.pengoworks.com/workshop/jquery/autocomplete.htm */
 ?>
-		<p><a href="#" id="dialog_link" class="ui-state-default ui-corner-all"><span class="ui-icon ui-icon-newwin"></span>Add Ingredient</a></p>
 
-
-        <form name="delete_ingredient" action="ingredients.php" method="post">
-          <input type="hidden" name="ingredient_name" value="">
-          <input type="hidden" name="ingredient_id" value="-1">
-          <input type="hidden" name="form_type" value="delete_ingredient">
+        <form name="delete_recipe" action="recipes.php" method="post">
+          <input type="hidden" name="recipe_name" value="">
+          <input type="hidden" name="recipe_id" value="-1">
+          <input type="hidden" name="form_type" value="delete_recipe">
         </form>
 
 
+	
+	
+	
+
+<div id="dialog" title="Add a recipe">
+			<form name="add_recipe" id="add_recipe" action="recipes.php" method="post">
+			<label for="recipe_name">Recipe Name: </label><br/><input type="text" name="recipe_name" size="100" id="recipe_name"/>
+			<!-- This <div> holds alert messages to be display in the sample page. -->
+			<br/><hr/>List of ingredients:
+			<div id="ingredient_add_inputs">
+			</div>
+			<a href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', '100g', '', 'diced');">add ingredient field </a>
+			<br/><hr/>
+			<div id="alerts">
+				<noscript>
+					<p>
+						<strong>CKEditor requires JavaScript to run</strong>. In a browser with no JavaScript
+						support, like yours, you should still see the contents (HTML data) and you should
+						be able to edit it normally, without a rich editor interface.
+					</p>
+				</noscript>
+			</div>
+			
+				<p>
+					<label for="editor1">
+						Instructions:</label><br />
+					<textarea class="ckeditor" cols="80" id="editor1" name="recipe_instructions" rows="10"></textarea>
+				</p>
+
+				<p>
+					<input type="submit" value="Submit" />
+				</p>
+
+			<input type="hidden" name="form_type" value="add_recipe">
+			<input type="hidden" name="ingredient_count" value="0">
+			<input type="hidden" name="recipe_id" value="-1">
+			</form>
+</div>
+	
+	
+	
+<div id="dialog_edit" title="Edit recipe">
+			<form name="edit_recipe" id="edit_recipe" action="recipes.php" method="post">
+			<label for="recipe_name">Recipe Name: </label><br/><input type="text" name="recipe_name" size="100" id="recipe_name"/>
+			<!-- This <div> holds alert messages to be display in the sample page. -->
+			<br/><hr/>List of ingredients:
+			<div id="ingredient_edit_inputs">
+			
+			</div>
+			<a href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', '100g', '', 'diced');">add ingredient field </a>
+			<br/><hr/>
+			<div id="alerts">
+				<noscript>
+					<p>
+						<strong>CKEditor requires JavaScript to run</strong>. In a browser with no JavaScript
+						support, like yours, you should still see the contents (HTML data) and you should
+						be able to edit it normally, without a rich editor interface.
+					</p>
+				</noscript>
+			</div>
+			
+				<p>
+					<label for="editor2">
+						Instructions:</label><br />
+					<textarea class="ckeditor" cols="80" id="editor2" name="recipe_instructions" rows="10"></textarea>
+				</p>
+
+				<p>
+					<input type="submit" value="Submit" />
+				</p>
+
+			<input type="hidden" name="form_type" value="edit_recipe">
+			<input type="hidden" name="ingredient_count" value="0">
+			<input type="hidden" name="recipe_id" value="-1">
+			</form>
+</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+		<p><a href="#" id="dialog_link" class="ui-state-default ui-corner-all"><span class="ui-icon ui-icon-newwin"></span>Add Recipe</a></p>
 
 
-<div id="tabs"> 
-	<ul> 
-		<li><a href="#tabs-1">Recipes</a></li> 
-		<li><a href="#tabs-2">Add a recipe</a></li> 
-	</ul> 
-	<div id="tabs-1"> 
-		<div id="demo"> 
-<table cellpadding="0" cellspacing="0" border="0" class="display" id="ingredients_data"> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+
+<div id="demo">
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="recipe_data"> 
 	<thead> 
 		<tr> 
 			<th>Recipe</th> 
@@ -373,14 +487,18 @@ CREATE TABLE  `recipemaster`.`rec_ing` (
 
 
 			echo '<td>'.$recipe->name.' <a href="#" onclick="
-				document.edit_ingredient.ingredient_name.value=decodeURIComponent(\''.rawurlencode($recipe->name).'\');
-				document.edit_ingredient.ingredient_id.value=decodeURIComponent(\''.rawurlencode($recipe->id).'\');
-				$(\'#dialog_edit\').dialog(\'open\');
+				document.edit_recipe.recipe_name.value=decodeURIComponent(\''.rawurlencode($recipe->name).'\');
+				document.edit_recipe.recipe_id.value=decodeURIComponent(\''.rawurlencode($recipe->id).'\');
+				document.edit_recipe.recipe_instructions.value=decodeURIComponent(\''.rawurlencode($recipe->instructions).'\');';
+			foreach ($recipe->ingredients as $ingredient) {
+				echo "addingredient('edit_recipe', 'ingredient_edit_inputs', decodeURIComponent('".rawurlencode($ingredient['qty'].$ingredient['unit'])."'), decodeURIComponent('".rawurlencode($ingredient['Ingredient']->name)."'), decodeURIComponent('".rawurlencode($ingredient['method'])."'));";
+			}
+			echo   '$(\'#dialog_edit\').dialog(\'open\');
 			">(edit)</a>
 			<a href="#" onclick="
-				document.delete_ingredient.ingredient_name.value=decodeURIComponent(\''.rawurlencode($recipe->name).'\');
-				document.delete_ingredient.ingredient_id.value=decodeURIComponent(\''.rawurlencode($recipe->id).'\');
-				document.delete_ingredient.submit();
+				document.delete_recipe.recipe_name.value=decodeURIComponent(\''.rawurlencode($recipe->name).'\');
+				document.delete_recipe.recipe_id.value=decodeURIComponent(\''.rawurlencode($recipe->id).'\');
+				document.delete_recipe.submit();
 			">(delete)</a></td>';
 			echo '<td class="center">'.$recipe->getTimeEstimate().'</td>';
 			$nutri_info = $recipe->getNutriInfo();
@@ -401,44 +519,20 @@ CREATE TABLE  `recipemaster`.`rec_ing` (
 	</tbody> 
 </table> 
 		</div>
-	</div> 
-		<div id="tabs-2"> 
-			<form name="add_recipe" action="recipes.php" method="post">
-			<label for="recipe_name">Recipe Name: </label><br/><input type="text" name="recipe_name" size="100" id="recipe_name"/>
-			<!-- This <div> holds alert messages to be display in the sample page. -->
-			<br/><hr/>List of ingredients:
-			<div id="ingredient_inputs">
-			</div>
-			<a href="#" onclick="addingredient();">add ingredient field </a>
-			<br/><hr/>
-			<div id="alerts">
-				<noscript>
-					<p>
-						<strong>CKEditor requires JavaScript to run</strong>. In a browser with no JavaScript
-						support, like yours, you should still see the contents (HTML data) and you should
-						be able to edit it normally, without a rich editor interface.
-					</p>
-				</noscript>
-			</div>
-			
-				<p>
-					<label for="editor1">
-						Instructions:</label><br />
-					<textarea class="ckeditor" cols="80" id="editor1" name="recipe_instructions" rows="10"></textarea>
-				</p>
+	</div>
 
-				<p>
-					<input type="submit" value="Submit" />
-				</p>
 
-			<input type="hidden" name="form_type" value="add_recipe">
-			<input type="hidden" name="ingredient_count" value="0">
-			<input type="hidden" name="recipe_id" value="-1">
-			</form>
-		</div> 
+
+
+
+<div id="footer">
+<span style="margin-top: 10px; float: left;">
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-xhtml10"
+        alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+  </span>
+	<h4>&copy; 2010, Alex Hornung</h4>
 </div>
-
-
 
 	</body>
 
