@@ -160,14 +160,6 @@ TODO: add photo stuff
 		    "sAjaxSource": 'ajax_recipes.php'
 		});
 
-		// Accordion
-		$("#accordion").accordion({
-		    header: "h3"
-		});
-
-		// Tabs
-		$('#tabs').tabs();
-
 		// Dialog                       
 		$('#dialog').dialog({
 		    autoOpen: false,
@@ -202,30 +194,6 @@ TODO: add photo stuff
 		$('#dialog_edit_link').click(function() {
 		    $('#dialog_edit').dialog('open');
 		    return false;
-		});
-
-		// Datepicker
-		$('#datepicker').datepicker({
-		    inline: true
-		});
-
-		// Slider
-		$('#slider').slider({
-		    range: true,
-		    values: [17, 67]
-		});
-
-		// Progressbar
-		$("#progressbar").progressbar({
-		    value: 20
-		});
-
-		//hover states on the static widgets
-		$('#dialog_link, ul#icons li').hover(function() {
-		    $(this).addClass('ui-state-hover');
-		},
-		function() {
-		    $(this).removeClass('ui-state-hover');
 		});
 
 	    });</script>
@@ -357,7 +325,7 @@ TODO: add photo stuff
 		<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">
 </textarea></p>
 
-		<p><input type="submit" value="Submit"></p><input type="hidden" name="form_type" value="add_recipe"> <input type="hidden" name="ingredient_count" value="0"> <input type="hidden" name="recipe_id" value="-1">
+		<input type="hidden" name="form_type" value="add_recipe"> <input type="hidden" name="ingredient_count" value="0"> <input type="hidden" name="recipe_id" value="-1">
 	    </form>
 	</div>
 
@@ -383,11 +351,11 @@ TODO: add photo stuff
 		<textarea cols="80" class="ckeditor" id="edit_instructions_editor" name="recipe_instructions" rows="10">
 </textarea></p>
 
-		<p><input type="submit" value="Submit"></p><input type="hidden" name="form_type" value="edit_recipe"> <input type="hidden" name="ingredient_count" value="0"> <input type="hidden" name="recipe_id" value="-1">
+		<input type="hidden" name="form_type" value="edit_recipe"> <input type="hidden" name="ingredient_count" value="0"> <input type="hidden" name="recipe_id" value="-1">
 	    </form>
 	</div>
 
-	<p><a href="#" id="dialog_link" class="ui-state-default ui-corner-all" name="dialog_link">Add Recipe</a></p>
+	<p><a href="#" id="dialog_link" name="dialog_link"><img src="add-icon.png" width="24" height="24" alt="Add Recipe"></a></p>
 
 	<div id="demo">
 	    <table cellpadding="0" cellspacing="0" border="0" class="display" id="recipe_data">

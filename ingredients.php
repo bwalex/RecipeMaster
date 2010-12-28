@@ -36,121 +36,87 @@ ob_start('tidyhtml');
 </script>
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
 </script>
-    <script type="text/javascript">
-	function editingredient(id) {
-			$.post("ajax_formdata.php", {
-			    ingredient: id
-			},
-			function(ingredient) {
-			    // format and output result
-			    if (ingredient.exception) {
-				alert(ingredient.exception);
-				return;
-			    }
+    <script type="text/javascript">	function editingredient(id) {
+	    $.post("ajax_formdata.php", {
+		ingredient: id
+	    },
+	    function(ingredient) {
+		// format and output result
+		if (ingredient.exception) {
+		    alert(ingredient.exception);
+		    return;
+		}
 
-			    document.edit_ingredient.ingredient_name.value = decodeURIComponent(ingredient.name);
-			    document.edit_ingredient.ingredient_qty.value = decodeURIComponent(ingredient.qty);
-			    document.edit_ingredient.ingredient_unit.value = decodeURIComponent(ingredient.unit);
-			    document.edit_ingredient.ingredient_kcal.value = decodeURIComponent(ingredient.kcal);
-			    document.edit_ingredient.ingredient_carb.value = decodeURIComponent(ingredient.carb);
-			    document.edit_ingredient.ingredient_sugar.value = decodeURIComponent(ingredient.sugar);
-			    document.edit_ingredient.ingredient_fat.value = decodeURIComponent(ingredient.fat);
-			    document.edit_ingredient.ingredient_sat_fat.value = decodeURIComponent(ingredient.sat_fat);
-			    document.edit_ingredient.ingredient_protein.value = decodeURIComponent(ingredient.protein);
-			    document.edit_ingredient.ingredient_fibre.value = decodeURIComponent(ingredient.fibre);
-			    document.edit_ingredient.ingredient_sodium.value = decodeURIComponent(ingredient.sodium);
-			    document.edit_ingredient.ingredient_cholesterol.value = decodeURIComponent(ingredient.cholesterol);
-			    document.edit_ingredient.ingredient_others.value = decodeURIComponent(ingredient.others);
-			    document.edit_ingredient.ingredient_id.value = decodeURIComponent(ingredient.id);
+		document.edit_ingredient.ingredient_name.value = decodeURIComponent(ingredient.name);
+		document.edit_ingredient.ingredient_qty.value = decodeURIComponent(ingredient.qty);
+		document.edit_ingredient.ingredient_unit.value = decodeURIComponent(ingredient.unit);
+		document.edit_ingredient.ingredient_kcal.value = decodeURIComponent(ingredient.kcal);
+		document.edit_ingredient.ingredient_carb.value = decodeURIComponent(ingredient.carb);
+		document.edit_ingredient.ingredient_sugar.value = decodeURIComponent(ingredient.sugar);
+		document.edit_ingredient.ingredient_fat.value = decodeURIComponent(ingredient.fat);
+		document.edit_ingredient.ingredient_sat_fat.value = decodeURIComponent(ingredient.sat_fat);
+		document.edit_ingredient.ingredient_protein.value = decodeURIComponent(ingredient.protein);
+		document.edit_ingredient.ingredient_fibre.value = decodeURIComponent(ingredient.fibre);
+		document.edit_ingredient.ingredient_sodium.value = decodeURIComponent(ingredient.sodium);
+		document.edit_ingredient.ingredient_cholesterol.value = decodeURIComponent(ingredient.cholesterol);
+		document.edit_ingredient.ingredient_others.value = decodeURIComponent(ingredient.others);
+		document.edit_ingredient.ingredient_id.value = decodeURIComponent(ingredient.id);
 
-			    $('#dialog_edit').dialog('open');
-			},
-			'json');
+		$('#dialog_edit').dialog('open');
+	    },
+	    'json');
+	}
+
+	function deleteingredient(id) {
+	    document.delete_ingredient.ingredient_id.value = id;
+	    document.delete_ingredient.submit();
+	}</script>
+    <script type="text/javascript">	$(function() {
+	    $('#ingredients_data').dataTable({
+		//"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"bServerSide": true,
+		"bProcessing": true,
+		"sAjaxSource": 'ajax_ingredients.php'
+	    });
+
+	    // Dialog                       
+	    $('#dialog').dialog({
+		autoOpen: false,
+		width: 600,
+		buttons: {
+		    "Add Ingredient": function() {
+			document.add_ingredient.submit();
+			$(this).dialog("close");
 		    }
+		}
+	    });
 
-		    function deleteingredient(id) {
-			document.delete_ingredient.ingredient_id.value = id;
-			document.delete_ingredient.submit();
+	    // Dialog Link
+	    $('#dialog_link').click(function() {
+		$('#dialog').dialog('open');
+		return false;
+	    });
+
+	    // Dialog                       
+	    $('#dialog_edit').dialog({
+		autoOpen: false,
+		width: 600,
+		buttons: {
+		    "Submit changes": function() {
+			document.edit_ingredient.submit();
+			$(this).dialog("close");
 		    }
-    </script>
-    <script type="text/javascript">
-	$(function() {
-			$('#ingredients_data').dataTable({
-			    //"bJQueryUI": true,
-			    "sPaginationType": "full_numbers",
-			    "bServerSide": true,
-			    "bProcessing": true,
-			    "sAjaxSource": 'ajax_ingredients.php'
-			});
+		}
+	    });
 
-			// Accordion
-			$("#accordion").accordion({
-			    header: "h3"
-			});
+	    // Dialog Link
+	    $('#dialog_edit_link').click(function() {
+		$('#dialog_edit').dialog('open');
+		return false;
+	    });
 
-			// Tabs
-			$('#tabs').tabs();
-
-			// Dialog                       
-			$('#dialog').dialog({
-			    autoOpen: false,
-			    width: 600,
-			    buttons: {
-				"Add Ingredient": function() {
-				    document.add_ingredient.submit();
-				    $(this).dialog("close");
-				}
-			    }
-			});
-
-			// Dialog Link
-			$('#dialog_link').click(function() {
-			    $('#dialog').dialog('open');
-			    return false;
-			});
-
-			// Dialog                       
-			$('#dialog_edit').dialog({
-			    autoOpen: false,
-			    width: 600,
-			    buttons: {
-				"Submit changes": function() {
-				    document.edit_ingredient.submit();
-				    $(this).dialog("close");
-				}
-			    }
-			});
-
-			// Dialog Link
-			$('#dialog_edit_link').click(function() {
-			    $('#dialog_edit').dialog('open');
-			    return false;
-			});
-
-			// Datepicker
-			$('#datepicker').datepicker({
-			    inline: true
-			});
-
-			// Slider
-			$('#slider').slider({
-			    range: true,
-			    values: [17, 67]
-			});
-
-			// Progressbar
-			$("#progressbar").progressbar({
-			    value: 20
-			});
-			/*
-						//hover states on the static widgets
-						$('#dialog_link, ul#icons li').hover(
-							function() { $(this).addClass('ui-state-hover'); }, 
-							function() { $(this).removeClass('ui-state-hover'); }
-						);
-						*/
-		    });
-    </script>
+	});</script>
     <style type="text/css">
 
 			/*demo page css*/
