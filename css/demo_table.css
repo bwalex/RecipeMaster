@@ -32,9 +32,9 @@
 
 .dataTables_wrapper {
 	position: relative;
-	min-height: 302px;
+	min-height: 180px;
 	clear: both;
-	_height: 302px;
+	_height: 180px;
 	zoom: 1; /* Feeling sorry for IE */
 }
 
@@ -86,19 +86,23 @@
 }
 
 .paginate_disabled_previous {
-	background-image: url('../images/back_disabled.jpg');
+	/*background-image: url('../images/back_disabled.jpg'); */
+	background-image: url('../back-icon.png');
 }
 
 .paginate_enabled_previous {
-	background-image: url('../images/back_enabled.jpg');
+	/* background-image: url('../images/back_enabled.jpg'); */
+	background-image: url('../back-icon.png');
 }
 
 .paginate_disabled_next {
-	background-image: url('../images/forward_disabled.jpg');
+	/* background-image: url('../images/forward_disabled.jpg'); */
+	background-image: url('../forward-icon.png');
 }
 
 .paginate_enabled_next {
-	background-image: url('../images/forward_enabled.jpg');
+	/* background-image: url('../images/forward_enabled.jpg'); */
+	background-image: url('../forward-icon.png');
 }
 
 
@@ -129,6 +133,7 @@ table.display thead th {
 	padding: 3px 18px 3px 10px;
 	border-bottom: 1px solid black;
 	font-weight: bold;
+	
 	cursor: pointer;
 	* cursor: hand;
 }
@@ -184,41 +189,10 @@ table.display td.center {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables row classes
  */
-table.display tr.odd.gradeA {
-	background-color: #ddffdd;
-}
-
-table.display tr.even.gradeA {
-	background-color: #eeffee;
-}
-
-table.display tr.odd.gradeC {
-	background-color: #ddddff;
-}
-
-table.display tr.even.gradeC {
-	background-color: #eeeeff;
-}
-
-table.display tr.odd.gradeX {
-	background-color: #ffdddd;
-}
-
-table.display tr.even.gradeX {
-	background-color: #ffeeee;
-}
-
-table.display tr.odd.gradeU {
-	background-color: #ddd;
-}
-
-table.display tr.even.gradeU {
-	background-color: #eee;
-}
 
 
 tr.odd {
-	background-color: #E2E4FF;
+	background-color: #EFEFEF;
 }
 
 tr.even {
@@ -313,6 +287,7 @@ td.details {
 	background-color: #99B3FF;
 }
 
+
 table.display tr.even.row_selected td {
 	background-color: #B0BED9;
 }
@@ -327,28 +302,14 @@ table.display tr.odd.row_selected td {
  */
 /* For the standard odd/even */
 tr.odd td.sorting_1 {
-	background-color: #D3D6FF;
+	background-color: #EAEAEA;
 }
 
-tr.odd td.sorting_2 {
-	background-color: #DADCFF;
-}
-
-tr.odd td.sorting_3 {
-	background-color: #E0E2FF;
-}
 
 tr.even td.sorting_1 {
-	background-color: #EAEBFF;
+	background-color: #FAFAFA;
 }
 
-tr.even td.sorting_2 {
-	background-color: #F2F3FF;
-}
-
-tr.even td.sorting_3 {
-	background-color: #F9F9FF;
-}
 
 
 /* For the Conditional-CSS grading rows */

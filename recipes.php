@@ -333,7 +333,7 @@ CREATE TABLE  `recipemaster`.`rec_ing` (
 			<br/><hr/>List of ingredients:
 			<div id="ingredient_add_inputs">
 			</div>
-			<a href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', '100g', '', 'diced');">add ingredient field </a>
+			<a href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', '100g', '', 'diced');"><img src="add-icon.png" width="16" height="16" alt="add ingredient field"/></a>
 			<br/><hr/>
 			<div id="alerts">
 				<noscript>
@@ -494,12 +494,12 @@ CREATE TABLE  `recipemaster`.`rec_ing` (
 				echo "addingredient('edit_recipe', 'ingredient_edit_inputs', decodeURIComponent('".rawurlencode($ingredient['qty'].$ingredient['unit'])."'), decodeURIComponent('".rawurlencode($ingredient['Ingredient']->name)."'), decodeURIComponent('".rawurlencode($ingredient['method'])."'));";
 			}
 			echo   '$(\'#dialog_edit\').dialog(\'open\');
-			">(edit)</a>
+			"><img src="edit-icon.png" width="12" height="12" alt="(edit)"/></a>
 			<a href="#" onclick="
 				document.delete_recipe.recipe_name.value=decodeURIComponent(\''.rawurlencode($recipe->name).'\');
 				document.delete_recipe.recipe_id.value=decodeURIComponent(\''.rawurlencode($recipe->id).'\');
 				document.delete_recipe.submit();
-			">(delete)</a></td>';
+			"><img src="delete-icon.png" width="12" height="12" alt="(delete)"/></a></td>';
 			echo '<td class="center">'.$recipe->getTimeEstimate().'</td>';
 			$nutri_info = $recipe->getNutriInfo();
 			/*echo '<td class="center">'.$row['unit'].'</td>'; */

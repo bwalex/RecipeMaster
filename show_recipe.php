@@ -316,8 +316,9 @@ CREATE TABLE  `recipemaster`.`rec_ing` (
 ?>
 
 
+
+<div class="highslide-gallery" style="clear: both;">
 <h2>Photos</h2>
-<div class="highslide-gallery">
 	<ul>
 	<li>
 	<a href="highslide/sample-images/thumbstrip01.jpg" class="highslide" 

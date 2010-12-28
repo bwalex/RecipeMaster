@@ -29,6 +29,7 @@ ob_start('tidyhtml');
 		<style type="text/css" title="currentStyle"> 
 			@import "css/demo_table.css";
 		</style> 
+	
 
 		<link type="text/css" href="css/style.css" rel="stylesheet" />	
 		<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet" />	
@@ -38,7 +39,10 @@ ob_start('tidyhtml');
 
 		<script type="text/javascript">
 			$(function(){
-				$('#ingredients_data').dataTable();
+				$('#ingredients_data').dataTable({
+		//"bJQueryUI": true,
+		"sPaginationType": "full_numbers"
+	});
 				
 				// Accordion
 				$("#accordion").accordion({ header: "h3" });
@@ -105,12 +109,13 @@ ob_start('tidyhtml');
 				$("#progressbar").progressbar({
 					value: 20 
 				});
-
+				/*
 				//hover states on the static widgets
 				$('#dialog_link, ul#icons li').hover(
 					function() { $(this).addClass('ui-state-hover'); }, 
 					function() { $(this).removeClass('ui-state-hover'); }
 				);
+				*/
 			});
 
 		</script>
@@ -229,7 +234,7 @@ CREATE TABLE  `recipemaster`.`ingredients` (
 
 /* http://www.pengoworks.com/workshop/jquery/autocomplete.htm */
 ?>
-		<p><a href="#" id="dialog_link" class="ui-state-default ui-corner-all"><span class="ui-icon ui-icon-newwin"></span>Add Ingredient</a></p>
+		<p><a href="#" id="dialog_link" ><img src="add-icon.png" width="24" height="24" alt="Add Ingredient"/></a></p>
 
 
         <form name="delete_ingredient" action="ingredients.php" method="post">
@@ -476,12 +481,12 @@ CREATE TABLE  `recipemaster`.`ingredients` (
 				document.edit_ingredient.ingredient_others.value=decodeURIComponent(\''.rawurlencode($ing->others).'\');
 				document.edit_ingredient.ingredient_id.value=decodeURIComponent(\''.rawurlencode($ing->id).'\');
 				$(\'#dialog_edit\').dialog(\'open\');
-			">(edit)</a>
+			"><img src="edit-icon.png" width="12" height="12" alt="(edit)"/></a>
 			<a href="#" onclick="
 				document.delete_ingredient.ingredient_name.value=decodeURIComponent(\''.rawurlencode($ing->name).'\');
 				document.delete_ingredient.ingredient_id.value=decodeURIComponent(\''.rawurlencode($ing->id).'\');
 				document.delete_ingredient.submit();
-			">(delete)</a></td>';
+			"><img src="delete-icon.png" width="12" height="12" alt="(delete)"/></a></td>';
 			echo '<td class="center">'.$ing->qty.' '.$ing->unit.'</td>';
 			/*echo '<td class="center">'.$ing->unit.'</td>'; */
 			echo '<td class="center">'.$ing->kcal.'</td>';
