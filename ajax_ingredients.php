@@ -1,18 +1,5 @@
 <?php
 
-/*
-if(isset($_REQUEST["rating"])) {
-	$rating = $_REQUEST["rating"];
-	$storedRatings = unserialize(file_get_contents(STORE));
-	$storedRatings[] = $rating;
-	put_contents(STORE, serialize($storedRatings));
-	$average = round(array_sum($storedRatings) / count($storedRatings), 2);
-	$count = count($storedRatings);
-	$xml = "<ratings><average>$average</average><count>$count</count></ratings>";
-	header('Content-type: text/xml'); 
-	echo $xml;
-}
-*/
 include('functions.php');
 
 $aColumns = array( 'name', 'qty', 'kcal', 'carb', 'sugar', 'fibre', 'protein', 'fat', 'sat_fat', 'sodium', 'cholesterol' );
@@ -74,7 +61,10 @@ $output .= '"aaData": [ ';
 
 foreach ($ingredients as $ingredient) {
     $output .= '[';
-    $output .= '"'.str_replace('"', '\"', $ingredient->name).'",';
+    $output .= '"'.str_replace('"', '\"',$ingredient->name.
+                               '<a href="#" onclick="editingredient(\''.$ingredient->id.'\');" ><img src="edit-icon.png" width="12" height="12" alt="(edit)"/></a>'.
+                               '<a href="#" onclick="deleteingredient(\''.$ingredient->id.'\');" ><img src="delete-icon.png" width="12" height="12" alt="(delete)"/></a>'
+                                ).'",';
     $output .= '"'.str_replace('"', '\"',$ingredient->qty.$ingredient->unit).'",';
     $output .= '"'.$ingredient->kcal.'",';
     $output .= '"'.$ingredient->carb.'",';

@@ -1,18 +1,5 @@
 <?php
 
-/*
-if(isset($_REQUEST["rating"])) {
-	$rating = $_REQUEST["rating"];
-	$storedRatings = unserialize(file_get_contents(STORE));
-	$storedRatings[] = $rating;
-	put_contents(STORE, serialize($storedRatings));
-	$average = round(array_sum($storedRatings) / count($storedRatings), 2);
-	$count = count($storedRatings);
-	$xml = "<ratings><average>$average</average><count>$count</count></ratings>";
-	header('Content-type: text/xml'); 
-	echo $xml;
-}
-*/
 include('functions.php');
 
 $aColumns = array( 'name', 'time_estimate', 'kcal', 'carb', 'sugar', 'fibre', 'protein', 'fat', 'sat_fat', 'sodium', 'cholesterol' );
@@ -97,6 +84,7 @@ function recipe_sort($a, $b)
     else
 	return ($val_a < $val_b) ? 1 : -1;
 }
+
 /*
  * Ordering
  */
@@ -120,7 +108,10 @@ foreach ($recipes as $recipe) {
     $nutri_info = $recipe->getNutriInfo();
 
     $output .= '[';
-    $output .= '"'.str_replace('"', '\"', $recipe->name).'",';
+    $output .= '"'.str_replace('"', '\"',$recipe->name.
+                               '<a href="#" onclick="editrecipe(\''.$recipe->id.'\');" ><img src="edit-icon.png" width="12" height="12" alt="(edit)"/></a>'.
+                               '<a href="#" onclick="deleterecipe(\''.$recipe->id.'\');" ><img src="delete-icon.png" width="12" height="12" alt="(delete)"/></a>'
+                                ).'",';
     $output .= '"'.str_replace('"', '\"',$recipe->getTimeEstimate()).'",';
     $output .= '"'.$nutri_info['kcal'].'",';
     $output .= '"'.$nutri_info['carb'].'",';

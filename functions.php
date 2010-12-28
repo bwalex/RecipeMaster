@@ -24,7 +24,7 @@ class Ingredient {
 				/* Get by name */
 				$preparedStatement = $db->prepare('SELECT * FROM ingredients WHERE name LIKE :name');
 				$preparedStatement->execute(array(':name' => $name));
-				$result = $preparedStatement->fetch();	
+				$result = $preparedStatement->fetch();  
 			} else {
 				/* Get by ID */
 				$preparedStatement = $db->prepare("SELECT * FROM ingredients WHERE id=:ingredient_id");
@@ -82,7 +82,7 @@ class Ingredient {
 
 		
 		$multiplier = $qty/$this->qty;
-                
+		
 		if ($unit == $this->unit) {
 			$multiplier *= 1;
 		} else if (($unit == 'g') && ($this->unit == 'ml')) {
@@ -104,7 +104,7 @@ class Ingredient {
 		} else {
 			throw new Exception("unknown unit mismatch, '".$unit."' vs '".$this->unit."'");
 		}
-                
+		
 		$info['kcal'] += $this->kcal * $multiplier;
 		$info['carb'] += $this->carb * $multiplier;
 		$info['sugar'] += $this->sugar * $multiplier;
@@ -141,7 +141,7 @@ class Ingredient {
 		if ($update) {
 			$preparedStatement = $db->prepare("SELECT * FROM ingredients WHERE id=:ingredient_id");
 			$preparedStatement->execute(array(':ingredient_id' => $this->id));
-			echo 'ID: '.$this->id;
+
 			if (!$preparedStatement->fetch()) {
 				throw new Exception('Tried to update ingredient, but ingredient doesn\'t exist');
 				return -1;
@@ -196,18 +196,43 @@ class Ingredient {
 	}
 }
 
-function get_all_ingredients() {
+function get_all_ingredients($restrict_query = '', $tokens = NULL) {
 	$ingredients = array();
 	
 	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-	$result = $db->query('SELECT id FROM ingredients');
+	if ($restrict_query == '') {
+		$result = $db->query('SELECT * FROM ingredients');
+	} else {
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$preparedStatement = $db->prepare('SELECT * FROM ingredients '.$restrict_query);
+		//echo $preparedStatement->queryString;
+		$preparedStatement->execute($tokens);
+		$result = $preparedStatement->fetchAll();
+	}
 	$i = 0;
 	foreach ($result as $row) {
-		$ingredients[$i++] = new Ingredient($row['id']);
+		$ingredients[$i++] = new Ingredient($row['id'], $row['name'], 1, $row['unit'], $row['qty'], $row['kcal'], $row['carb'], $row['sugar'], $row['fibre'], $row['protein'], $row['fat'], $row['sat_fat'], $row['sodium'], $row['cholesterol'], $row['others']);
+		//$ingredients[$i++] = new Ingredient($row['id']);
 	}
 
 	return $ingredients;
 }
+
+
+function get_ingredients_count($restrict_query = '', $tokens = NULL) {
+	$ingredients = array();
+	
+	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	if ($restrict_query == '') {
+		$result = $db->query('SELECT COUNT(id) FROM ingredients');
+		return $result->fetchColumn();
+	} else {
+		$preparedStatement = $db->prepare('SELECT COUNT(id) FROM ingredients '.$restrict_query);
+		$preparedStatement->execute($tokens);
+		return $preparedStatement->fetchColumn();
+	}
+}
+
 
 class Recipe {
 	var $id;
@@ -218,10 +243,10 @@ class Recipe {
 
 	/*
 	 * array of maps such as:
-	 *	Ingredient	(Ingredient)
-	 *	qty		(number)
-	 *	unit		(string)
-	 *	method		(string)
+	 *      Ingredient      (Ingredient)
+	 *      qty             (number)
+	 *      unit            (string)
+	 *      method          (string)
 	 * http://nutritiondata.self.com/facts/spices-and-herbs/225/2?mbid=ndhp
 	 */
 	var $ingredients;
@@ -235,7 +260,7 @@ class Recipe {
 				/* Get by name */
 				$preparedStatement = $db->prepare('SELECT * FROM recipes WHERE name LIKE :name');
 				$preparedStatement->execute(array(':name' => $name));
-				$result = $preparedStatement->fetch();	
+				$result = $preparedStatement->fetch();  
 			} else {
 				/* Get by ID */
 				$preparedStatement = $db->prepare("SELECT * FROM recipes WHERE id=:recipe_id");
@@ -247,7 +272,7 @@ class Recipe {
 				throw new Exception('Recipe doesn\'t exist!');
 			}
 
-			$this->id = $result['id'];	
+			$this->id = $result['id'];      
 			$this->name = $result['name'];
 			$this->description = $result['description'];
 			$this->instructions = $result['instructions'];
@@ -437,11 +462,19 @@ class Recipe {
 	}
 }
 
-function get_all_recipes() {
-	$recipes = array();
+function get_all_recipes($restrict_query = '', $tokens = NULL) {
+	$ingredients = array();
 	
 	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-	$result = $db->query('SELECT id FROM recipes');
+	if ($restrict_query == '') {
+		$result = $db->query('SELECT id FROM recipes');
+	} else {
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$preparedStatement = $db->prepare('SELECT id FROM recipes '.$restrict_query);
+		//echo $preparedStatement->queryString;
+		$preparedStatement->execute($tokens);
+		$result = $preparedStatement->fetchAll();
+	}
 	$i = 0;
 	foreach ($result as $row) {
 		$recipes[$i++] = new Recipe($row['id']);
@@ -449,5 +482,26 @@ function get_all_recipes() {
 
 	return $recipes;
 }
+
+function get_recipes_count($restrict_query = '', $tokens = NULL) {
+	$ingredients = array();
+	
+	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	if ($restrict_query == '') {
+		$result = $db->query('SELECT COUNT(id) FROM recipes');
+		return $result->fetchColumn();
+	} else {
+		$preparedStatement = $db->prepare('SELECT COUNT(id) FROM recipes '.$restrict_query);
+		$preparedStatement->execute($tokens);
+		return $preparedStatement->fetchColumn();
+	}
+}
+
+
+
+
+
+
+
 
 ?>
