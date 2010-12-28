@@ -18,8 +18,6 @@ ob_start('tidyhtml');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <!--
-TODO: ability to remove ingredients from recipe ingredient list
-TODO: clean list of ingredients each time
 TODO: add photo stuff
  -->
 
@@ -54,8 +52,10 @@ TODO: add photo stuff
 		var elem = document.getElementById(id);
 		if (elem.hasChildNodes()) {
 		    ning = Number(document.getElementById(form).ingredient_count.value) - 1;
-		    elem.removeChild(elem.lastChild);
 		    document.getElementById(form).ingredient_count.value = ning;
+		}
+		for(var i = 0; elem.hasChildNodes() && i < 4; i++) {
+		    elem.removeChild(elem.lastChild);
 		}
 	    }
 
@@ -343,7 +343,9 @@ TODO: add photo stuff
 		<hr>
 		List of ingredients:
 
-		<div id="ingredient_add_inputs"></div><a href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', '100g', '', 'diced');"><img src="add-icon.png" width="16" height="16" alt="add ingredient field"></a><br>
+		<div id="ingredient_add_inputs"></div>
+		<a href="#" onclick="deletelastingredient('add_recipe', 'ingredient_add_inputs');"><img src="delete-icon.png" width="16" height="16" alt="remove ingredient field"></a>
+		<a href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', '100g', '', 'diced');"><img src="add-icon.png" width="16" height="16" alt="add ingredient field"></a><br>
 		<hr>
 
 		<div id="alerts">
@@ -367,7 +369,9 @@ TODO: add photo stuff
 		<hr>
 		List of ingredients:
 
-		<div id="ingredient_edit_inputs"></div><a href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', '100g', '', 'diced');">add ingredient field</a><br>
+		<div id="ingredient_edit_inputs"></div>
+		<a href="#" onclick="deletelastingredient('edit_recipe', 'ingredient_edit_inputs');"><img src="delete-icon.png" width="16" height="16" alt="remove ingredient field"></a>
+		<a href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', '100g', '', 'diced');">add ingredient field</a><br>
 		<hr>
 
 		<div id="alerts">
