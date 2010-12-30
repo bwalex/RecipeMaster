@@ -1,4 +1,266 @@
 <?php
+
+class Photo {
+	var $id;
+	var $parent_id;
+	var $type;
+	var $caption;
+	var $photo_path;
+	var $photo_data;
+	var $table;
+	var $new;
+	var $mime;
+	var $extension;
+
+	var $mime_types = array(
+		'image/gif' => 'gif',
+		'image/jpeg' => 'jpg',
+		'image/png' => 'png',
+	/*
+		'application/x-shockwave-flash' => 'swf',
+		'image/psd' => 'psd',
+		'image/bmp' => 'bmp',
+		'image/tiff' => 'tiff',
+		'image/tiff' => 'tiff',
+		'image/jp2' => 'jp2',
+		'image/iff' => 'iff',
+		'image/vnd.wap.wbmp' => 'bmp',
+	*/
+		'image/xbm' => 'xbm'
+	/*
+		'image/vnd.microsoft.icon' => 'ico'
+	*/
+	);
+
+	function Photo($type, $id = -1, $parent_id = -1, $caption = '', $data = NULL) {
+		$photo_table = '';
+
+		switch ($type) {
+			case 'ingredient':
+				$photo_table = 'ingredient_photos';
+				break;
+			case 'recipe':
+				$photo_table = 'recipe_photos';
+				break;
+			default:
+				throw new Exception('Unknown photo type');
+		}
+		$this->table = $photo_table;
+
+		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+		if ($id > -1) {
+			$preparedStatement = $db->prepare("SELECT * FROM ".$photo_table." WHERE id=:id");
+			$preparedStatement->execute(array(':id' => $id));
+			$result = $preparedStatement->fetch();
+			if (!$result) {
+				throw new Exception('Object doesn\'t exist!');
+			}
+			$this->id = $result['id'];
+			$this->parent_id = $result['parent_id'];
+			$this->caption = $result['photo_caption'];
+			$this->mime = $result['photo_mime'];
+			$this->extension = $this->mime_types[$this->mime];
+			$this->photo_data = NULL;
+			$this->new = 0;
+		} else {
+			$this->id = -1;
+			$this->parent_id = $parent_id;
+			$this->caption = $caption;
+			$this->photo_path = '';
+			$this->extension = '';
+			$this->mime = '';
+			$this->photo_data = $data;
+			$this->new = 1;
+			echo 'new photo, '.$data;
+		}
+	}
+
+	function get() {
+		if ($this->new == 1)
+			return NULL;
+
+		return 'photos/'.$this->id.'.'.$this->extension;
+	}
+
+	function getThumbnail() {
+		if ($this->new == 1)
+			return NULL;
+
+		return 'thumbs/'.$this->id.'.jpg';
+	}
+
+	function validate($photo = $this->photo_data) {
+
+		if ($photo == NULL) {
+			return 0;
+		}
+
+		$info = getimagesize($photo);
+
+		if (empty($info)) {
+			return 0;
+		}
+
+		$image = FALSE;
+		switch($info['mime']) {
+			case "image/gif":
+				$image = imagecreatefromgif($photo);
+				break;
+			case "image/jpeg":
+				$image = imagecreatefromjpeg($photo);
+				break;
+			case "image/png":
+				$image = imagecreatefrompng($photo);
+				break;
+			case "image/xbm":
+				$image = imagecreatefromxbm($photo);
+				break;
+			default:
+				return 0;
+		}
+
+		if ($image == FALSE) {
+			return 0;
+		}
+
+		$this->mime = $info['mime'];
+		$this->extension = $this->mime_types[$this->mime];
+		imagedestroy($image);
+		return 1;
+	}
+
+	function store() {
+		if ($this->photo_data == NULL)
+			return 0;
+
+		$val = $this->validate();
+		if ($val == 0)
+			return 0;
+
+		if ($this->mime == '')
+			return 0;
+
+		if ($this->extension == '')
+			return 0;
+
+		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+		echo 'Table for store: '.$this->table;
+		$preparedStatement = $db->prepare("INSERT INTO ".$this->table." (parent_id, photo_caption, photo_mime) ".
+			"VALUES (:parent_id, :caption, :mime);");
+		$preparedStatement->execute(array(
+			':parent_id' => $this->parent_id,
+			':caption' => $this->caption,
+			':mime' => $this->mime
+			));
+
+		$n = $preparedStatement->rowCount();
+		if ($n <= 0) {
+			throw new Exception('photo insert failed');
+		}
+
+		$this->id = $db->lastInsertId('id');
+		echo 'new id: '.$this->id;
+		$path = 'photos/'.$this->id.'.'.$this->extension;
+
+		if(copy($this->photo_data, $path)) {
+			/* Generate thumbnail */
+			echo 'copy ok!';
+			// Set a maximum height and width
+			$width = 200;
+			$height = 200;
+			$info = getimagesize($path);
+			$width_orig = $info[0];
+			$height_orig = $info[1];
+			$ratio_orig = $width_orig/$height_orig;
+			if ($width/$height > $ratio_orig) {
+				$width = $height*$ratio_orig;
+			} else {
+				$height = $width/$ratio_orig;
+			}
+			$image_p = imagecreatetruecolor($width, $height);
+			switch($this->mime) {
+				case "image/gif":
+					$image = imagecreatefromgif($path);
+					break;
+				case "image/jpeg":
+					$image = imagecreatefromjpeg($path);
+					break;
+				case "image/png":
+					$image = imagecreatefrompng($path);
+					break;
+				case "image/xbm":
+					$image = imagecreatefromxbm($path);
+					break;
+				default:
+					throw new Exception('Unknown mime type in Photo->store(), this should have never happened!')
+			}
+			imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
+			imagejpeg($image_p, 'thumbs/'.$this->id.'.jpg');
+			$this->new = 0;
+		} else {
+			throw new Exception('copying image failed');
+		}
+
+		return $n;
+	}
+
+	function delete() {
+		if ($this->new == 1)
+			return 0;
+
+		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+
+		$preparedStatement = $db->prepare("DELETE FROM ".$this->table." WHERE id=:id");
+		$preparedStatement->execute(array(':id' => $this->id));
+		$n = $preparedStatement->rowCount();
+
+		unlink('photos/'.$this->id.'.'.$this->extension);
+		unlink('thumbs/'.$this->id.'.jpg');
+		$this->id = -1;
+		$this->new = 1;
+		return $n;
+	}
+}
+
+function delete_photos($type, $parent_id) {
+	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+
+	$photo_table = $type."_photos";
+
+	$preparedStatement = $db->prepare("SELECT id FROM ".$photo_table." WHERE parent_id=:parent_id");
+	$preparedStatement->execute(array(':parent_id' => $parent_id));
+	$result = $preparedStatement->fetchAll();
+
+	foreach($result as $row) {
+		$id = $row['id'];
+		$photo = new Photo($type, $id);
+		$photo->delete();
+	}
+	return $n;	
+}
+
+function get_photos($type, $parent_id) {
+	$photos = array();
+	$photo_table = $type."_photos";
+
+	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	$preparedStatement = $db->prepare("SELECT id FROM ".$photo_table." WHERE parent_id=:parent_id");
+	$preparedStatement->execute(array(':parent_id' => $parent_id));
+	$result = $preparedStatement->fetchAll();
+
+	foreach($result as $row) {
+		$id = $row['id'];
+		$photo = new Photo($type, $id);
+		array_push($photos, $photo);
+	}
+
+	return $photos;
+}
+
 class Ingredient {
 	var $name;
 	var $id;
@@ -298,6 +560,8 @@ class Recipe {
 				$ings[$i++] = $elem;
 			}
 			$this->ingredients = $ings;
+
+			$this->photos = get_photos("recipe", $this->id);
 		} else {
 			$this->id = $id;
 			$this->name = $name;
@@ -498,8 +762,44 @@ function get_recipes_count($restrict_query = '', $tokens = NULL) {
 }
 
 
+function print_header() {
+	echo '
+	<div id="header" class="container_16">
+	    <div id="logo">
+		<img src="images/recipe_master.png" alt="RecipeMaster"/>
+	    </div>
+	</div>
+	<div id="navbar" class="container_16 clearfix">
+		<div class="grid_2">
+		    <a href="ingredients.php">Ingredients</a>
+		</div>
+		<div class="grid_2">
+		    <a href="recipes.php">Recipes</a>
+		</div>
+	</div>
+    ';
+}
 
-
+function print_footer() {
+	echo '
+	<div id="footer" class="container_16 clearfix">
+	    <div style="text-align: left;" class="grid_2">
+		<a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Transitional" height="31" width="88"></a>
+	    </div>
+	    <div class="grid_14">
+		<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />&copy; <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Alex Hornung</span>
+		<!--<h4>&copy; 2010, Alex Hornung</h4>-->
+	    </div>
+	    <div id="lastfooter" class="container_16">
+	    built using <a href="http://960.gs/">960 gs</a>,
+	    <a href="http://www.famfamfam.com/lab/icons/silk/">FAMFAMFAM silk icons</a>,
+	    <a href="http://www.datatables.net/">DataTables</a>,
+	    <a href="http://www.jquery.com/">jQuery</a> and
+	    <a href="http://jqueryui.com/">jQuery user interface</a>
+	    </div>
+	</div>
+    ';
+}
 
 
 

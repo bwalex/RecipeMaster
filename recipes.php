@@ -1,4 +1,6 @@
 <?php
+include('functions.php');
+
 function tidyhtml($input)
 {
     $config = array(
@@ -16,9 +18,14 @@ function tidyhtml($input)
 
 ob_start('tidyhtml');
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
 TODO: add photo stuff
+TODO: font? http://en.wikipedia.org/wiki/Droid_(font)
+TODO: find a place for the add recipe/ingredient buttons
+TODO: chart
+TODO: login
  -->
 
 <html>
@@ -157,7 +164,10 @@ TODO: add photo stuff
 		    "sPaginationType": "full_numbers",
 		    "bServerSide": true,
 		    "bProcessing": true,
-		    "sAjaxSource": 'ajax_recipes.php'
+		    "sAjaxSource": 'ajax_recipes.php',
+		    "aoColumnDefs": [
+			{ "aTargets": [ 0 ], "sWidth": '200px' }
+		    ]
 		});
 
 		// Dialog                       
@@ -210,13 +220,14 @@ TODO: add photo stuff
 </head>
 
 <body>
-    <div id="header">
-	<h1>RecipeMaster</h1>
-    </div>
+    <?php print_header(); ?>
+    <div class="spacer container_16"></div>
 
-    <div id="main">
+    <div id="content" class="container_16">
+	<div class="container_16">
+	    <h1>Recipes<a href="#" id="dialog_link" name="dialog_link"><img src="icons/add.png" width="16" height="16" alt="Add Recipe"></a></h1>
+	</div>
 	<?php
-			include('functions.php');
 
 			function print_msg($msg) {
 				echo '<div class="ui-widget">
@@ -264,10 +275,24 @@ TODO: add photo stuff
 							$recipe->addIngredient($ingredient_qty, $ingredient_unit,
 							    $method, $ingredient_id, $ingredient_name);
 						}
-						
+
 						$n = $recipe->save();
+						print_r($_FILES);
+						foreach ($_FILES as $file) {
+						    //http://www.bitrepository.com/how-to-validate-an-image-upload.html
+						    $photo = new Photo("recipe", -1, $recipe->id, 'Test image caption', $file['tmp_name']);
+						    $m = $photo->store();
+						    if ($m == 0) {
+							$types = '';
+							foreach($photo->mime_types as $mime) {
+							    $types .= $mime . ', ';
+							}
+							$types = substr_replace( $types, "", -2 );
+							print_error("Error processing image '".$file['name']."', supported image types are: ".$types)
+						    }
+						}
 						if ($n > 0)
-							print_msg('Successfully added recipe '.$ingredient_name);
+							print_msg('Successfully added recipe '.$recipe_name);
 						print_msg("Rows affected: ".($n + $m)."<br/>");
 					} else if ($form_type == "edit_recipe") {
 						for ($i = 1; $i <= $ingredient_count; $i++) {
@@ -304,7 +329,7 @@ TODO: add photo stuff
 	</form>
 
 	<div id="dialog" title="Add a recipe">
-	    <form name="add_recipe" id="add_recipe" action="recipes.php" method="post">
+	    <form name="add_recipe" id="add_recipe" action="recipes.php" method="POST" enctype="multipart/form-data">
 		<label for="recipe_name">Recipe Name:</label><br>
 		<input type="text" name="recipe_name" size="100" id="recipe_name"> <!-- This <div> holds alert messages to be display in the sample page. -->
 		<br>
@@ -312,8 +337,8 @@ TODO: add photo stuff
 		List of ingredients:
 
 		<div id="ingredient_add_inputs"></div>
-		<a href="#" onclick="deletelastingredient('add_recipe', 'ingredient_add_inputs');"><img src="delete-icon.png" width="16" height="16" alt="remove ingredient field"></a>
-		<a href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', '100g', '', 'diced');"><img src="add-icon.png" width="16" height="16" alt="add ingredient field"></a><br>
+		<a href="#" onclick="deletelastingredient('add_recipe', 'ingredient_add_inputs');"><img src="icons/cross.png" width="16" height="16" alt="remove ingredient field"></a>
+		<a href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', '100g', '', 'diced');"><img src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
 		<hr>
 
 		<div id="alerts">
@@ -325,6 +350,7 @@ TODO: add photo stuff
 		<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">
 </textarea></p>
 
+		<input type="file" name="datafile" size="40">
 		<input type="hidden" name="form_type" value="add_recipe"> <input type="hidden" name="ingredient_count" value="0"> <input type="hidden" name="recipe_id" value="-1">
 	    </form>
 	</div>
@@ -338,8 +364,8 @@ TODO: add photo stuff
 		List of ingredients:
 
 		<div id="ingredient_edit_inputs"></div>
-		<a href="#" onclick="deletelastingredient('edit_recipe', 'ingredient_edit_inputs');"><img src="delete-icon.png" width="16" height="16" alt="remove ingredient field"></a>
-		<a href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', '100g', '', 'diced');">add ingredient field</a><br>
+		<a href="#" onclick="deletelastingredient('edit_recipe', 'ingredient_edit_inputs');"><img src="icons/cross.png" width="16" height="16" alt="remove ingredient field"></a>
+		<a href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', '100g', '', 'diced');"><img src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
 		<hr>
 
 		<div id="alerts">
@@ -355,7 +381,6 @@ TODO: add photo stuff
 	    </form>
 	</div>
 
-	<p><a href="#" id="dialog_link" name="dialog_link"><img src="add-icon.png" width="24" height="24" alt="Add Recipe"></a></p>
 
 	<div id="demo">
 	    <table cellpadding="0" cellspacing="0" border="0" class="display" id="recipe_data">
@@ -414,10 +439,7 @@ TODO: add photo stuff
 	</div>
     </div>
 
-    <div id="footer">
-	<span style="margin-top: 10px; float: left;"><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Transitional" height="31" width="88"></a></span>
-
-	<h4>&copy; 2010, Alex Hornung</h4>
-    </div>
+    <div class="spacer container_16"></div>
+    <?php print_footer(); ?>
 </body>
 </html>

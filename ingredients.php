@@ -1,4 +1,6 @@
 <?php
+include('functions.php');
+
 function tidyhtml($input)
 {
     $config = array(
@@ -16,8 +18,12 @@ function tidyhtml($input)
 
 ob_start('tidyhtml');
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+TODO: add a show ingredient page, possibly with some photos, etc
+ -->
+ 
 <html>
 <head>
     <meta name="generator" content="HTML Tidy for Windows (vers 11 August 2008), see www.w3.org">
@@ -77,7 +83,10 @@ ob_start('tidyhtml');
 		"sPaginationType": "full_numbers",
 		"bServerSide": true,
 		"bProcessing": true,
-		"sAjaxSource": 'ajax_ingredients.php'
+		"sAjaxSource": 'ajax_ingredients.php',
+		"aoColumnDefs": [
+			{ "aTargets": [ 0 ], "sWidth": '200px' }
+		    ]
 	    });
 
 	    // Dialog                       
@@ -130,13 +139,14 @@ ob_start('tidyhtml');
 </head>
 
 <body>
-    <div id="header">
-	<h1>RecipeMaster</h1>
-    </div>
-
-    <div id="main">
+    <?php print_header(); ?>
+    <div class="spacer container_16"></div>
+    <div id="content" class="container_16">
+	<div class="container_16">
+	    <h1>Ingredients<a href="#" id="dialog_link" name="dialog_link"><img src="icons/add.png" width="16" height="16" alt="Add Ingredient"></a></h1>
+	</div>
+	
 	<?php
-		include('functions.php');
 
 		function print_msg($msg) {
 			echo '<div class="ui-widget">
@@ -212,7 +222,6 @@ ob_start('tidyhtml');
 		/* http://www.pengoworks.com/workshop/jquery/autocomplete.htm */
 		?>
 
-	<p><a href="#" id="dialog_link" name="dialog_link"><img src="add-icon.png" width="24" height="24" alt="Add Ingredient"></a></p>
 
 	<form name="delete_ingredient" action="ingredients.php" method="post" id="delete_ingredient">
 	    <input type="hidden" name="ingredient_name" value=""> <input type="hidden" name="ingredient_id" value="-1"> <input type="hidden" name="form_type" value="delete_ingredient">
@@ -367,10 +376,7 @@ ob_start('tidyhtml');
 	</div>
     </div>
 
-    <div id="footer">
-	<span style="margin-top: 10px; float: left;"><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Transitional" height="31" width="88"></a></span>
-
-	<h4>&copy; 2010, Alex Hornung</h4>
-    </div>
+    <div class="spacer container_16"></div>
+    <?php print_footer(); ?>
 </body>
 </html>
