@@ -11,18 +11,20 @@
 CREATE TABLE IF NOT EXISTS `ingredients` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
-  `unit` text NOT NULL,
+  `unit` text,
   `qty` float NOT NULL,
-  `kcal` int(11) NOT NULL,
-  `carb` float NOT NULL,
-  `sugar` float NOT NULL,
-  `fibre` float NOT NULL,
-  `protein` float NOT NULL,
-  `fat` float NOT NULL,
-  `sat_fat` float NOT NULL,
-  `sodium` int(11) NOT NULL,
-  `cholesterol` int(11) NOT NULL,
-  `others` text NOT NULL,
+  `typical_qty` float,
+  `typical_unit` text,
+  `kcal` int(11),
+  `carb` float,
+  `sugar` float,
+  `fibre` float,
+  `protein` float,
+  `fat` float,
+  `sat_fat` float,
+  `sodium` int(11),
+  `cholesterol` int(11),
+  `others` text,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -35,9 +37,9 @@ CREATE TABLE IF NOT EXISTS `ingredients` (
 CREATE TABLE IF NOT EXISTS `recipes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
-  `description` text NOT NULL,
-  `instructions` text NOT NULL,
-  `time_estimate` int(11) NOT NULL,
+  `description` text,
+  `instructions` text,
+  `time_estimate` int(11),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -68,8 +70,8 @@ CREATE TABLE IF NOT EXISTS `rec_ing` (
   `recipe_id` int(11) NOT NULL,
   `ingredient_id` int(11) NOT NULL,
   `ingredient_qty` float NOT NULL,
-  `method` text NOT NULL,
-  `ingredient_unit` text NOT NULL,
+  `method` text,
+  `ingredient_unit` text,
   PRIMARY KEY (`id`),
   FOREIGN KEY (recipe_id) references recipes(id),
   FOREIGN KEY (ingredient_id) references ingredients(id)

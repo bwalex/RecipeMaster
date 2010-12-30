@@ -26,6 +26,9 @@ TODO: chart
 TODO: login
 TODO: load jquery via google APIs CDN
 TODO: use jqueryUI-only-necessary
+TODO: add serves N field
+TODO: add time estimate selection field
+TODO: ignore empty ingredient name fields
  -->
 
 <html>
@@ -165,10 +168,9 @@ TODO: use jqueryUI-only-necessary
 					if ($form_type == "add_recipe") {
 						foreach ($_POST['ing_name'] as $key => $ingredient_name) {
 							$ingredient_id = -1;
-							$ingredient_qty_unit = $_POST['ing_qty'][$key];
+							$ingredient_qty = $_POST['ing_qty'][$key];
+							$ingredient_unit = $_POST['ing_unit'][$key];
 							$method = $_POST['ing_method'][$key];
-							$ingredient_qty = preg_replace('/[^0-9]*/','', $ingredient_qty_unit);
-							$ingredient_unit = preg_replace('/[0-9]*/','', $ingredient_qty_unit);
 							
 							$recipe->addIngredient($ingredient_qty, $ingredient_unit,
 							    $method, $ingredient_id, $ingredient_name);
@@ -196,10 +198,9 @@ TODO: use jqueryUI-only-necessary
 					} else if ($form_type == "edit_recipe") {
 						foreach ($_POST['ing_name'] as $key => $ingredient_name) {
 							$ingredient_id = -1;
-							$ingredient_qty_unit = $_POST['ing_qty'][$key];
+							$ingredient_qty = $_POST['ing_qty'][$key];
+							$ingredient_unit = $_POST['ing_unit'][$key];
 							$method = $_POST['ing_method'][$key];
-							$ingredient_qty = preg_replace('/[^0-9]*/','', $ingredient_qty_unit);
-							$ingredient_unit = preg_replace('/[0-9]*/','', $ingredient_qty_unit);
 							
 							$recipe->addIngredient($ingredient_qty, $ingredient_unit,
 							    $method, $ingredient_id, $ingredient_name);
@@ -259,20 +260,15 @@ TODO: use jqueryUI-only-necessary
 
 	<div id="dialog" title="Add a recipe">
 	    <form name="add_recipe" id="add_recipe" action="recipes.php" method="POST" enctype="multipart/form-data">
-		<label for="recipe_name">Recipe Name:</label><br>
-		<input type="text" name="recipe_name" size="100" id="recipe_name"> <!-- This <div> holds alert messages to be display in the sample page. -->
+		<label for="add_recipe_name">Recipe Name:</label><br>
+		<input type="text" name="recipe_name" id="add_recipe_name" size="100"> <!-- This <div> holds alert messages to be display in the sample page. -->
 		<br>
 		<hr>
 		List of ingredients:
 
 		<div id="ingredient_add_inputs"></div>
-		<a class="boring" href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', null, '100g', '', 'diced');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
+		<a class="boring" href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', null, '100', 'g', '', 'method (e.g. diced)');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
 		<hr>
-
-		<div id="alerts">
-		    <noscript>
-		    <p><strong>CKEditor requires JavaScript to run</strong>. In a browser with no JavaScript support, like yours, you should still see the contents (HTML data) and you should be able to edit it normally, without a rich editor interface.</p></noscript>
-		</div>
 
 		<p><label for="add_instructions_editor">Instructions:</label><br>
 		<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">
@@ -290,20 +286,15 @@ TODO: use jqueryUI-only-necessary
 
 	<div id="dialog_edit" title="Edit recipe">
 	    <form name="edit_recipe" id="edit_recipe" action="recipes.php" method="post" enctype="multipart/form-data">
-		<label for="recipe_name">Recipe Name:</label><br>
-		<input type="text" name="recipe_name" size="100" id="recipe_name"> <!-- This <div> holds alert messages to be display in the sample page. -->
+		<label for="edit_recipe_name">Recipe Name:</label><br>
+		<input type="text" name="recipe_name" id="edit_recipe_name" size="100"> <!-- This <div> holds alert messages to be display in the sample page. -->
 		<br>
 		<hr>
 		List of ingredients:
 
 		<div id="ingredient_edit_inputs"></div>
-		<a class="boring" href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', null, '100g', '', 'diced');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
+		<a class="boring" href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', null, '100', '', '', 'method (e.g. diced)');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
 		<hr>
-
-		<div id="alerts">
-		    <noscript>
-		    <p><strong>CKEditor requires JavaScript to run</strong>. In a browser with no JavaScript support, like yours, you should still see the contents (HTML data) and you should be able to edit it normally, without a rich editor interface.</p></noscript>
-		</div>
 
 		<p><label for="edit_instructions_editor">Instructions:</label><br>
 		<textarea cols="80" class="ckeditor" id="edit_instructions_editor" name="recipe_instructions" rows="10">
@@ -373,6 +364,9 @@ TODO: use jqueryUI-only-necessary
 			<th>Cholesterol (mg)</th>
 		    </tr>
 		</tfoot>
+		<tbody>
+		    <tr><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td></tr>
+		</tbody>
 	    </table>
 	</div>
     </div>

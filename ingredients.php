@@ -22,6 +22,8 @@ ob_start('tidyhtml');
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
 TODO: add a show ingredient page, possibly with some photos, etc
+TODO: add tooltip for typical weight stuff
+TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
  -->
  
 <html>
@@ -56,6 +58,8 @@ TODO: add a show ingredient page, possibly with some photos, etc
 		document.edit_ingredient.ingredient_name.value = decodeURIComponent(ingredient.name);
 		document.edit_ingredient.ingredient_qty.value = decodeURIComponent(ingredient.qty);
 		document.edit_ingredient.ingredient_unit.value = decodeURIComponent(ingredient.unit);
+		document.edit_ingredient.ingredient_typical_qty.value = decodeURIComponent(ingredient.typical_qty);
+		document.edit_ingredient.ingredient_typical_unit.value = decodeURIComponent(ingredient.typical_unit);
 		document.edit_ingredient.ingredient_kcal.value = decodeURIComponent(ingredient.kcal);
 		document.edit_ingredient.ingredient_carb.value = decodeURIComponent(ingredient.carb);
 		document.edit_ingredient.ingredient_sugar.value = decodeURIComponent(ingredient.sugar);
@@ -143,7 +147,7 @@ TODO: add a show ingredient page, possibly with some photos, etc
     <div class="spacer container_16"></div>
     <div id="content" class="container_16">
 	<div class="container_16">
-	    <h1>Ingredients<a href="#" id="dialog_link" name="dialog_link"><img src="icons/add.png" width="16" height="16" alt="Add Ingredient"></a></h1>
+	    <h1>Ingredients<a class="boring" href="#" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Ingredient"></a></h1>
 	</div>
 	
 	<?php
@@ -164,13 +168,15 @@ TODO: add a show ingredient page, possibly with some photos, etc
 				</div>';
 		}
 
-		if ($_POST['ingredient_id'] && $_POST['ingredient_name']) {
+		if ($_POST['ingredient_id']) {
 			try {
 				$form_type = $_POST['form_type'];
 				$ingredient_name = $_POST['ingredient_name'];
 				$ingredient_id = $_POST['ingredient_id'];
 				$ingredient_unit = $_POST['ingredient_unit'];
 				$ingredient_qty = $_POST['ingredient_qty'];
+				$ingredient_typical_unit = $_POST['ingredient_typical_unit'];
+				$ingredient_typical_qty = $_POST['ingredient_typical_qty'];
 				$ingredient_kcal = $_POST['ingredient_kcal'];
 				$ingredient_carb = $_POST['ingredient_carb'];
 				$ingredient_sugar = $_POST['ingredient_sugar'];
@@ -187,7 +193,8 @@ TODO: add a show ingredient page, possibly with some photos, etc
 					$new = 0;
 
 				$ingredient = new Ingredient($ingredient_id, $ingredient_name, $new,
-				    $ingredient_unit, $ingredient_qty, $ingredient_kcal,
+				    $ingredient_unit, $ingredient_qty,
+				    $ingredient_typical_unit, $ingredient_typical_qty, $ingredient_kcal,
 				    $ingredient_carb, $ingredient_sugar, $ingredient_fibre,
 				    $ingredient_protein, $ingredient_fat, $ingredient_sat_fat,
 				    $ingredient_sodium, $ingredient_cholesterol,
@@ -215,7 +222,13 @@ TODO: add a show ingredient page, possibly with some photos, etc
 				}
 			
 			} catch (Exception $e) {
-				print_error('Exception: '.$e->getMessage());
+				$code = $e->getCode();
+				$msg = $e->getMessage();
+				if (($code == "HY000") && (stripos($msg, 'foreign'))) {
+				    print_error('Cannot delete this ingredient, at least one recipe still depends on it.');
+				} else {
+				    print_error('Exception: '.$msg);
+				}
 			}
 		}
 
@@ -234,7 +247,13 @@ TODO: add a show ingredient page, possibly with some photos, etc
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Qty (100):</span> <span class="formw"><input type="text" name="ingredient_qty"></span></span> <span class="right"><span class="label">Unit name (mg):</span> <span class="forwm"><input type="text" name="ingredient_unit"></span></span>
+		    <span class="left"><span class="label">Qty (100):</span> <span class="formw"><input type="text" name="ingredient_qty"></span></span> <span class="right"><span class="label">Unit name:</span> <span class="forwm">
+			    <select name="ingredient_unit"><option>&nbsp;</option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option></select>
+		    </span></span>
+		</div>
+		<div class="row">
+		    <span class="left"><span class="label">Typical unit weight:</span> <span class="formw"><input size="10" type="text" name="ingredient_typical_qty"><select name="ingredient_typical_unit"><option>g</option><option>mg</option><option>kg</option></select>
+		    </span></span>
 		</div>
 
 		<div class="row">
@@ -280,7 +299,14 @@ TODO: add a show ingredient page, possibly with some photos, etc
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Qty (100):</span> <span class="formw"><input type="text" name="ingredient_qty"></span></span> <span class="right"><span class="label">Unit name (mg):</span> <span class="forwm"><input type="text" name="ingredient_unit"></span></span>
+		    <span class="left"><span class="label">Qty (100):</span> <span class="formw"><input type="text" name="ingredient_qty"></span></span> <span class="right"><span class="label">Unit name:</span> <span class="forwm">
+			<select name="ingredient_unit"><option>&nbsp;</option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option></select>
+		    </span></span>
+		</div>
+		
+		<div class="row">
+		    <span class="left"><span class="label">Typical unit weight:</span> <span class="formw"><input size="10" type="text" name="ingredient_typical_qty"><select name="ingredient_typical_unit"><option>g</option><option>mg</option><option>kg</option></select>
+		    </span></span>
 		</div>
 
 		<div class="row">

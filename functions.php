@@ -1,5 +1,13 @@
 <?php
 
+function db_connect()
+{
+	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+	return $db;
+}
+
 class Photo {
 	var $id;
 	var $parent_id;
@@ -47,8 +55,7 @@ class Photo {
 		}
 		$this->table = $photo_table;
 
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$db = db_connect();
 
 		if ($id > -1) {
 			$preparedStatement = $db->prepare("SELECT * FROM ".$photo_table." WHERE id=:id");
@@ -88,8 +95,7 @@ class Photo {
 		if ($this->new == 1)
 			return NULL;
 		
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$db = db_connect();
 
 		$preparedStatement = $db->prepare("UPDATE ".$this->table." SET photo_caption=:caption WHERE id=:id");
 
@@ -168,8 +174,7 @@ class Photo {
 		if ($this->extension == '')
 			return 0;
 
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$db = db_connect();
 
 		echo 'Table for store: '.$this->table;
 		$preparedStatement = $db->prepare("INSERT INTO ".$this->table." (parent_id, photo_caption, photo_mime) ".
@@ -235,7 +240,7 @@ class Photo {
 		if ($this->new == 1)
 			return 0;
 
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+		$db = db_connect();
 
 		$preparedStatement = $db->prepare("DELETE FROM ".$this->table." WHERE id=:id");
 		$preparedStatement->execute(array(':id' => $this->id));
@@ -250,8 +255,7 @@ class Photo {
 }
 
 function delete_photos($type, $parent_id, $keep = array()) {
-	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$db = db_connect();
 
 	$photo_table = $type."_photos";
 
@@ -270,11 +274,12 @@ function delete_photos($type, $parent_id, $keep = array()) {
 	$preparedStatement = $db->prepare($query);	
 	$preparedStatement->execute($tokens);
 	$result = $preparedStatement->fetchAll();
+	$n = 0;
 
 	foreach($result as $row) {
 		$id = $row['id'];
 		$photo = new Photo($type, $id);
-		$photo->delete();
+		$n += $photo->delete();
 	}
 	return $n;	
 }
@@ -283,7 +288,7 @@ function get_photos($type, $parent_id) {
 	$photos = array();
 	$photo_table = $type."_photos";
 
-	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	$db = db_connect();
 	$preparedStatement = $db->prepare("SELECT id FROM ".$photo_table." WHERE parent_id=:parent_id");
 	$preparedStatement->execute(array(':parent_id' => $parent_id));
 	$result = $preparedStatement->fetchAll();
@@ -302,6 +307,8 @@ class Ingredient {
 	var $id;
 	var $unit;
 	var $qty;
+	var $typical_unit;
+	var $typical_qty;
 	var $kcal;
 	var $carb;
 	var $sugar;
@@ -313,8 +320,8 @@ class Ingredient {
 	var $cholesterol;
 	var $others;
 
-	function Ingredient($id, $name = '', $new = 0, $unit = '', $qty = 0, $kcal = 0, $carb = 0, $sugar = 0, $fibre = 0, $protein = 0, $fat = 0, $sat_fat = 0, $sodium = 0, $cholesterol = 0, $others = '') {
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	function Ingredient($id, $name = '', $new = 0, $unit = '', $qty = 0, $typical_unit = '', $typical_qty = 0, $kcal = 0, $carb = 0, $sugar = 0, $fibre = 0, $protein = 0, $fat = 0, $sat_fat = 0, $sodium = 0, $cholesterol = 0, $others = '') {
+		$db = db_connect();
 		$result = 0;
 
 		if (!$new) {
@@ -338,6 +345,8 @@ class Ingredient {
 			$this->id = $result['id'];
 			$this->unit = $result['unit'];
 			$this->qty = $result['qty'];
+			$this->typical_unit = $result['typical_unit'];
+			$this->typical_qty = $result['typical_qty'];
 			$this->kcal = $result['kcal'];
 			$this->carb = $result['carb'];
 			$this->sugar = $result['sugar'];
@@ -353,6 +362,8 @@ class Ingredient {
 			$this->id = $id;
 			$this->unit = $unit;
 			$this->qty = $qty;
+			$this->typical_unit = $typical_unit;
+			$this->typical_qty = $typical_qty;
 			$this->kcal = $kcal;
 			$this->carb = $carb;
 			$this->sugar = $sugar;
@@ -379,8 +390,12 @@ class Ingredient {
 		$info['cholesterol'] = 0;
 
 		
-		$multiplier = $qty/$this->qty;
-		
+		if (($unit == '') && ($this->typical_qty != 0)) {
+			$multiplier = $qty * $this->typical_qty/$this->qty;
+			$unit = $this->typical_unit;
+		} else {
+			$multiplier = $qty/$this->qty;
+		}
 		if ($unit == $this->unit) {
 			$multiplier *= 1;
 		} else if (($unit == 'g') && ($this->unit == 'ml')) {
@@ -418,7 +433,7 @@ class Ingredient {
 	}
 
 	function delete() {
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+		$db = db_connect();
 		$preparedStatement = $db->prepare("DELETE FROM ingredients WHERE id=:ingredient_id");
 		$preparedStatement->execute(array(':ingredient_id' => $this->id));
 		$n = $preparedStatement->rowCount();
@@ -427,7 +442,7 @@ class Ingredient {
 	}
 
 	function save($update = 0) {
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+		$db = db_connect();
 		$preparedStatement = $db->prepare('SELECT * FROM ingredients WHERE name LIKE :name');
 		$preparedStatement->execute(array(':name' => $this->name));
 		$result = $preparedStatement->fetch();
@@ -444,11 +459,13 @@ class Ingredient {
 				throw new Exception('Tried to update ingredient, but ingredient doesn\'t exist');
 				return -1;
 			}
-			$preparedStatement = $db->prepare("UPDATE ingredients SET name=:ingredient_name, unit=:ingredient_unit, qty=:ingredient_qty, kcal=:ingredient_kcal, carb=:ingredient_carb, sugar=:ingredient_sugar, fibre=:ingredient_fibre, protein=:ingredient_protein, fat=:ingredient_fat, sat_fat=:ingredient_sat_fat, sodium=:ingredient_sodium, cholesterol=:ingredient_cholesterol,  others=:ingredient_others WHERE id=:ingredient_id");
+			$preparedStatement = $db->prepare("UPDATE ingredients SET name=:ingredient_name, unit=:ingredient_unit, qty=:ingredient_qty, typical_unit=:ingredient_typical_unit, typical_qty=:ingredient_typical_qty, kcal=:ingredient_kcal, carb=:ingredient_carb, sugar=:ingredient_sugar, fibre=:ingredient_fibre, protein=:ingredient_protein, fat=:ingredient_fat, sat_fat=:ingredient_sat_fat, sodium=:ingredient_sodium, cholesterol=:ingredient_cholesterol,  others=:ingredient_others WHERE id=:ingredient_id");
 			$preparedStatement->execute(array(
 				':ingredient_name' => $this->name,
 				':ingredient_unit' => $this->unit,
 				':ingredient_qty' => $this->qty,
+				':ingredient_typical_unit' => $this->typical_unit,
+				':ingredient_typical_qty' => $this->typical_qty,
 				':ingredient_kcal' => $this->kcal,
 				':ingredient_carb' => $this->carb,
 				':ingredient_sugar' => $this->sugar,
@@ -464,12 +481,14 @@ class Ingredient {
 			$n = $preparedStatement->rowCount();
 			return $n;
 		} else {
-			$preparedStatement = $db->prepare("INSERT INTO ingredients (name, unit, qty, kcal, carb, sugar, fibre, protein, fat, sat_fat, sodium, cholesterol, others) ".
-				"VALUES (:ingredient_name, :ingredient_unit, :ingredient_qty, :ingredient_kcal, :ingredient_carb, :ingredient_sugar, :ingredient_fibre, :ingredient_protein, :ingredient_fat, :ingredient_sat_fat, :ingredient_sodium,  :ingredient_cholesterol,  :ingredient_others);");
+			$preparedStatement = $db->prepare("INSERT INTO ingredients (name, unit, qty, typical_unit, typical_qty, kcal, carb, sugar, fibre, protein, fat, sat_fat, sodium, cholesterol, others) ".
+				"VALUES (:ingredient_name, :ingredient_unit, :ingredient_qty, :ingredient_typical_unit, :ingredient_typical_qty, :ingredient_kcal, :ingredient_carb, :ingredient_sugar, :ingredient_fibre, :ingredient_protein, :ingredient_fat, :ingredient_sat_fat, :ingredient_sodium,  :ingredient_cholesterol,  :ingredient_others);");
 			$preparedStatement->execute(array(
 				':ingredient_name' => $this->name,
 				':ingredient_unit' => $this->unit,
 				':ingredient_qty' => $this->qty,
+				':ingredient_typical_unit' => $this->typical_unit,
+				':ingredient_typical_qty' => $this->typical_qty,
 				':ingredient_kcal' => $this->kcal,
 				':ingredient_carb' => $this->carb,
 				':ingredient_sugar' => $this->sugar,
@@ -497,7 +516,7 @@ class Ingredient {
 function get_all_ingredients($restrict_query = '', $tokens = NULL) {
 	$ingredients = array();
 	
-	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	$db = db_connect();
 	if ($restrict_query == '') {
 		$result = $db->query('SELECT * FROM ingredients');
 	} else {
@@ -509,7 +528,7 @@ function get_all_ingredients($restrict_query = '', $tokens = NULL) {
 	}
 	$i = 0;
 	foreach ($result as $row) {
-		$ingredients[$i++] = new Ingredient($row['id'], $row['name'], 1, $row['unit'], $row['qty'], $row['kcal'], $row['carb'], $row['sugar'], $row['fibre'], $row['protein'], $row['fat'], $row['sat_fat'], $row['sodium'], $row['cholesterol'], $row['others']);
+		$ingredients[$i++] = new Ingredient($row['id'], $row['name'], 1, $row['unit'], $row['qty'], $row['typical_unit'], $row['typical_qty'], $row['kcal'], $row['carb'], $row['sugar'], $row['fibre'], $row['protein'], $row['fat'], $row['sat_fat'], $row['sodium'], $row['cholesterol'], $row['others']);
 		//$ingredients[$i++] = new Ingredient($row['id']);
 	}
 
@@ -520,7 +539,7 @@ function get_all_ingredients($restrict_query = '', $tokens = NULL) {
 function get_ingredients_count($restrict_query = '', $tokens = NULL) {
 	$ingredients = array();
 	
-	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	$db = db_connect();
 	if ($restrict_query == '') {
 		$result = $db->query('SELECT COUNT(id) FROM ingredients');
 		return $result->fetchColumn();
@@ -550,7 +569,7 @@ class Recipe {
 	var $ingredients;
 
 	function Recipe($id, $name = '', $new = 0, $description = '', $instructions = '', $time_estimate = 0, $ingredients = NULL) {
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+		$db = db_connect();
 		$result = 0;
 
 		if (!$new) {
@@ -623,16 +642,18 @@ class Recipe {
 	}
 
 	function delete() {
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
-		$preparedStatement = $db->prepare("DELETE FROM recipes WHERE id=:recipe_id");
-		$preparedStatement->execute(array(':recipe_id' => $this->id));
-		$n = $preparedStatement->rowCount();
+		$db = db_connect();
 
 		$preparedStatement = $db->prepare("DELETE FROM rec_ing WHERE recipe_id=:recipe_id");
 		$preparedStatement->execute(array(':recipe_id' => $this->id));
+		$n = $preparedStatement->rowCount();
+
+		$n += delete_photos("recipe", $this->id);
+
+		$preparedStatement = $db->prepare("DELETE FROM recipes WHERE id=:recipe_id");
+		$preparedStatement->execute(array(':recipe_id' => $this->id));
 		$n += $preparedStatement->rowCount();
 
-		delete_photos("recipe", $this->id);
 		return $n;
 	}
 
@@ -680,7 +701,8 @@ class Recipe {
 	}
 
 	function save($update = 0) {
-		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+		$db = db_connect();
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$preparedStatement = $db->prepare('SELECT * FROM recipes WHERE name LIKE :name');
 		$preparedStatement->execute(array(':name' => $this->name));
 		$result = $preparedStatement->fetch();
@@ -766,7 +788,7 @@ class Recipe {
 function get_all_recipes($restrict_query = '', $tokens = NULL) {
 	$ingredients = array();
 	
-	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	$db = db_connect();
 	if ($restrict_query == '') {
 		$result = $db->query('SELECT id FROM recipes');
 	} else {
@@ -787,7 +809,7 @@ function get_all_recipes($restrict_query = '', $tokens = NULL) {
 function get_recipes_count($restrict_query = '', $tokens = NULL) {
 	$ingredients = array();
 	
-	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	$db = db_connect();
 	if ($restrict_query == '') {
 		$result = $db->query('SELECT COUNT(id) FROM recipes');
 		return $result->fetchColumn();
@@ -821,10 +843,10 @@ function print_footer() {
 	echo '
 	<div id="footer" class="container_16 clearfix">
 	    <div style="text-align: left;" class="grid_2">
-		<a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Transitional" height="31" width="88"></a>
+		<a class="boring" href="http://validator.w3.org/check?uri=referer"><img class="boring" src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Transitional" height="31" width="88"></a>
 	    </div>
 	    <div class="grid_14">
-		<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />&copy; <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Alex Hornung</span>
+		<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />&copy; <span xmlns:cc="http://creativecommons.org/ns#">Alex Hornung</span> <!-- span: property="cc:attributionName" -->
 		<!--<h4>&copy; 2010, Alex Hornung</h4>-->
 	    </div>
 	    <div id="lastfooter" class="container_16">

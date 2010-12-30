@@ -59,30 +59,34 @@ $output .= '"iTotalRecords": '.intval($iTotal).', ';
 $output .= '"iTotalDisplayRecords": '.intval($iFilteredTotal).', ';
 $output .= '"aaData": [ ';
 
-foreach ($ingredients as $ingredient) {
-    $output .= '[';
-    $output .= '"'.str_replace('"', '\"',$ingredient->name.
-                               '<a href="#" class="boring" onclick="editingredient(\''.$ingredient->id.'\');" ><img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
-                               '<a href="#" class="boring" onclick="deleteingredient(\''.$ingredient->id.'\');" ><img class="boring" src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
-                                ).'",';
-    $output .= '"'.str_replace('"', '\"',$ingredient->qty.$ingredient->unit).'",';
-    $output .= '"'.$ingredient->kcal.'",';
-    $output .= '"'.$ingredient->carb.'",';
-    $output .= '"'.$ingredient->sugar.'",';
-    $output .= '"'.$ingredient->fibre.'",';
-    $output .= '"'.$ingredient->protein.'",';
-    $output .= '"'.$ingredient->fat.'",';
-    $output .= '"'.$ingredient->sat_fat.'",';
-    $output .= '"'.$ingredient->sodium.'",';
-    $output .= '"'.$ingredient->cholesterol.'"';
-    $output .= '],';
+if (!empty($ingredients)) {
+    foreach ($ingredients as $ingredient) {
+        $output .= '[';
+        $output .= '"'.str_replace('"', '\"',$ingredient->name.
+                                   '<a href="#" class="boring" onclick="editingredient(\''.$ingredient->id.'\');" ><img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
+                                   '<a href="#" class="boring" onclick="deleteingredient(\''.$ingredient->id.'\');" ><img class="boring" src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
+                                    ).'",';
+        $output .= '"'.str_replace('"', '\"',$ingredient->qty.$ingredient->unit).'",';
+        $output .= '"'.$ingredient->kcal.'",';
+        $output .= '"'.$ingredient->carb.'",';
+        $output .= '"'.$ingredient->sugar.'",';
+        $output .= '"'.$ingredient->fibre.'",';
+        $output .= '"'.$ingredient->protein.'",';
+        $output .= '"'.$ingredient->fat.'",';
+        $output .= '"'.$ingredient->sat_fat.'",';
+        $output .= '"'.$ingredient->sodium.'",';
+        $output .= '"'.$ingredient->cholesterol.'"';
+        $output .= '],';
+    }
+    /* Remove last comma */
+    $output = substr_replace( $output, "", -1 );
+    
+
 }
-/* Remove last comma */
-$output = substr_replace( $output, "", -1 );
 
 $output .= ']';
 $output .= '}';
-
+    
 echo $output;
 
 ?>

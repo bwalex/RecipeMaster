@@ -85,51 +85,54 @@ function recipe_sort($a, $b)
 	return ($val_a < $val_b) ? 1 : -1;
 }
 
-/*
- * Ordering
- */
-if ( isset( $_REQUEST['iSortCol_0'] ) )
-{
-	for ( $i=0 ; $i<intval( $_REQUEST['iSortingCols'] ) ; $i++ )
-	{
-		if ( $_REQUEST[ 'bSortable_'.intval($_REQUEST['iSortCol_'.$i]) ] == "true" )
-		{
-                        $sort_dir = strtoupper($_REQUEST['sSortDir_'.$i]);
-                        if ($sort_dir != 'ASC' && $sort_dir != 'DESC')
-                            continue;
-			$sort_col = $aColumns[ intval( $_REQUEST['iSortCol_'.$i] ) ];
+if (!empty($recipes)) {
+    /*
+     * Ordering
+     */
+    if ( isset( $_REQUEST['iSortCol_0'] ) )
+    {
+	    for ( $i=0 ; $i<intval( $_REQUEST['iSortingCols'] ) ; $i++ )
+	    {
+		    if ( $_REQUEST[ 'bSortable_'.intval($_REQUEST['iSortCol_'.$i]) ] == "true" )
+		    {
+			    $sort_dir = strtoupper($_REQUEST['sSortDir_'.$i]);
+			    if ($sort_dir != 'ASC' && $sort_dir != 'DESC')
+				continue;
+			    $sort_col = $aColumns[ intval( $_REQUEST['iSortCol_'.$i] ) ];
+    
+			    usort($recipes, "recipe_sort");
+		    }
+	    }
+    }
 
-			usort($recipes, "recipe_sort");
-		}
-	}
+    foreach ($recipes as $recipe) {
+	$nutri_info = $recipe->getNutriInfo();
+    
+	$output .= '[';
+	$output .= '"'.str_replace('"', '\"','<a class="recipe" href="show_recipe.php?recipe_id='.$recipe->id.'">'.$recipe->name.'</a>'.
+				   '<a class="boring" href="#" onclick="editrecipe(\''.$recipe->id.'\');" ><img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
+				   '<a class="boring" href="#" onclick="deleterecipe(\''.$recipe->id.'\');" ><img class="boring" src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
+				    ).'",';
+	$output .= '"'.str_replace('"', '\"',$recipe->getTimeEstimate()).'",';
+	$output .= '"'.$nutri_info['kcal'].'",';
+	$output .= '"'.$nutri_info['carb'].'",';
+	$output .= '"'.$nutri_info['sugar'].'",';
+	$output .= '"'.$nutri_info['fibre'].'",';
+	$output .= '"'.$nutri_info['protein'].'",';
+	$output .= '"'.$nutri_info['fat'].'",';
+	$output .= '"'.$nutri_info['sat_fat'].'",';
+	$output .= '"'.$nutri_info['sodium'].'",';
+	$output .= '"'.$nutri_info['cholesterol'].'"';
+	$output .= '],';
+    }
+    /* Remove last comma */
+    $output = substr_replace( $output, "", -1 );
+    
+
 }
-
-foreach ($recipes as $recipe) {
-    $nutri_info = $recipe->getNutriInfo();
-
-    $output .= '[';
-    $output .= '"'.str_replace('"', '\"','<a class="recipe" href="show_recipe.php?recipe_id='.$recipe->id.'">'.$recipe->name.'</a>'.
-                               '<a class="boring" href="#" onclick="editrecipe(\''.$recipe->id.'\');" ><img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
-                               '<a class="boring" href="#" onclick="deleterecipe(\''.$recipe->id.'\');" ><img class="boring" src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
-                                ).'",';
-    $output .= '"'.str_replace('"', '\"',$recipe->getTimeEstimate()).'",';
-    $output .= '"'.$nutri_info['kcal'].'",';
-    $output .= '"'.$nutri_info['carb'].'",';
-    $output .= '"'.$nutri_info['sugar'].'",';
-    $output .= '"'.$nutri_info['fibre'].'",';
-    $output .= '"'.$nutri_info['protein'].'",';
-    $output .= '"'.$nutri_info['fat'].'",';
-    $output .= '"'.$nutri_info['sat_fat'].'",';
-    $output .= '"'.$nutri_info['sodium'].'",';
-    $output .= '"'.$nutri_info['cholesterol'].'"';
-    $output .= '],';
-}
-/* Remove last comma */
-$output = substr_replace( $output, "", -1 );
 
 $output .= ']';
 $output .= '}';
-
+    
 echo $output;
-
 ?>

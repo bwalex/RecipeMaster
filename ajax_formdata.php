@@ -12,6 +12,8 @@ if(isset($_REQUEST["ingredient"])) {
 	    $output .= '"name" : "'.str_replace('"', '\"', $ingredient->name).'" ,';
 	    $output .= '"qty" : "'.str_replace('"', '\"', $ingredient->qty).'" ,';
 	    $output .= '"unit" : "'.str_replace('"', '\"', $ingredient->unit).'" ,';
+	    $output .= '"typical_qty" : "'.str_replace('"', '\"', $ingredient->typical_qty).'" ,';
+	    $output .= '"typical_unit" : "'.str_replace('"', '\"', $ingredient->typical_unit).'" ,';
 	    $output .= '"kcal" : "'.str_replace('"', '\"', $ingredient->kcal).'" ,';
 	    $output .= '"carb" : "'.str_replace('"', '\"', $ingredient->carb).'" ,';
 	    $output .= '"sugar" : "'.str_replace('"', '\"', $ingredient->sugar).'" ,';

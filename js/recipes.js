@@ -1,3 +1,17 @@
+function createselect(name, options) {
+    var select = document.createElement("select");
+    select.name = name;
+
+    for (var i in options) {
+        option = document.createElement("option");
+        option_value = document.createTextNode(options[i]);
+        option.appendChild(option_value);
+        select.appendChild(option);
+    }
+
+    return select;
+}
+
 function deleteallingredients(form, id) {
     document.getElementById(form).ingredient_count.value = 0;
     var elem = document.getElementById(id);
@@ -6,7 +20,7 @@ function deleteallingredients(form, id) {
     }
 }
 
-function addingredient(form, id, before_node, qty, name, method) {
+function addingredient(form, id, before_node, qty, unit, name, method) {
     ning = Number(document.getElementById(form).ingredient_count.value) + 1;
     var row = document.createElement("div");
     row.className = 'row';
@@ -18,6 +32,10 @@ function addingredient(form, id, before_node, qty, name, method) {
     input.value = qty;
 
     row.appendChild(input);
+
+    select = createselect("ing_unit[]", ["", "g", "ml", "mg", "kg", "l"]);
+    select.value = unit;
+    row.appendChild(select);
 
     var input = document.createElement("input");
     input.type = "text";
@@ -56,6 +74,10 @@ function addingredient(form, id, before_node, qty, name, method) {
     input2.size = "20";
     input2.name = "ing_method[]";
     input2.value = method;
+    input2.onclick = function() {
+        if (this.value == "method (e.g. diced)")
+        this.value="";
+    }
 
     row.appendChild(input2);
 
@@ -86,7 +108,7 @@ function addingredient(form, id, before_node, qty, name, method) {
          * NOTE: elem = null is ok here since that's the
          * case where we append an extra row at the end.
          */
-        addingredient(form, id, elem, '100g', '', 'diced');
+        addingredient(form, id, elem, '100', 'g', '', 'method (e.g. diced)');
     }
 
     img = document.createElement("img");
@@ -130,7 +152,7 @@ function editrecipe(id) {
             this.checkDirty(); // true
         });
         for (var i in recipe.ingredients) {
-            addingredient('edit_recipe', 'ingredient_edit_inputs', null, recipe.ingredients[i].qty + recipe.ingredients[i].unit, recipe.ingredients[i].name, recipe.ingredients[i].method);
+            addingredient('edit_recipe', 'ingredient_edit_inputs', null, recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].name, recipe.ingredients[i].method);
         }
         for (var i in recipe.photos) {
             addphoto('edit_recipe', 'photo_edit_inputs', null, recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption);
