@@ -37,7 +37,7 @@ TODO: add photo stuff
 
 			@import "css/demo_table.css";
     </style>
-    <script type="text/javascript" src="highslide/highslide-with-gallery.js">
+    <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
 </script>
     <script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8">
 </script>
@@ -132,6 +132,8 @@ TODO: add photo stuff
 					echo '</div>';
 				$i++;
 			}
+			if ($i % 2 != 0)
+			    echo '</div>';
 			
 			echo '<h2 style="clear: left; padding-top: 15px;">Preparation</h2>';
 			echo $recipe->instructions;
@@ -167,7 +169,7 @@ TODO: add photo stuff
 			foreach ($recipe->photos as $photo) {
 			    echo '<li>';
 			    echo '<a href="'.$photo->get().'" class="highslide" title="'.$photo->caption.'" onclick="return hs.expand(this, config1 )">';
-			    echo '<img src="'.$photo->getThumbnail().'" alt="">';
+			    echo '<img src="'.$photo->getThumbnail().'" alt="photo of dish">';
 			    echo '</a>';
 			    echo '</li>';
 			}

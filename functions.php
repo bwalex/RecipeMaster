@@ -84,6 +84,27 @@ class Photo {
 		return 'photos/'.$this->id.'.'.$this->extension;
 	}
 
+	function updateCaption($caption) {
+		if ($this->new == 1)
+			return NULL;
+		
+		$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+		$preparedStatement = $db->prepare("UPDATE ".$this->table." SET photo_caption=:caption WHERE id=:id");
+
+		$preparedStatement->execute(array(
+			':caption' => $caption,
+			':id' => $this->id
+		));
+
+		$n = $preparedStatement->rowCount();
+		if ($n > 0)
+			$this->caption = $caption;
+
+		return $n;
+	}
+
 	function getThumbnail() {
 		if ($this->new == 1)
 			return NULL;
@@ -91,7 +112,9 @@ class Photo {
 		return 'thumbs/'.$this->id.'.jpg';
 	}
 
-	function validate($photo = $this->photo_data) {
+	function validate($photo = NULL) {
+		if ($photo == NULL)
+			$photo = $this->photo_data;
 
 		if ($photo == NULL) {
 			return 0;
@@ -196,7 +219,7 @@ class Photo {
 					$image = imagecreatefromxbm($path);
 					break;
 				default:
-					throw new Exception('Unknown mime type in Photo->store(), this should have never happened!')
+					throw new Exception('Unknown mime type in Photo->store(), this should have never happened!');
 			}
 			imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
 			imagejpeg($image_p, 'thumbs/'.$this->id.'.jpg');
@@ -226,13 +249,26 @@ class Photo {
 	}
 }
 
-function delete_photos($type, $parent_id) {
+function delete_photos($type, $parent_id, $keep = array()) {
 	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	$photo_table = $type."_photos";
 
-	$preparedStatement = $db->prepare("SELECT id FROM ".$photo_table." WHERE parent_id=:parent_id");
-	$preparedStatement->execute(array(':parent_id' => $parent_id));
+	$query = "SELECT id FROM ".$photo_table." WHERE parent_id=:parent_id ";
+	$tokens = array(':parent_id' => $parent_id);
+
+	if (!empty($keep)) {
+		$i = 0;
+		foreach ($keep as $entry) {
+			$query .= " AND NOT id=:id_".$i;
+			$tokens[":id_".$i] = $entry;
+			$i++;
+		}
+	}
+
+	$preparedStatement = $db->prepare($query);	
+	$preparedStatement->execute($tokens);
 	$result = $preparedStatement->fetchAll();
 
 	foreach($result as $row) {
@@ -564,6 +600,8 @@ class Recipe {
 			$this->photos = get_photos("recipe", $this->id);
 		} else {
 			$this->id = $id;
+			if ($name == '')
+				throw new Exception('No recipe name specified!');
 			$this->name = $name;
 			$this->description = $description;
 			$this->instructions = $instructions;
@@ -593,6 +631,8 @@ class Recipe {
 		$preparedStatement = $db->prepare("DELETE FROM rec_ing WHERE recipe_id=:recipe_id");
 		$preparedStatement->execute(array(':recipe_id' => $this->id));
 		$n += $preparedStatement->rowCount();
+
+		delete_photos("recipe", $this->id);
 		return $n;
 	}
 
@@ -658,9 +698,6 @@ class Recipe {
 			}
 			
 			$preparedStatement = $db->prepare("UPDATE recipes SET name=:recipe_name, description=:recipe_description, instructions=:recipe_instructions, time_estimate=:time_estimate WHERE id=:recipe_id");
-			/* Add new recipe */
-			$preparedStatement = $db->prepare("INSERT INTO recipes (name, description, instructions, time_estimate) ".
-				"VALUES (:recipe_name, :recipe_description, :recipe_instructions, :time_estimate);");
 			$preparedStatement->execute(array(
 				':recipe_name' => $this->name,
 				':recipe_description' => $this->description,

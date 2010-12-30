@@ -109,8 +109,8 @@ foreach ($recipes as $recipe) {
 
     $output .= '[';
     $output .= '"'.str_replace('"', '\"','<a class="recipe" href="show_recipe.php?recipe_id='.$recipe->id.'">'.$recipe->name.'</a>'.
-                               '<a href="#" onclick="editrecipe(\''.$recipe->id.'\');" ><img src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
-                               '<a href="#" onclick="deleterecipe(\''.$recipe->id.'\');" ><img src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
+                               '<a class="boring" href="#" onclick="editrecipe(\''.$recipe->id.'\');" ><img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
+                               '<a class="boring" href="#" onclick="deleterecipe(\''.$recipe->id.'\');" ><img class="boring" src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
                                 ).'",';
     $output .= '"'.str_replace('"', '\"',$recipe->getTimeEstimate()).'",';
     $output .= '"'.$nutri_info['kcal'].'",';

@@ -62,8 +62,8 @@ $output .= '"aaData": [ ';
 foreach ($ingredients as $ingredient) {
     $output .= '[';
     $output .= '"'.str_replace('"', '\"',$ingredient->name.
-                               '<a href="#" onclick="editingredient(\''.$ingredient->id.'\');" ><img src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
-                               '<a href="#" onclick="deleteingredient(\''.$ingredient->id.'\');" ><img src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
+                               '<a href="#" class="boring" onclick="editingredient(\''.$ingredient->id.'\');" ><img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
+                               '<a href="#" class="boring" onclick="deleteingredient(\''.$ingredient->id.'\');" ><img class="boring" src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
                                 ).'",';
     $output .= '"'.str_replace('"', '\"',$ingredient->qty.$ingredient->unit).'",';
     $output .= '"'.$ingredient->kcal.'",';

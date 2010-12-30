@@ -171,6 +171,20 @@ a.recipe {
   color: #000000;
 }
 
+a.boring {
+  text-decoration: none;
+  border-style: none;
+  outline-style: hidden;
+  border: none;
+  outline: none;
+  color: #000000;
+}
+
+img.boring {
+  border: none;
+  outline: none;
+}
+
 /*
 	Variable Grid System.
 	Learn more ~ http://www.spry-soft.com/grids/

@@ -40,7 +40,7 @@ if(isset($_REQUEST["ingredient"])) {
 	    $output .= '"time" : "'.str_replace('"', '\"', $recipe->time_estimate).'" ,';
 	    $output .= '"description" : "'.rawurlencode($recipe->description).'" ,';
 	    $output .= '"instructions" : "'.rawurlencode($recipe->instructions).'" ,';
-	    $output .= '"ingredients" : [';
+	    $output .= '"ingredients" : [ ';
 	    foreach ($recipe->ingredients as $ingredient) {
 		$output .= '{';
 		$output .= '"qty" : "'.str_replace('"', '\"', $ingredient['qty']).'",';
@@ -51,7 +51,22 @@ if(isset($_REQUEST["ingredient"])) {
 	    }
 	    /* Remove last comma */
 	    $output = substr_replace($output, "", -1);
+	    $output .= '], ';
+
+
+	    $output .= '"photos" : [ ';
+	    foreach ($recipe->photos as $photo) {
+		$output .= '{';
+		$output .= '"id" : "'.str_replace('"', '\"', $photo->id).'",';
+		$output .= '"photo" : "'.str_replace('"', '\"', $photo->get()).'",';
+		$output .= '"thumb" : "'.str_replace('"', '\"', $photo->getThumbnail()).'",';
+		$output .= '"caption" : "'.str_replace('"', '\"', $photo->caption).'"';
+		$output .= '},';
+	    }
+	    /* Remove last comma */
+	    $output = substr_replace($output, "", -1);
 	    $output .= ']';
+
 	    $output .= '}';
 	} catch (Exception $e) {
 	    $output = '{ "exception" : "'.$e->getMessage().'" }';

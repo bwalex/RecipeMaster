@@ -21,11 +21,11 @@ ob_start('tidyhtml');
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
-TODO: add photo stuff
 TODO: font? http://en.wikipedia.org/wiki/Droid_(font)
-TODO: find a place for the add recipe/ingredient buttons
 TODO: chart
 TODO: login
+TODO: load jquery via google APIs CDN
+TODO: use jqueryUI-only-necessary
  -->
 
 <html>
@@ -37,127 +37,26 @@ TODO: login
     <style type="text/css" title="currentStyle">
 	    @import "css/demo_table.css";
     </style>
+    
+    
     <link type="text/css" href="css/style.css" rel="stylesheet">
     <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet">
     <script type="text/javascript" src="js/jquery-1.4.4.min.js">
 </script>
     <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">
-</script>
+    </script>
+    
+    
+    <script type="text/javascript" src="fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+    <link rel="stylesheet" href="fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
+    
+    
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
 </script>
     <script type="text/javascript" src="ckeditor/ckeditor.js">
 </script>
-    <script type="text/javascript">	    function deleteallingredients(form, id) {
-		document.getElementById(form).ingredient_count.value = 0;
-		var elem = document.getElementById(id);
-		while (elem.hasChildNodes()) {
-		    elem.removeChild(elem.firstChild);
-		}
-	    }
-
-	    function deletelastingredient(form, id) {
-		var elem = document.getElementById(id);
-		if (elem.hasChildNodes()) {
-		    ning = Number(document.getElementById(form).ingredient_count.value) - 1;
-		    document.getElementById(form).ingredient_count.value = ning;
-		}
-		for(var i = 0; elem.hasChildNodes() && i < 4; i++) {
-		    elem.removeChild(elem.lastChild);
-		}
-	    }
-
-	    function addingredient(form, id, qty, name, method) {
-		ning = Number(document.getElementById(form).ingredient_count.value) + 1;
-		var input = document.createElement("input");
-		input.type = "text";
-		input.size = "10";
-		input.name = "ing_qty_" + ning;
-		input.value = qty;
-
-		var elem = document.getElementById(id);
-		elem.appendChild(input);
-
-		var input = document.createElement("input");
-		input.type = "text";
-		input.size = "50";
-		input.name = "ing_name_" + ning;
-		input.value = name;
-
-		var elem = document.getElementById(id);
-		elem.appendChild(input);
-
-		$(input).autocomplete({
-		    source: function(request, response) {
-			$.ajax({
-			    url: "ajax_autocomplete.php",
-			    dataType: "json",
-			    data: {
-				type: "ingredients",
-				maxRows: 12,
-				term: request.term
-			    },
-			    success: function(data) {
-				if (data.exception) {
-				    response([]);
-				    alert(data.exception);
-				    return;
-				}
-
-				response(data.objects);
-			    }
-			});
-		    },
-		    minLength: 2
-		});
-
-		var input2 = document.createElement("input");
-		input2.type = "text";
-		input2.size = "20";
-		input2.name = "ing_method_" + ning;
-		input2.value = method;
-
-		var elem = document.getElementById(id);
-		elem.appendChild(input2);
-
-		var br = document.createElement("br");
-		var elem = document.getElementById(id);
-		elem.appendChild(br);
-		document.getElementById(form).ingredient_count.value = ning;
-		input.focus();
-	    }
-
-	    function editrecipe(id) {
-		$.post("ajax_formdata.php", {
-		    recipe: id
-		},
-		function(recipe) {
-		    // format and output result
-		    if (recipe.exception) {
-			alert(recipe.exception);
-			return;
-		    }
-
-		    deleteallingredients('edit_recipe', 'ingredient_edit_inputs');
-		    document.edit_recipe.recipe_name.value = recipe.name;
-		    document.edit_recipe.recipe_instructions.value = decodeURIComponent(recipe.instructions);
-		    CKEDITOR.instances.edit_instructions_editor.setData(decodeURIComponent(recipe.instructions),
-		    function() {
-			this.checkDirty(); // true
-		    });
-		    for (var i in recipe.ingredients) {
-			addingredient('edit_recipe', 'ingredient_edit_inputs', recipe.ingredients[i].qty + recipe.ingredients[i].unit, recipe.ingredients[i].name, recipe.ingredients[i].method);
-		    }
-		    document.edit_recipe.recipe_id.value = recipe.id;
-
-		    $('#dialog_edit').dialog('open');
-		},
-		'json');
-	    }
-
-	    function deleterecipe(id) {
-		document.delete_recipe.recipe_id.value = id;
-		document.delete_recipe.submit();
-	    }</script>
+    <script type="text/javascript" src="js/recipes.js">
+    </script>
     <script type="text/javascript">	    $(function() {
 		$('#recipe_data').dataTable({
 		    //"bJQueryUI": true,
@@ -225,7 +124,7 @@ TODO: login
 
     <div id="content" class="container_16">
 	<div class="container_16">
-	    <h1>Recipes<a href="#" id="dialog_link" name="dialog_link"><img src="icons/add.png" width="16" height="16" alt="Add Recipe"></a></h1>
+	    <h1>Recipes<a href="#" class="boring" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Recipe"></a></h1>
 	</div>
 	<?php
 
@@ -245,7 +144,7 @@ TODO: login
 					</div>';
 			}
 
-			if ($_POST['recipe_id'] && $_POST['recipe_name']) {
+			if ($_POST['recipe_id']) {
 				try {
 					$form_type = $_POST['form_type'];
 					$recipe_name = $_POST['recipe_name'];
@@ -264,11 +163,10 @@ TODO: login
 					    $recipe_time_estimate);
 					
 					if ($form_type == "add_recipe") {
-						for ($i = 1; $i <= $ingredient_count; $i++) {
+						foreach ($_POST['ing_name'] as $key => $ingredient_name) {
 							$ingredient_id = -1;
-							$ingredient_name = $_POST['ing_name_'.$i];
-							$ingredient_qty_unit = $_POST['ing_qty_'.$i];
-							$method = $_POST['ing_method_'.$i];
+							$ingredient_qty_unit = $_POST['ing_qty'][$key];
+							$method = $_POST['ing_method'][$key];
 							$ingredient_qty = preg_replace('/[^0-9]*/','', $ingredient_qty_unit);
 							$ingredient_unit = preg_replace('/[0-9]*/','', $ingredient_qty_unit);
 							
@@ -277,29 +175,29 @@ TODO: login
 						}
 
 						$n = $recipe->save();
-						print_r($_FILES);
-						foreach ($_FILES as $file) {
-						    //http://www.bitrepository.com/how-to-validate-an-image-upload.html
-						    $photo = new Photo("recipe", -1, $recipe->id, 'Test image caption', $file['tmp_name']);
-						    $m = $photo->store();
-						    if ($m == 0) {
-							$types = '';
-							foreach($photo->mime_types as $mime) {
-							    $types .= $mime . ', ';
+
+						if (!empty($_FILES['recipe_photo']['tmp_name'])) {
+						    foreach ($_FILES['recipe_photo']['tmp_name'] as $key => $file) {
+							$photo = new Photo("recipe", -1, $recipe->id, $_POST['photo_caption'][$key], $file);
+							$m = $photo->store();
+							if ($m == 0) {
+							    $types = '';
+							    foreach($photo->mime_types as $mime) {
+								$types .= $mime . ', ';
+							    }
+							    $types = substr_replace( $types, "", -2 );
+							    print_error("Error processing image '".$_FILES['recipe_photo']['name'][$key]."', supported image types are: ".$types);
 							}
-							$types = substr_replace( $types, "", -2 );
-							print_error("Error processing image '".$file['name']."', supported image types are: ".$types)
 						    }
 						}
 						if ($n > 0)
 							print_msg('Successfully added recipe '.$recipe_name);
 						print_msg("Rows affected: ".($n + $m)."<br/>");
 					} else if ($form_type == "edit_recipe") {
-						for ($i = 1; $i <= $ingredient_count; $i++) {
+						foreach ($_POST['ing_name'] as $key => $ingredient_name) {
 							$ingredient_id = -1;
-							$ingredient_name = $_POST['ing_name_'.$i];
-							$ingredient_qty_unit = $_POST['ing_qty_'.$i];
-							$method = $_POST['ing_method_'.$i];
+							$ingredient_qty_unit = $_POST['ing_qty'][$key];
+							$method = $_POST['ing_method'][$key];
 							$ingredient_qty = preg_replace('/[^0-9]*/','', $ingredient_qty_unit);
 							$ingredient_unit = preg_replace('/[0-9]*/','', $ingredient_qty_unit);
 							
@@ -307,6 +205,37 @@ TODO: login
 							    $method, $ingredient_id, $ingredient_name);
 						}
 						$n = $recipe->save(1);
+
+						$keep = array();
+						if (!empty($_POST['photo_id'])) {
+						    foreach ($_POST['photo_id'] as $key => $photo_id) {
+							if ($photo_id >= 0) {
+							    /* Edit caption and keep */
+							    $photo = new Photo("recipe", $photo_id);
+							    $photo->updateCaption($_POST['photo_caption'][$key]);
+							    array_push($keep, $photo_id);
+							}
+						    }
+						    delete_photos("recipe", $recipe->id, $keep);
+    
+						    /* No, we don't do this in the same loop as to avoid deleting the new photos whose ids we don't have at that point */
+						    $file_no = 0;
+						    foreach ($_POST['photo_id'] as $key => $photo_id) {
+							if ($photo_id == -1) {
+							    /* new photo */
+							    $photo = new Photo("recipe", -1, $recipe->id, $_POST['photo_caption'][$key], $_FILES['recipe_photo']['tmp_name'][$file_no++]);
+							    $m = $photo->store();
+							    if ($m == 0) {
+								$types = '';
+								foreach($photo->mime_types as $mime) {
+								    $types .= $mime . ', ';
+								}
+								$types = substr_replace( $types, "", -2 );
+								print_error("Error processing image '".$_FILES['recipe_photo']['name'][$file_no-1]."', supported image types are: ".$types);
+							    }
+							}
+						    }
+						}
 
 						if ($n > 0)
 							print_msg('Successfully edited recipe '.$recipe_name);
@@ -337,8 +266,7 @@ TODO: login
 		List of ingredients:
 
 		<div id="ingredient_add_inputs"></div>
-		<a href="#" onclick="deletelastingredient('add_recipe', 'ingredient_add_inputs');"><img src="icons/cross.png" width="16" height="16" alt="remove ingredient field"></a>
-		<a href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', '100g', '', 'diced');"><img src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
+		<a class="boring" href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', null, '100g', '', 'diced');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
 		<hr>
 
 		<div id="alerts">
@@ -350,13 +278,18 @@ TODO: login
 		<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">
 </textarea></p>
 
-		<input type="file" name="datafile" size="40">
+		<hr>
+		List of photos:
+
+		<div id="photo_add_inputs"></div>
+		<a class="boring" href="#" onclick="addphoto('add_recipe', 'photo_add_inputs', null, '-1', '', '', 'Description');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
+    
 		<input type="hidden" name="form_type" value="add_recipe"> <input type="hidden" name="ingredient_count" value="0"> <input type="hidden" name="recipe_id" value="-1">
 	    </form>
 	</div>
 
 	<div id="dialog_edit" title="Edit recipe">
-	    <form name="edit_recipe" id="edit_recipe" action="recipes.php" method="post">
+	    <form name="edit_recipe" id="edit_recipe" action="recipes.php" method="post" enctype="multipart/form-data">
 		<label for="recipe_name">Recipe Name:</label><br>
 		<input type="text" name="recipe_name" size="100" id="recipe_name"> <!-- This <div> holds alert messages to be display in the sample page. -->
 		<br>
@@ -364,8 +297,7 @@ TODO: login
 		List of ingredients:
 
 		<div id="ingredient_edit_inputs"></div>
-		<a href="#" onclick="deletelastingredient('edit_recipe', 'ingredient_edit_inputs');"><img src="icons/cross.png" width="16" height="16" alt="remove ingredient field"></a>
-		<a href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', '100g', '', 'diced');"><img src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
+		<a class="boring" href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', null, '100g', '', 'diced');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
 		<hr>
 
 		<div id="alerts">
@@ -377,6 +309,12 @@ TODO: login
 		<textarea cols="80" class="ckeditor" id="edit_instructions_editor" name="recipe_instructions" rows="10">
 </textarea></p>
 
+		<hr>
+		List of photos:
+
+		<div id="photo_edit_inputs"></div>
+		<a class="boring" href="#" onclick="addphoto('edit_recipe', 'photo_edit_inputs', null, '-1', '', '', 'Description');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
+    
 		<input type="hidden" name="form_type" value="edit_recipe"> <input type="hidden" name="ingredient_count" value="0"> <input type="hidden" name="recipe_id" value="-1">
 	    </form>
 	</div>
