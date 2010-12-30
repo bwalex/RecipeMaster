@@ -80,7 +80,6 @@ class Photo {
 			$this->mime = '';
 			$this->photo_data = $data;
 			$this->new = 1;
-			echo 'new photo, '.$data;
 		}
 	}
 
@@ -176,7 +175,6 @@ class Photo {
 
 		$db = db_connect();
 
-		echo 'Table for store: '.$this->table;
 		$preparedStatement = $db->prepare("INSERT INTO ".$this->table." (parent_id, photo_caption, photo_mime) ".
 			"VALUES (:parent_id, :caption, :mime);");
 		$preparedStatement->execute(array(
@@ -191,12 +189,10 @@ class Photo {
 		}
 
 		$this->id = $db->lastInsertId('id');
-		echo 'new id: '.$this->id;
 		$path = 'photos/'.$this->id.'.'.$this->extension;
 
 		if(copy($this->photo_data, $path)) {
 			/* Generate thumbnail */
-			echo 'copy ok!';
 			// Set a maximum height and width
 			$width = 200;
 			$height = 200;
@@ -377,7 +373,7 @@ class Ingredient {
 		}
 	}
 
-	function getNutriInfo($qty, $unit) {
+	function getNutriInfo($qty, $unit, $dont_except = 0) {
 		$info = array();
 		$info['kcal'] = 0;
 		$info['carb'] = 0;
@@ -394,6 +390,8 @@ class Ingredient {
 			$multiplier = $qty * $this->typical_qty/$this->qty;
 			$unit = $this->typical_unit;
 		} else {
+			if ($this->qty == 0)
+				return NULL;
 			$multiplier = $qty/$this->qty;
 		}
 		if ($unit == $this->unit) {
@@ -415,7 +413,11 @@ class Ingredient {
 		} else if (($unit == 'ml') && ($this->unit == 'l')) {
 			$multiplier /= 1000;
 		} else {
-			throw new Exception("unknown unit mismatch, '".$unit."' vs '".$this->unit."'");
+			//return NULL;
+			if ($dont_except)
+				return $info;
+			else
+				throw new Exception("unknown unit mismatch, '".$unit."' vs '".$this->unit."'");
 		}
 		
 		$info['kcal'] += $this->kcal * $multiplier;
@@ -671,7 +673,7 @@ class Recipe {
 			return "No Estimate";
 	}
 
-	function getNutriInfo() {
+	function getNutriInfo($dont_except = 0) {
 		$info = array();
 		$info['kcal'] = 0;
 		$info['carb'] = 0;
@@ -684,7 +686,7 @@ class Recipe {
 		$info['cholesterol'] = 0;
 
 		foreach ($this->ingredients as $elem) {
-			$ingredient_info = $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
+			$ingredient_info = $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit'], $dont_except);
 
 			$info['kcal'] += $ingredient_info['kcal'];
 			$info['carb'] += $ingredient_info['carb'];

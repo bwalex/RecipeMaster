@@ -40,6 +40,13 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
     <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet">
     <script type="text/javascript" src="js/jquery-1.4.4.min.js">
 </script>
+    <script src="http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js"></script>
+    
+    
+    
+    
+    
+    
     <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">
 </script>
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
@@ -82,6 +89,19 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 	    document.delete_ingredient.submit();
 	}</script>
     <script type="text/javascript">	$(function() {
+	    // select all desired input fields and attach tooltips to them
+	    $("#foo2").tooltip({
+	    
+		    // place tooltip on the right edge
+		    position: "top center",
+	    	    
+		    // use the built-in fadeIn/fadeOut effect
+		    effect: "fade",
+	    
+		    // custom opacity setting
+		    opacity: 0.7
+	    });
+
 	    $('#ingredients_data').dataTable({
 		//"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
@@ -110,7 +130,7 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 		$('#dialog').dialog('open');
 		return false;
 	    });
-
+	    
 	    // Dialog                       
 	    $('#dialog_edit').dialog({
 		autoOpen: false,
@@ -173,7 +193,11 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 				$form_type = $_POST['form_type'];
 				$ingredient_name = $_POST['ingredient_name'];
 				$ingredient_id = $_POST['ingredient_id'];
-				$ingredient_unit = $_POST['ingredient_unit'];
+
+				$ingredient_unit = trim($_POST['ingredient_unit']);
+				if (ord($ingredient_unit) == 194)
+				    $ingredient_unit = '';
+
 				$ingredient_qty = $_POST['ingredient_qty'];
 				$ingredient_typical_unit = $_POST['ingredient_typical_unit'];
 				$ingredient_typical_qty = $_POST['ingredient_typical_qty'];
@@ -241,13 +265,13 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 	</form><!-- ui-dialog -->
 
 	<div id="dialog" title="Add an ingredient">
-	    <form name="add_ingredient" action="ingredients.php" method="post" id="add_ingredient">
+	    <form name="add_ingredient" action="ingredients.php" method="post" id="add_ingredient"><div id="inputs">
 		<div class="row">
 		    <span class="left"><span class="label">Name:</span> <span class="formw"><input type="text" name="ingredient_name"></span></span>
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Qty (100):</span> <span class="formw"><input type="text" name="ingredient_qty"></span></span> <span class="right"><span class="label">Unit name:</span> <span class="forwm">
+		    <span class="left"><span class="label">Qty (100):</span> <span class="formw"><input type="text" name="ingredient_qty" id="foo2" title="What's on your mind?"></span></span> <span class="right"><span class="label">Unit name:</span> <span class="forwm">
 			    <select name="ingredient_unit"><option>&nbsp;</option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option></select>
 		    </span></span>
 		</div>
@@ -289,7 +313,7 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 		    <textarea cols="100" rows="3" style="width: 90%;" name="ingredient_others">
 </textarea></span>
 		</div><input type="hidden" name="ingredient_id" value="-1"> <input type="hidden" name="form_type" value="add_ingredient"> <!--<input type="submit"/>-->
-	    </form>
+	    </div></form>
 	</div>
 
 	<div id="dialog_edit" title="Edit an ingredient">

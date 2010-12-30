@@ -21,7 +21,6 @@ function deleteallingredients(form, id) {
 }
 
 function addingredient(form, id, before_node, qty, unit, name, method) {
-    ning = Number(document.getElementById(form).ingredient_count.value) + 1;
     var row = document.createElement("div");
     row.className = 'row';
 
@@ -127,7 +126,7 @@ function addingredient(form, id, before_node, qty, unit, name, method) {
     } else {
         elem.insertBefore(row, before_node);
     }
-    document.getElementById(form).ingredient_count.value = ning;
+
     input.focus();
 }
 
@@ -259,6 +258,5 @@ function addphoto(form, id, before_node, photoid, photo, thumb, caption) {
     } else {
         elem.insertBefore(row, before_node);
     }
-    document.getElementById(form).ingredient_count.value = ning;
     input.focus();
 }

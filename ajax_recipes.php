@@ -20,7 +20,7 @@ if ( isset( $_REQUEST['iDisplayStart'] ) && $_REQUEST['iDisplayLength'] != '-1' 
     $query .= " LIMIT ".intval($_REQUEST['iDisplayStart']).", ".intval($_REQUEST['iDisplayLength']);
 }
 
-
+try {
 //echo $query;
 $recipes = get_all_recipes($query, $tokens);
 
@@ -42,8 +42,13 @@ function recipe_sort($a, $b)
     global $sort_col;
     global $sort_dir;
 
-    $nutri_info_a = $a->getNutriInfo();
-    $nutri_info_b = $b->getNutriInfo();
+    try {
+	$nutri_info_a = $a->getNutriInfo(1);
+	$nutri_info_b = $b->getNutriInfo(1);
+    } catch(Exception $e) {
+	return 0;
+    }
+
 
     switch ($sort_col) {
 	case "name":
@@ -106,7 +111,7 @@ if (!empty($recipes)) {
     }
 
     foreach ($recipes as $recipe) {
-	$nutri_info = $recipe->getNutriInfo();
+	$nutri_info = $recipe->getNutriInfo(1);
     
 	$output .= '[';
 	$output .= '"'.str_replace('"', '\"','<a class="recipe" href="show_recipe.php?recipe_id='.$recipe->id.'">'.$recipe->name.'</a>'.
@@ -135,4 +140,15 @@ $output .= ']';
 $output .= '}';
     
 echo $output;
+} catch (Exception $e) {
+    $output = '{';
+    $output .= '"sEcho": '.intval($_REQUEST['sEcho']).', ';
+    $output .= '"iTotalRecords": 0, ';
+    $output .= '"iTotalDisplayRecords": 0, ';
+    $output .= '"aaData": [ ';
+    
+    $output .= ']';
+    $output .= '}';
+    echo $output;
+}
 ?>

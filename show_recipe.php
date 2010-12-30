@@ -21,10 +21,11 @@ ob_start('tidyhtml');
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
-TODO: copy recipe
+TODO: add edit recipe button
 TODO: split ingredients into two columns
-TODO: http://www.flickr.com/photos/87116893@N00/5292842186/ http://www.flickr.com/photos/87116893@N00/5292842186/sizes/o/in/photostream/
-TODO: add photo stuff
+inspiration: http://www.flickr.com/photos/87116893@N00/5292842186/ http://www.flickr.com/photos/87116893@N00/5292842186/sizes/o/in/photostream/
+TODO: add bullet points
+TODO: add print stuff
 -->
 
 <html>
@@ -126,8 +127,11 @@ TODO: add photo stuff
 				} else {
 					$class = "rightfixed";
 				}
-				echo '<span class="'.$class.'">'.$ingredient['qty'].$ingredient['unit'].' '.$ingredient['Ingredient']->name.' ('.$ingredient['method'].')</span>';
-				
+				if ($ingredient['method'])
+				    echo '<div class="'.$class.'">'.$ingredient['qty'].$ingredient['unit'].' '.$ingredient['Ingredient']->name.' ('.$ingredient['method'].')</div>';
+				else
+				    echo '<div class="'.$class.'">'.$ingredient['qty'].$ingredient['unit'].' '.$ingredient['Ingredient']->name.'</div>';
+
 				if ($i % 2 != 0)
 					echo '</div>';
 				$i++;
@@ -236,7 +240,7 @@ TODO: add photo stuff
 
 		
 	<div class="container_16 clearfix">
-	    <a name="detailednutri" id="detailednutri">.</a>
+	    <a name="detailednutri" id="detailednutri"></a>
 	    <h4 id="acc_head"><a style="text-decoration: none; color: #000000;" href="#detailednutri">Detailed nutritional analysis</a></h4>
 	    <div id="acc_content">
 		<div id="demo">

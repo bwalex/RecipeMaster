@@ -27,8 +27,8 @@ TODO: login
 TODO: load jquery via google APIs CDN
 TODO: use jqueryUI-only-necessary
 TODO: add serves N field
-TODO: add time estimate selection field
-TODO: ignore empty ingredient name fields
+TODO: add time estimate field
+TODO: add copy button
  -->
 
 <html>
@@ -60,7 +60,26 @@ TODO: ignore empty ingredient name fields
 </script>
     <script type="text/javascript" src="js/recipes.js">
     </script>
-    <script type="text/javascript">	    $(function() {
+    <script type="text/javascript">
+	    $(document).ready(function() {
+		CKEDITOR.config.toolbar =
+		[
+		    ['Source','-','Preview','-','Templates'],
+		    ['Cut','Copy','Paste','PasteText','PasteFromWord','-','SpellChecker', 'Scayt'],
+		    ['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
+		    '/',
+		    ['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],
+		    ['NumberedList','BulletedList','-','Outdent','Indent','Blockquote','CreateDiv'],
+		    ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+		    ['BidiLtr', 'BidiRtl' ],
+		    ['Link','Unlink','Anchor'],
+		    ['Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak'],
+		    '/',
+		    ['Styles','Format','Font','FontSize'],
+		    ['TextColor','BGColor'],
+		    ['Maximize', 'ShowBlocks','-','About']
+		];
+	    });	    $(function() {
 		$('#recipe_data').dataTable({
 		    //"bJQueryUI": true,
 		    "sPaginationType": "full_numbers",
@@ -166,14 +185,19 @@ TODO: ignore empty ingredient name fields
 					    $recipe_time_estimate);
 					
 					if ($form_type == "add_recipe") {
-						foreach ($_POST['ing_name'] as $key => $ingredient_name) {
-							$ingredient_id = -1;
-							$ingredient_qty = $_POST['ing_qty'][$key];
-							$ingredient_unit = $_POST['ing_unit'][$key];
-							$method = $_POST['ing_method'][$key];
-							
-							$recipe->addIngredient($ingredient_qty, $ingredient_unit,
-							    $method, $ingredient_id, $ingredient_name);
+						if (!empty($_POST['ing_name'])) {
+						    foreach ($_POST['ing_name'] as $key => $ingredient_name) {
+							    if (empty($ingredient_name))
+								continue;
+							    $ingredient_id = -1;
+							    $ingredient_qty = $_POST['ing_qty'][$key];
+							    $ingredient_unit = $_POST['ing_unit'][$key];
+							    $method = $_POST['ing_method'][$key];
+							    
+							    $recipe->addIngredient($ingredient_qty, $ingredient_unit,
+								$method, $ingredient_id, $ingredient_name);
+						    }
+						    /* XXX: maybe throw error */
 						}
 
 						$n = $recipe->save();
@@ -196,14 +220,19 @@ TODO: ignore empty ingredient name fields
 							print_msg('Successfully added recipe '.$recipe_name);
 						print_msg("Rows affected: ".($n + $m)."<br/>");
 					} else if ($form_type == "edit_recipe") {
-						foreach ($_POST['ing_name'] as $key => $ingredient_name) {
-							$ingredient_id = -1;
-							$ingredient_qty = $_POST['ing_qty'][$key];
-							$ingredient_unit = $_POST['ing_unit'][$key];
-							$method = $_POST['ing_method'][$key];
-							
-							$recipe->addIngredient($ingredient_qty, $ingredient_unit,
-							    $method, $ingredient_id, $ingredient_name);
+						if (!empty($_POST['ing_name'])) {
+						    foreach ($_POST['ing_name'] as $key => $ingredient_name) {
+							    if (empty($ingredient_name))
+								continue;
+							    $ingredient_id = -1;
+							    $ingredient_qty = $_POST['ing_qty'][$key];
+							    $ingredient_unit = $_POST['ing_unit'][$key];
+							    $method = $_POST['ing_method'][$key];
+							    
+							    $recipe->addIngredient($ingredient_qty, $ingredient_unit,
+								$method, $ingredient_id, $ingredient_name);
+						    }
+						    /* XXX: maybe throw error? */
 						}
 						$n = $recipe->save(1);
 
