@@ -29,6 +29,13 @@ TODO: use jqueryUI-only-necessary
 TODO: add serves N field
 TODO: add time estimate field
 TODO: add copy button
+
+-- misc: apply to all files --
+TODO: Ketchup validation
+TODO: tesupload or so
+TODO: config file for db and thumb size, paths, etc
+TODO: replace jquery ui dialog with jquery tools overlay thingie?
+TODO: ajaxify show ingredients
  -->
 
 <html>
