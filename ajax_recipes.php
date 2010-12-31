@@ -12,7 +12,7 @@ if ( $_REQUEST['sSearch'] != "" ) {
     $tokens = array(':filter_name' => '%'.$_REQUEST['sSearch'].'%');
 }
 
-$iFilteredTotal = get_recipes_count($query, tokens);
+$iFilteredTotal = get_recipes_count($query, $tokens);
 
 /* 
  * Paging
@@ -153,3 +153,4 @@ echo $output;
     echo $output;
 }
 ?>
+
