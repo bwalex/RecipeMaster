@@ -105,25 +105,29 @@ TODO: add copy button
 
 		// Dialog Link
 		$('#dialog_link').click(function() {
-		    $('#dialog').dialog('open');
-		    return false;
-		});
+		    deleteallingredients('add_recipe', 'ingredient_add_inputs');
+		    deleteallphotos('add_recipe', 'photo_add_inputs');
+		    document.add_recipe.recipe_id.value = '-1';
+		    document.add_recipe.form_type.value = 'add_recipe';
+		    document.add_recipe.recipe_name.value = '';
+		    document.add_recipe.recipe_instructions.value = '';
+		    CKEDITOR.instances.add_instructions_editor.setData('',
+			function() {
+			    this.checkDirty(); // true
+		    });
 
-		// Dialog                       
-		$('#dialog_edit').dialog({
-		    autoOpen: false,
-		    width: 800,
-		    buttons: {
-			"Submit changes": function() {
-			    document.edit_recipe.submit();
-			    $(this).dialog("close");
+		    $('#dialog').dialog('option', {
+			title: 'Add a recipe',
+			autoOpen: false,
+			width: 800,
+			buttons: {
+			    "Add Recipe": function() {
+				document.add_recipe.submit();
+				$(this).dialog("close");
+			    }
 			}
-		    }
-		});
-
-		// Dialog Link
-		$('#dialog_edit_link').click(function() {
-		    $('#dialog_edit').dialog('open');
+		    });
+		    $('#dialog').dialog('open');
 		    return false;
 		});
 
@@ -300,45 +304,18 @@ TODO: add copy button
 		<hr>
 
 		<p><label for="add_instructions_editor">Instructions:</label><br>
-		<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">
-</textarea></p>
+		<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">dummy</textarea></p>
 
 		<hr>
 		List of photos:
 
 		<div id="photo_add_inputs"></div>
 		<a class="boring" href="#" onclick="addphoto('add_recipe', 'photo_add_inputs', null, '-1', '', '', 'Description');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
-    
-		<input type="hidden" name="form_type" value="add_recipe"> <input type="hidden" name="ingredient_count" value="0"> <input type="hidden" name="recipe_id" value="-1">
+		<input type="hidden" name="form_type" value="add_recipe">
+		<input type="hidden" name="ingredient_count" value="0">
+		<input type="hidden" name="recipe_id" value="-1">
 	    </form>
 	</div>
-
-	<div id="dialog_edit" title="Edit recipe">
-	    <form name="edit_recipe" id="edit_recipe" action="recipes.php" method="post" enctype="multipart/form-data">
-		<label for="edit_recipe_name">Recipe Name:</label><br>
-		<input type="text" name="recipe_name" id="edit_recipe_name" size="100"> <!-- This <div> holds alert messages to be display in the sample page. -->
-		<br>
-		<hr>
-		List of ingredients:
-
-		<div id="ingredient_edit_inputs"></div>
-		<a class="boring" href="#" onclick="addingredient('edit_recipe', 'ingredient_edit_inputs', null, '100', '', '', 'method (e.g. diced)');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
-		<hr>
-
-		<p><label for="edit_instructions_editor">Instructions:</label><br>
-		<textarea cols="80" class="ckeditor" id="edit_instructions_editor" name="recipe_instructions" rows="10">
-</textarea></p>
-
-		<hr>
-		List of photos:
-
-		<div id="photo_edit_inputs"></div>
-		<a class="boring" href="#" onclick="addphoto('edit_recipe', 'photo_edit_inputs', null, '-1', '', '', 'Description');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
-    
-		<input type="hidden" name="form_type" value="edit_recipe"> <input type="hidden" name="ingredient_count" value="0"> <input type="hidden" name="recipe_id" value="-1">
-	    </form>
-	</div>
-
 
 	<div id="demo">
 	    <table cellpadding="0" cellspacing="0" border="0" class="display" id="recipe_data">

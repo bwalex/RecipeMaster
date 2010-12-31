@@ -42,6 +42,7 @@ function recipe_sort($a, $b)
     global $sort_col;
     global $sort_dir;
 
+    /* XXX: http://bugs.php.net/bug.php?id=50688 */
     try {
 	$nutri_info_a = $a->getNutriInfo(1);
 	$nutri_info_b = $b->getNutriInfo(1);

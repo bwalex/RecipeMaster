@@ -22,8 +22,8 @@ ob_start('tidyhtml');
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
 TODO: add a show ingredient page, possibly with some photos, etc
-TODO: add tooltip for typical weight stuff
 TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
+TODO: add optional ingredients as dynamic list of extras, like ingredients in a recipe
  -->
  
 <html>
@@ -51,7 +51,24 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 </script>
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
 </script>
-    <script type="text/javascript">	function editingredient(id) {
+    <script type="text/javascript">
+	function addtooltip(input) {
+	    img = document.createElement("img");
+	    img.alt = '?';
+	    img.height = '16';
+	    img.width = '16';
+	    img.src = 'icons/help.png';
+	    img.className = 'boring';
+	    img.onmouseover = function() {
+		$(input).data('tooltip').show();
+	    }
+	    img.onmouseout = function() {
+		$(input).data('tooltip').hide();
+	    }
+	    parent = input.parentNode;
+	    parent.appendChild(img);
+	}
+	function editingredient(id) {
 	    $.post("ajax_formdata.php", {
 		ingredient: id
 	    },
@@ -62,24 +79,37 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 		    return;
 		}
 
-		document.edit_ingredient.ingredient_name.value = decodeURIComponent(ingredient.name);
-		document.edit_ingredient.ingredient_qty.value = decodeURIComponent(ingredient.qty);
-		document.edit_ingredient.ingredient_unit.value = decodeURIComponent(ingredient.unit);
-		document.edit_ingredient.ingredient_typical_qty.value = decodeURIComponent(ingredient.typical_qty);
-		document.edit_ingredient.ingredient_typical_unit.value = decodeURIComponent(ingredient.typical_unit);
-		document.edit_ingredient.ingredient_kcal.value = decodeURIComponent(ingredient.kcal);
-		document.edit_ingredient.ingredient_carb.value = decodeURIComponent(ingredient.carb);
-		document.edit_ingredient.ingredient_sugar.value = decodeURIComponent(ingredient.sugar);
-		document.edit_ingredient.ingredient_fat.value = decodeURIComponent(ingredient.fat);
-		document.edit_ingredient.ingredient_sat_fat.value = decodeURIComponent(ingredient.sat_fat);
-		document.edit_ingredient.ingredient_protein.value = decodeURIComponent(ingredient.protein);
-		document.edit_ingredient.ingredient_fibre.value = decodeURIComponent(ingredient.fibre);
-		document.edit_ingredient.ingredient_sodium.value = decodeURIComponent(ingredient.sodium);
-		document.edit_ingredient.ingredient_cholesterol.value = decodeURIComponent(ingredient.cholesterol);
-		document.edit_ingredient.ingredient_others.value = decodeURIComponent(ingredient.others);
-		document.edit_ingredient.ingredient_id.value = decodeURIComponent(ingredient.id);
+		document.add_ingredient.ingredient_name.value = decodeURIComponent(ingredient.name);
+		document.add_ingredient.ingredient_qty.value = decodeURIComponent(ingredient.qty);
+		document.add_ingredient.ingredient_unit.value = decodeURIComponent(ingredient.unit);
+		document.add_ingredient.ingredient_typical_qty.value = decodeURIComponent(ingredient.typical_qty);
+		document.add_ingredient.ingredient_typical_unit.value = decodeURIComponent(ingredient.typical_unit);
+		document.add_ingredient.ingredient_kcal.value = decodeURIComponent(ingredient.kcal);
+		document.add_ingredient.ingredient_carb.value = decodeURIComponent(ingredient.carb);
+		document.add_ingredient.ingredient_sugar.value = decodeURIComponent(ingredient.sugar);
+		document.add_ingredient.ingredient_fat.value = decodeURIComponent(ingredient.fat);
+		document.add_ingredient.ingredient_sat_fat.value = decodeURIComponent(ingredient.sat_fat);
+		document.add_ingredient.ingredient_protein.value = decodeURIComponent(ingredient.protein);
+		document.add_ingredient.ingredient_fibre.value = decodeURIComponent(ingredient.fibre);
+		document.add_ingredient.ingredient_sodium.value = decodeURIComponent(ingredient.sodium);
+		document.add_ingredient.ingredient_cholesterol.value = decodeURIComponent(ingredient.cholesterol);
+		document.add_ingredient.ingredient_others.value = decodeURIComponent(ingredient.others);
+		document.add_ingredient.ingredient_id.value = decodeURIComponent(ingredient.id);
+		document.add_ingredient.form_type.value = 'edit_ingredient';
 
-		$('#dialog_edit').dialog('open');
+		$('#dialog').dialog('option',
+		{
+		    title: 'Edit ingredient',
+		    autoOpen: false,
+		    width: 600,
+		    buttons: {
+			"Submit changes": function() {
+			    document.add_ingredient.submit();
+			    $(this).dialog("close");
+			}
+		    }
+		});
+		$('#dialog').dialog('open');
 	    },
 	    'json');
 	}
@@ -90,15 +120,16 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 	}</script>
     <script type="text/javascript">	$(function() {
 	    // select all desired input fields and attach tooltips to them
-	    $("#foo2").tooltip({
-	    
-		    // place tooltip on the right edge
+	    $(".has_tooltip").tooltip({
 		    position: "top center",
-	    	    
-		    // use the built-in fadeIn/fadeOut effect
+	    	    events: {
+			def: ',',
+			input: ',',
+			widget: ',',
+			tooltip: ','
+			
+		    },
 		    effect: "fade",
-	    
-		    // custom opacity setting
 		    opacity: 0.7
 	    });
 
@@ -111,6 +142,11 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 		"aoColumnDefs": [
 			{ "aTargets": [ 0 ], "sWidth": '200px' }
 		    ]
+	    });
+
+	    // Add tooltips
+	    $('.has_tooltip').each(function() {
+		addtooltip(this);
 	    });
 
 	    // Dialog                       
@@ -127,25 +163,37 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 
 	    // Dialog Link
 	    $('#dialog_link').click(function() {
-		$('#dialog').dialog('open');
-		return false;
-	    });
-	    
-	    // Dialog                       
-	    $('#dialog_edit').dialog({
-		autoOpen: false,
-		width: 600,
-		buttons: {
-		    "Submit changes": function() {
-			document.edit_ingredient.submit();
-			$(this).dialog("close");
+		document.add_ingredient.ingredient_name.value = '';
+		document.add_ingredient.ingredient_qty.value = '';
+		document.add_ingredient.ingredient_unit.value = '';
+		document.add_ingredient.ingredient_typical_qty.value = '';
+		document.add_ingredient.ingredient_typical_unit.value = '';
+		document.add_ingredient.ingredient_kcal.value = '';
+		document.add_ingredient.ingredient_carb.value = '';
+		document.add_ingredient.ingredient_sugar.value = '';
+		document.add_ingredient.ingredient_fat.value = '';
+		document.add_ingredient.ingredient_sat_fat.value = '';
+		document.add_ingredient.ingredient_protein.value = '';
+		document.add_ingredient.ingredient_fibre.value = '';
+		document.add_ingredient.ingredient_sodium.value = '';
+		document.add_ingredient.ingredient_cholesterol.value = '';
+		document.add_ingredient.ingredient_others.value = '';
+		document.add_ingredient.ingredient_id.value = '-1';
+		document.add_ingredient.form_type.value = 'add_ingredient';
+		
+		$('#dialog').dialog('option', {
+		    title: 'Add an ingredient',
+		    autoOpen: false,
+		    width: 600,
+		    buttons: {
+			"Add Ingredient": function() {
+			    document.add_ingredient.submit();
+			    $(this).dialog("close");
+			}
 		    }
-		}
-	    });
+		});
 
-	    // Dialog Link
-	    $('#dialog_edit_link').click(function() {
-		$('#dialog_edit').dialog('open');
+		$('#dialog').dialog('open');
 		return false;
 	    });
 
@@ -265,107 +313,125 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 	</form><!-- ui-dialog -->
 
 	<div id="dialog" title="Add an ingredient">
-	    <form name="add_ingredient" action="ingredients.php" method="post" id="add_ingredient"><div id="inputs">
+	    <form name="add_ingredient" action="ingredients.php" method="post" id="add_ingredient">
 		<div class="row">
-		    <span class="left"><span class="label">Name:</span> <span class="formw"><input type="text" name="ingredient_name"></span></span>
+		    <span class="left">
+			<span class="label">Name:</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_name">
+			</span>
+		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Qty (100):</span> <span class="formw"><input type="text" name="ingredient_qty" id="foo2" title="What's on your mind?"></span></span> <span class="right"><span class="label">Unit name:</span> <span class="forwm">
-			    <select name="ingredient_unit"><option>&nbsp;</option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option></select>
-		    </span></span>
-		</div>
-		<div class="row">
-		    <span class="left"><span class="label">Typical unit weight:</span> <span class="formw"><input size="10" type="text" name="ingredient_typical_qty"><select name="ingredient_typical_unit"><option>g</option><option>mg</option><option>kg</option></select>
-		    </span></span>
-		</div>
-
-		<div class="row">
-		    <span class="left"><span class="label">kcal:</span> <span class="formw"><input type="text" name="ingredient_kcal"></span></span>
-		</div>
-
-		<div class="row">
-		    <span class="left"><span class="label">Carbohydrates (g):</span> <span class="formw"><input type="text" name="ingredient_carb"></span></span> <span class="right"><span class="label">of which sugars (g):</span> <span class="formw"><input type="text" name="ingredient_sugar"></span></span>
-		</div>
-
-		<div class="row">
-		    <span class="left"><span class="label">Fat (g):</span> <span class="formw"><input type="text" name="ingredient_fat"></span></span> <span class="right"><span class="label">of which saturates (g):</span> <span class="formw"><input type="text" name="ingredient_sat_fat"></span></span>
-		</div>
-
-		<div class="row">
-		    <span class="left"><span class="label">Protein (g):</span> <span class="formw"><input type="text" name="ingredient_protein"></span></span>
-		</div>
-
-		<div class="row">
-		    <span class="left"><span class="label">Fibre (g):</span> <span class="formw"><input type="text" name="ingredient_fibre"></span></span>
-		</div>
-
-		<div class="row">
-		    <span class="left"><span class="label">Sodium (mg):</span> <span class="formw"><input type="text" name="ingredient_sodium"></span></span>
-		</div>
-
-		<div class="row">
-		    <span class="left"><span class="label">Cholesterol (mg):</span> <span class="formw"><input type="text" name="ingredient_cholesterol"></span></span>
-		</div>
-
-		<div class="row">
-		    <span class="labelfull">Others (foo=bar, moh=meh):</span> <span class="formfull">
-		    <textarea cols="100" rows="3" style="width: 90%;" name="ingredient_others">
-</textarea></span>
-		</div><input type="hidden" name="ingredient_id" value="-1"> <input type="hidden" name="form_type" value="add_ingredient"> <!--<input type="submit"/>-->
-	    </div></form>
-	</div>
-
-	<div id="dialog_edit" title="Edit an ingredient">
-	    <form name="edit_ingredient" action="ingredients.php" method="post" id="edit_ingredient">
-		<div class="row">
-		    <span class="left"><span class="label">Name:</span> <span class="formw"><input type="text" name="ingredient_name"></span></span>
-		</div>
-
-		<div class="row">
-		    <span class="left"><span class="label">Qty (100):</span> <span class="formw"><input type="text" name="ingredient_qty"></span></span> <span class="right"><span class="label">Unit name:</span> <span class="forwm">
-			<select name="ingredient_unit"><option>&nbsp;</option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option></select>
-		    </span></span>
+		    <span class="left">
+			<span class="label">Qty (100):</span>
+			<span class="formw">
+			    <input size="12" type="text" name="ingredient_qty" class="has_tooltip" title="The quantity of this ingredient that the nutritional information is for">
+			    <select name="ingredient_unit">
+				<option>&nbsp;</option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option>
+			    </select>
+			</span>
+		    </span>
 		</div>
 		
 		<div class="row">
-		    <span class="left"><span class="label">Typical unit weight:</span> <span class="formw"><input size="10" type="text" name="ingredient_typical_qty"><select name="ingredient_typical_unit"><option>g</option><option>mg</option><option>kg</option></select>
-		    </span></span>
+		    <span class="left">
+			<span class="label">Typical unit weight:</span>
+			<span class="formw">
+			    <input size="12" type="text" name="ingredient_typical_qty">
+			    <select name="ingredient_typical_unit" class="has_tooltip" title="The typical weight of one unit of this ingredient (i.e. the typical weight of 1 tomato)">
+				<option>g</option><option>mg</option><option>kg</option>
+			    </select>
+			</span>
+		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">kcal:</span> <span class="formw"><input type="text" name="ingredient_kcal"></span></span>
+		    <span class="left">
+			<span class="label">kcal:</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_kcal">
+			</span>
+		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Carbohydrates (g):</span> <span class="formw"><input type="text" name="ingredient_carb"></span></span> <span class="right"><span class="label">of which sugars (g):</span> <span class="formw"><input type="text" name="ingredient_sugar"></span></span>
+		    <span class="left">
+			<span class="label">Carbohydrates (g):</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_carb">
+			</span>
+		    </span>
+		    <span class="right">
+			<span class="label">of which sugars (g):</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_sugar">
+			</span>
+		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Fat (g):</span> <span class="formw"><input type="text" name="ingredient_fat"></span></span> <span class="right"><span class="label">of which saturates (g):</span> <span class="formw"><input type="text" name="ingredient_sat_fat"></span></span>
+		    <span class="left">
+			<span class="label">Fat (g):</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_fat">
+			</span>
+		    </span>
+		    <span class="right">
+			<span class="label">of which saturates (g):</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_sat_fat">
+			</span>
+		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Protein (g):</span> <span class="formw"><input type="text" name="ingredient_protein"></span></span>
+		    <span class="left">
+			<span class="label">Protein (g):</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_protein">
+			</span>
+		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Fibre (g):</span> <span class="formw"><input type="text" name="ingredient_fibre"></span></span>
+		    <span class="left">
+			<span class="label">Fibre (g):</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_fibre">
+			</span>
+		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Sodium (mg):</span> <span class="formw"><input type="text" name="ingredient_sodium"></span></span>
+		    <span class="left">
+			<span class="label">Sodium (mg):</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_sodium">
+			</span>
+		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="left"><span class="label">Cholesterol (mg):</span> <span class="formw"><input type="text" name="ingredient_cholesterol"></span></span>
+		    <span class="left">
+			<span class="label">Cholesterol (mg):</span>
+			<span class="formw">
+			    <input type="text" name="ingredient_cholesterol">
+			</span>
+		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="labelfull">Others (foo=bar, moh=meh):</span> <span class="formfull">
-		    <textarea cols="100" rows="3" style="width: 90%;" name="ingredient_others">
-</textarea></span>
-		</div><input type="hidden" name="form_type" value="edit_ingredient"> <input type="hidden" name="ingredient_id" value="-1"> <!--<input type="submit"/>-->
+		    <span class="labelfull">Others (foo=bar, moh=meh):</span>
+		    <span class="formfull">
+			<textarea cols="100" rows="3" style="width: 90%;" name="ingredient_others"></textarea>
+		    </span>
+		</div>
+
+		<input type="hidden" name="ingredient_id" value="-1">
+		<input type="hidden" name="form_type" value="add_ingredient">
+		<!--<input type="submit"/>-->
 	    </form>
 	</div>
 

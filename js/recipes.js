@@ -73,10 +73,9 @@ function addingredient(form, id, before_node, qty, unit, name, method) {
     input2.size = "20";
     input2.name = "ing_method[]";
     input2.value = method;
-    input2.onclick = function() {
-        if (this.value == "method (e.g. diced)")
+    $(input2).one('focus', function() {
         this.value="";
-    }
+    });
 
     row.appendChild(input2);
 
@@ -141,24 +140,37 @@ function editrecipe(id) {
             return;
         }
 
-        deleteallingredients('edit_recipe', 'ingredient_edit_inputs');
-        deleteallphotos('edit_recipe', 'photo_edit_inputs');
+        deleteallingredients('add_recipe', 'ingredient_add_inputs');
+        deleteallphotos('add_recipe', 'photo_add_inputs');
 
-        document.edit_recipe.recipe_name.value = recipe.name;
-        document.edit_recipe.recipe_instructions.value = decodeURIComponent(recipe.instructions);
-        CKEDITOR.instances.edit_instructions_editor.setData(decodeURIComponent(recipe.instructions),
+        document.add_recipe.recipe_name.value = recipe.name;
+        document.add_recipe.recipe_instructions.value = decodeURIComponent(recipe.instructions);
+        CKEDITOR.instances.add_instructions_editor.setData(decodeURIComponent(recipe.instructions),
         function() {
             this.checkDirty(); // true
         });
         for (var i in recipe.ingredients) {
-            addingredient('edit_recipe', 'ingredient_edit_inputs', null, recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].name, recipe.ingredients[i].method);
+            addingredient('add_recipe', 'ingredient_add_inputs', null, recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].name, recipe.ingredients[i].method);
         }
         for (var i in recipe.photos) {
-            addphoto('edit_recipe', 'photo_edit_inputs', null, recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption);
+            addphoto('add_recipe', 'photo_add_inputs', null, recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption);
         }
-        document.edit_recipe.recipe_id.value = recipe.id;
+        document.add_recipe.recipe_id.value = recipe.id;
+        document.add_recipe.form_type.value = 'edit_recipe';
 
-        $('#dialog_edit').dialog('open');
+	$('#dialog').dialog('option',
+	{
+	    title: 'Edit recipe',
+	    autoOpen: false,
+	    width: 800,
+	    buttons: {
+		"Submit changes": function() {
+		    document.add_recipe.submit();
+		    $(this).dialog("close");
+		}
+	    }
+	});
+	$('#dialog').dialog('open');
     },
     'json');
 }
