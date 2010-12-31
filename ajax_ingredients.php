@@ -37,6 +37,8 @@ if ( isset( $_REQUEST['iSortCol_0'] ) )
         $query .= ' '.$sOrder;
 }
 
+$iFilteredTotal = get_ingredients_count($query, $tokens);
+
 /* 
  * Paging
  */
@@ -49,9 +51,7 @@ if ( isset( $_REQUEST['iDisplayStart'] ) && $_REQUEST['iDisplayLength'] != '-1' 
 //echo $query;
 $ingredients = get_all_ingredients($query, $tokens);
 
-
 $iTotal = get_ingredients_count();
-$iFilteredTotal = count($ingredients);
 
 $output = '{';
 $output .= '"sEcho": '.intval($_REQUEST['sEcho']).', ';

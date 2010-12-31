@@ -12,6 +12,8 @@ if ( $_REQUEST['sSearch'] != "" ) {
     $tokens = array(':filter_name' => '%'.$_REQUEST['sSearch'].'%');
 }
 
+$iFilteredTotal = get_recipes_count($query, tokens);
+
 /* 
  * Paging
  */
@@ -24,9 +26,7 @@ try {
 //echo $query;
 $recipes = get_all_recipes($query, $tokens);
 
-
 $iTotal = get_recipes_count();
-$iFilteredTotal = count($recipes);
 
 $output = '{';
 $output .= '"sEcho": '.intval($_REQUEST['sEcho']).', ';
