@@ -46,7 +46,7 @@ function bbox_get_width($bbox) {
 }
 
 $width = 260;
-$height = 500;
+$height = 520;
 
 // create a image
 $im = imagecreate($width, $height);
@@ -66,6 +66,10 @@ $font_size_normal = 9;
 $side_margin = 6;
 $file_font_bold = "DroidSans-Bold.ttf";
 $file_font_regular = "DroidSans.ttf";
+
+$fontpath = realpath('./');
+putenv('GDFONTPATH='.$fontpath);
+
 
 $bbox = imagettfbbox($font_size_big, 0, $file_font_bold, 'Nutrition Facts');
 $y = bbox_get_height($bbox) + 5;
@@ -200,7 +204,7 @@ $y_initial = $y;
 $x_start = intval($width/2);
 for ($i = 0; $i < 5; $i++) {
 	$x = $x_start;
-	$color_max = ($n-1) * $color_step;
+	$color_max = ($n-1) * $color_step_basic;
 	if ($n*$color_step_basic >= 255) {
 		$color_step = $color_step_mini;
 	} else {
