@@ -1,6 +1,6 @@
 <?php
 
-$carbs = $_GET['carbs'];
+$carbs = round($_GET['carbs'], 0);
 $protein = $_GET['protein'];
 $fat = $_GET['fat'];
 $sat_fat = $_GET['sat_fat'];
@@ -70,7 +70,7 @@ $file_font_regular = "DroidSans.ttf";
 $bbox = imagettfbbox($font_size_big, 0, $file_font_bold, 'Nutrition Facts');
 $y = bbox_get_height($bbox) + 5;
 $x = intval(($width - bbox_get_width($bbox))/2);
-imagettftext($im, $font_size_big, 0, $x, $y, $text_color, 'arialbd.ttf', 'Nutrition Facts');
+imagettftext($im, $font_size_big, 0, $x, $y, $text_color, $file_font_bold, 'Nutrition Facts');
 
 $y += 10;
 imagefilledrectangle($im, $side_margin, $y, $width-$side_margin, $y+8, $text_color);
@@ -79,110 +79,110 @@ $y += 12;
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Amount Per Serving');
 $y += bbox_get_height($bbox);
 $normal_height = bbox_get_height($bbox);
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arialbd.ttf', 'Amount Per Serving');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_bold, 'Amount Per Serving');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Calories ');
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arialbd.ttf', 'Calories');
-imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $calories);
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_bold, 'Calories');
+imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, $file_font_regular, $calories);
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, 'Calories from Fat: '.$fat_cal);
-imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, 'arial.ttf', 'Calories from Fat: '.$fat_cal);
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_regular, 'Calories from Fat: '.$fat_cal);
 $y += 4;
 imagefilledrectangle($im, $side_margin, $y, $width-$side_margin, $y+2, $text_color);
 $y += 6 + $normal_height;
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, '% Daily Value*');
-imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, 'arialbd.ttf', '% Daily Value*');
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_bold, '% Daily Value*');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Total Fat ');
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arialbd.ttf', 'Total Fat');
-imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $fat.'g');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_bold, 'Total Fat');
+imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, $file_font_regular, $fat.'g');
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $fat_rdi_pct.'%');
-imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $fat_rdi_pct.'%');
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_regular, $fat_rdi_pct.'%');
 
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arial.ttf', '     Saturated Fat '.$sat_fat.'g');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_regular, '     Saturated Fat '.$sat_fat.'g');
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $sat_fat_rdi_pct.'%');
-imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $sat_fat_rdi_pct.'%');
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_regular, $sat_fat_rdi_pct.'%');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Cholesterol ');
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arialbd.ttf', 'Cholesterol');
-imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $cholesterol.'mg');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_bold, 'Cholesterol');
+imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, $file_font_regular, $cholesterol.'mg');
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $cholesterol_rdi_pct.'%');
-imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $cholesterol_rdi_pct.'%');
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_regular, $cholesterol_rdi_pct.'%');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Sodium ');
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arialbd.ttf', 'Sodium');
-imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $sodium.'mg');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_bold, 'Sodium');
+imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, $file_font_regular, $sodium.'mg');
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $sodium_rdi_pct.'%');
-imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $sodium_rdi_pct.'%');
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_regular, $sodium_rdi_pct.'%');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Total Carbohydrate ');
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arialbd.ttf', 'Total Carbohydrate');
-imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $carbs.'g');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_bold, 'Total Carbohydrate');
+imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, $file_font_regular, $carbs.'g');
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $carbs_rdi_pct.'%');
-imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $carbs_rdi_pct.'%');
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_regular, $carbs_rdi_pct.'%');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arial.ttf', '     Dietary Fibre '.$fibre.'g');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_regular, '     Dietary Fibre '.$fibre.'g');
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $fibre_rdi_pct.'%');
-imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $fibre_rdi_pct.'%');
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_regular, $fibre_rdi_pct.'%');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arial.ttf', '     Sugars '.$sugars.'g');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_regular, '     Sugars '.$sugars.'g');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Protein ');
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arialbd.ttf', 'Protein');
-imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $protein.'g');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_bold, 'Protein');
+imagettftext($im, $font_size_normal, 0, $side_margin+bbox_get_width($bbox), $y, $text_color, $file_font_regular, $protein.'g');
 
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $protein_rdi_pct.'%');
-imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, 'arial.ttf', $protein_rdi_pct.'%');
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_regular, $protein_rdi_pct.'%');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 imagefilledrectangle($im, $side_margin, $y, $width-$side_margin, $y+8, $text_color);
 $y += 12 + $normal_height;
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, 'arial.ttf', '* Based on a 2000 calorie diet');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_regular, '* Based on a 2000 calorie diet');
 $y += 20;
 
 $lower_y = $y + intval(($width-60)*1.73/2);
@@ -294,17 +294,17 @@ $color = imagecolorallocate($im, 255, 255, 255);
 // Fat
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Carbs');
 $x = $side_margin+($third_width-bbox_get_width($bbox))/2;
-imagettftext($im, $font_size_normal, 0, $x, $y, $color, 'arialbd.ttf', 'Carbs');
+imagettftext($im, $font_size_normal, 0, $x, $y, $color, $file_font_bold, 'Carbs');
 
 // Carbs
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Fat');
 $x = $side_margin+$third_width+($third_width-bbox_get_width($bbox))/2;
-imagettftext($im, $font_size_normal, 0, $x, $y, $color, 'arialbd.ttf', 'Fat');
+imagettftext($im, $font_size_normal, 0, $x, $y, $color, $file_font_bold, 'Fat');
 
 // Protein
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Protein');
 $x = $side_margin+$third_width*2+($third_width-bbox_get_width($bbox))/2;
-imagettftext($im, $font_size_normal, 0, $x, $y, $color, 'arialbd.ttf', 'Protein');
+imagettftext($im, $font_size_normal, 0, $x, $y, $color, $file_font_bold, 'Protein');
 
 $y = $line_y;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
@@ -314,17 +314,17 @@ $y += $normal_height+5;
 // Carbs
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $carb_pct.'%');
 $x = $side_margin+($third_width-bbox_get_width($bbox))/2;
-imagettftext($im, $font_size_normal, 0, $x, $y, $text_color, 'arial.ttf', $carb_pct.'%');
+imagettftext($im, $font_size_normal, 0, $x, $y, $text_color, $file_font_regular, $carb_pct.'%');
 
 // Fat
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $fat_pct.'%');
 $x = $side_margin+$third_width+($third_width-bbox_get_width($bbox))/2;
-imagettftext($im, $font_size_normal, 0, $x, $y, $text_color, 'arial.ttf', $fat_pct.'%');
+imagettftext($im, $font_size_normal, 0, $x, $y, $text_color, $file_font_regular, $fat_pct.'%');
 
 // Protein
 $bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $protein_pct.'%');
 $x = $side_margin+$third_width*2+($third_width-bbox_get_width($bbox))/2;
-imagettftext($im, $font_size_normal, 0, $x, $y, $text_color, 'arial.ttf', $protein_pct.'%');
+imagettftext($im, $font_size_normal, 0, $x, $y, $text_color, $file_font_regular, $protein_pct.'%');
 
 # Prints out all the figures and picture and frees memory 
 header('Content-type: image/png'); 

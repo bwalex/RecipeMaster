@@ -373,7 +373,7 @@ class Ingredient {
 		}
 	}
 
-	function getNutriInfo($qty, $unit, $dont_except = 0) {
+	function getNutriInfo($qty, $unit, $dont_except = 0, $fractional_precision = 1) {
 		$info = array();
 		$info['kcal'] = 0;
 		$info['carb'] = 0;
@@ -393,6 +393,10 @@ class Ingredient {
 			if ($this->qty == 0)
 				return NULL;
 			$multiplier = $qty/$this->qty;
+		}
+		if ($unit == 'l') {
+			$unit = 'ml';
+			$multiplier *= 1000;
 		}
 		if ($unit == $this->unit) {
 			$multiplier *= 1;
@@ -420,15 +424,15 @@ class Ingredient {
 				throw new Exception("unknown unit mismatch, '".$unit."' vs '".$this->unit."'");
 		}
 		
-		$info['kcal'] += $this->kcal * $multiplier;
-		$info['carb'] += $this->carb * $multiplier;
-		$info['sugar'] += $this->sugar * $multiplier;
-		$info['fat'] += $this->fat * $multiplier;
-		$info['sat_fat'] += $this->sat_fat * $multiplier;
-		$info['protein'] += $this->protein * $multiplier;
-		$info['fibre'] += $this->fibre * $multiplier;
-		$info['sodium'] += $this->sodium * $multiplier;
-		$info['cholesterol'] += $this->cholesterol * $multiplier;
+		$info['kcal'] += round($this->kcal * $multiplier, $fractional_precision);
+		$info['carb'] += round($this->carb * $multiplier, $fractional_precision);
+		$info['sugar'] += round($this->sugar * $multiplier, $fractional_precision);
+		$info['fat'] += round($this->fat * $multiplier, $fractional_precision);
+		$info['sat_fat'] += round($this->sat_fat * $multiplier, $fractional_precision);
+		$info['protein'] += round($this->protein * $multiplier, $fractional_precision);
+		$info['fibre'] += round($this->fibre * $multiplier, $fractional_precision);
+		$info['sodium'] += round($this->sodium * $multiplier, $fractional_precision);
+		$info['cholesterol'] += round($this->cholesterol * $multiplier, $fractional_precision);
 
 
 		return $info;

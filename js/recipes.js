@@ -74,7 +74,8 @@ function addingredient(form, id, before_node, qty, unit, name, method) {
     input2.name = "ing_method[]";
     input2.value = method;
     $(input2).one('focus', function() {
-        this.value="";
+        if (this.value == 'method (e.g. diced)')
+            this.value="";
     });
 
     row.appendChild(input2);
