@@ -49,10 +49,19 @@ TODO: add copy button
     <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">
     </script>
     
-    
+    <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
+    </script>
+    <script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8">
+    </script>
+    <link rel="stylesheet" type="text/css" href="highslide/highslide.css">
+    <!--[if lt IE 7]>
+	<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
+    <![endif]-->
+
+<!--
     <script type="text/javascript" src="fancybox/jquery.fancybox-1.3.4.pack.js"></script>
     <link rel="stylesheet" href="fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
-    
+-->
     
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
 </script>
@@ -61,6 +70,8 @@ TODO: add copy button
     <script type="text/javascript" src="js/recipes.js">
     </script>
     <script type="text/javascript">
+	    hs.showCredits = false;
+	    hs.zIndexCounter = 2000;
 	    $(document).ready(function() {
 		CKEDITOR.config.toolbar =
 		[

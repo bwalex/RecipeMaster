@@ -859,7 +859,9 @@ function print_footer() {
 	    built using <a href="http://960.gs/">960 gs</a>,
 	    <a href="http://www.famfamfam.com/lab/icons/silk/">FAMFAMFAM silk icons</a>,
 	    <a href="http://www.datatables.net/">DataTables</a>,
-	    <a href="http://www.jquery.com/">jQuery</a> and
+	    <a href="http://highslide.com/">Highslide</a>,
+	    <a href="http://www.jquery.com/">jQuery</a>,
+	    <a href="http://flowplayer.org/tools/index.html">jQuery Tools</a>,
 	    <a href="http://jqueryui.com/">jQuery user interface</a>
 	    </div>
 	</div>

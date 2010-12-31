@@ -201,9 +201,16 @@ function addphoto(form, id, before_node, photoid, photo, thumb, caption) {
     if (photo != '') {
         a = document.createElement("a");
         a.href = photo;
-
         a.title = caption;
-        $(a).fancybox();
+
+        // Highslide
+        a.className = 'highslide';
+        a.onclick = function() {
+            return hs.expand(this, config1 )
+        }
+        // Fancybox
+        //$(a).fancybox();
+
     
         img = document.createElement("img");
         img.alt = 'photo of dish';

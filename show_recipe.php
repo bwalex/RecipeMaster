@@ -39,12 +39,13 @@ TODO: add print stuff
 			@import "css/demo_table.css";
     </style>
     <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
-</script>
+    </script>
     <script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8">
-</script>
-    <link rel="stylesheet" type="text/css" href="highslide/highslide.css"><!--[if lt IE 7]>
-		<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
-		<![endif]-->
+    </script>
+    <link rel="stylesheet" type="text/css" href="highslide/highslide.css">
+    <!--[if lt IE 7]>
+	<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
+    <![endif]-->
     <link type="text/css" href="css/style.css" rel="stylesheet">
     <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet">
     <script type="text/javascript" src="js/jquery-1.4.4.min.js">

@@ -5,7 +5,9 @@
 .highslide-container div {
 	font-family: Verdana, Helvetica;
 	font-size: 10pt;
+	z-index: 100000;
 }
+
 .highslide-container table {
 	background: none;
 }
