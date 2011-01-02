@@ -15,6 +15,21 @@
 	-webkit-box-shadow:0 0 10px #000;
 }
 
+div.form-ok {
+	background-color: #90EE90;
+	border-style: dashed;
+	border-width: 1px;
+	border-color: #666666;
+	margin-bottom: 10px;
+}
+
+div.form-error {
+	background-color: #F08080;
+	border-style: dashed;
+	border-width: 1px;
+	border-color: #666666;
+	margin-bottom: 10px;	
+}
 
 div.row {
   clear: left;

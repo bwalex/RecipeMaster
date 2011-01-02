@@ -26,7 +26,7 @@ function addingredient(form, id, before_node, qty, unit, name, method) {
 
     var input = document.createElement("input");
     input.type = "text";
-    input.size = "10";
+    input.size = "5";
     input.name = "ing_qty[]";
     input.value = qty;
 
@@ -38,7 +38,7 @@ function addingredient(form, id, before_node, qty, unit, name, method) {
 
     var input = document.createElement("input");
     input.type = "text";
-    input.size = "50";
+    input.size = "35";
     input.name = "ing_name[]";
     input.value = name;
 
@@ -145,13 +145,13 @@ function editrecipe(id) {
         deleteallphotos('add_recipe', 'photo_add_inputs');
 
         document.add_recipe.recipe_name.value = recipe.name;
-        document.add_recipe.recipe_instructions.value = decodeURIComponent(recipe.instructions);
-        CKEDITOR.instances.add_instructions_editor.setData(decodeURIComponent(recipe.instructions),
+        document.add_recipe.recipe_instructions.value = recipe.instructions;
+        CKEDITOR.instances.add_instructions_editor.setData(recipe.instructions,
         function() {
             this.checkDirty(); // true
         });
         for (var i in recipe.ingredients) {
-            addingredient('add_recipe', 'ingredient_add_inputs', null, recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].name, recipe.ingredients[i].method);
+            addingredient('add_recipe', 'ingredient_add_inputs', null, recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].Ingredient.name, recipe.ingredients[i].method);
         }
         for (var i in recipe.photos) {
             addphoto('add_recipe', 'photo_add_inputs', null, recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption);

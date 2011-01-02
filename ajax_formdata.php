@@ -7,24 +7,7 @@ if(isset($_REQUEST["ingredient"])) {
 	$output = '';
 	try {
 	    $ingredient = new Ingredient($id);
-	    $output .= '{';
-	    $output .= '"id" : "'.str_replace('"', '\"', $ingredient->id).'" ,';
-	    $output .= '"name" : "'.str_replace('"', '\"', $ingredient->name).'" ,';
-	    $output .= '"qty" : "'.str_replace('"', '\"', $ingredient->qty).'" ,';
-	    $output .= '"unit" : "'.str_replace('"', '\"', $ingredient->unit).'" ,';
-	    $output .= '"typical_qty" : "'.str_replace('"', '\"', $ingredient->typical_qty).'" ,';
-	    $output .= '"typical_unit" : "'.str_replace('"', '\"', $ingredient->typical_unit).'" ,';
-	    $output .= '"kcal" : "'.str_replace('"', '\"', $ingredient->kcal).'" ,';
-	    $output .= '"carb" : "'.str_replace('"', '\"', $ingredient->carb).'" ,';
-	    $output .= '"sugar" : "'.str_replace('"', '\"', $ingredient->sugar).'" ,';
-	    $output .= '"fibre" : "'.str_replace('"', '\"', $ingredient->fibre).'" ,';
-	    $output .= '"protein" : "'.str_replace('"', '\"', $ingredient->protein).'" ,';
-	    $output .= '"fat" : "'.str_replace('"', '\"', $ingredient->fat).'" ,';
-	    $output .= '"sat_fat" : "'.str_replace('"', '\"', $ingredient->sat_fat).'" ,';
-	    $output .= '"sodium" : "'.str_replace('"', '\"', $ingredient->sodium).'" ,';
-	    $output .= '"cholesterol" : "'.str_replace('"', '\"', $ingredient->cholesterol).'" ,';
-	    $output .= '"others" : "'.str_replace('"', '\"', $ingredient->others).'"';
-	    $output .= '}';
+	    $output = $ingredient->getJSON();
 	} catch (Exception $e) {
 	    $output = '{ "exception" : "'.$e->getMessage().'" }';
 	}
@@ -36,40 +19,7 @@ if(isset($_REQUEST["ingredient"])) {
 
 	try {
 	    $recipe = new Recipe($id);
-	    $output .= '{';
-	    $output .= '"id" : "'.str_replace('"', '\"', $recipe->id).'" ,';
-	    $output .= '"name" : "'.str_replace('"', '\"', $recipe->name).'" ,';
-	    $output .= '"time" : "'.str_replace('"', '\"', $recipe->time_estimate).'" ,';
-	    $output .= '"description" : "'.rawurlencode($recipe->description).'" ,';
-	    $output .= '"instructions" : "'.rawurlencode($recipe->instructions).'" ,';
-	    $output .= '"ingredients" : [ ';
-	    foreach ($recipe->ingredients as $ingredient) {
-		$output .= '{';
-		$output .= '"qty" : "'.str_replace('"', '\"', $ingredient['qty']).'",';
-		$output .= '"unit" : "'.str_replace('"', '\"', $ingredient['unit']).'",';
-		$output .= '"name" : "'.str_replace('"', '\"', $ingredient['Ingredient']->name).'",';
-		$output .= '"method" : "'.str_replace('"', '\"', $ingredient['method']).'"';
-		$output .= '},';
-	    }
-	    /* Remove last comma */
-	    $output = substr_replace($output, "", -1);
-	    $output .= '], ';
-
-
-	    $output .= '"photos" : [ ';
-	    foreach ($recipe->photos as $photo) {
-		$output .= '{';
-		$output .= '"id" : "'.str_replace('"', '\"', $photo->id).'",';
-		$output .= '"photo" : "'.str_replace('"', '\"', $photo->get()).'",';
-		$output .= '"thumb" : "'.str_replace('"', '\"', $photo->getThumbnail()).'",';
-		$output .= '"caption" : "'.str_replace('"', '\"', $photo->caption).'"';
-		$output .= '},';
-	    }
-	    /* Remove last comma */
-	    $output = substr_replace($output, "", -1);
-	    $output .= ']';
-
-	    $output .= '}';
+	    $output = $recipe->getJSON();
 	} catch (Exception $e) {
 	    $output = '{ "exception" : "'.$e->getMessage().'" }';
 	}

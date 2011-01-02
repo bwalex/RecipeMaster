@@ -68,7 +68,8 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 	    parent = input.parentNode;
 	    parent.appendChild(img);
 	}
-	function editingredient(id) {
+
+	function editingredient(id) {
 	    $.post("ajax_formdata.php", {
 		ingredient: id
 	    },
@@ -102,13 +103,20 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		    title: 'Edit ingredient',
 		    autoOpen: false,
 		    width: 600,
-		    buttons: {
-			"Submit changes": function() {
-			    document.add_ingredient.submit();
-			    $(this).dialog("close");
+		    buttons: [
+			{
+			    id: "dialog-submit",
+			    text: "Submit changes",
+			    click: function() {
+				$ret = $(document.add_ingredient).submit();
+				if ($ret == true)
+				    $(this).dialog("close");
+			    }
 			}
-		    }
+		    ]
 		});
+
+		clearmsgdiv(document.getElementById('dialog-messages'));
 		$('#dialog').dialog('open');
 	    },
 	    'json');
@@ -116,9 +124,65 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 
 	function deleteingredient(id) {
 	    document.delete_ingredient.ingredient_id.value = id;
-	    document.delete_ingredient.submit();
+	    $(document.delete_ingredient).submit();
 	}</script>
-    <script type="text/javascript">	$(function() {
+
+    <script type="text/javascript">
+	function printmsgdiv(container, msg, className) {
+	    var widget = document.createElement('div');
+	    widget.className = className;
+	    
+	    var p = document.createElement('p');
+	    var text = document.createTextNode(msg);
+	    p.appendChild(text);
+	    widget.appendChild(p);
+    
+	    container.appendChild(widget);
+	}
+
+	function clearmsgdiv(elem) {
+	    while (elem.hasChildNodes()) {
+		elem.removeChild(elem.firstChild);
+	    }
+	}
+	var oTable;
+	$(function() {
+
+	    $('form').submit(function() {
+		clearmsgdiv(document.getElementById('global-messages'));
+		clearmsgdiv(document.getElementById('dialog-messages'));
+
+		$("#dialog-submit").button("disable");
+		$.ajax({
+		    type: "POST",
+		    timeout: 30000, /* in ms */
+		    url: "ajax_form_ingredients.php",
+		    dataType: "json",
+		    data: $(this).serialize(),
+		    success: function(data) {
+			if (data.error == 0) {
+			    for (var i in data.msg) {
+				printmsgdiv(document.getElementById('global-messages'), data.msg[i], 'form-ok');
+			    }
+
+			    $('#dialog').dialog('close');
+			} else {
+			    for (var i in data.errmsg) {
+				printmsgdiv(document.getElementById(data.where), data.errmsg[i], 'form-error');
+			    }
+			}
+
+			/* Refresh table */
+			oTable.fnDraw();
+		    },
+		    error: function(req, textstatus) {
+			alert('Request failed: ' + textstatus);
+		    }
+		});
+		$("#dialog-submit").button("enable");
+		return false;
+	    });
+
 	    // select all desired input fields and attach tooltips to them
 	    $(".has_tooltip").tooltip({
 		    position: "top center",
@@ -133,7 +197,12 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		    opacity: 0.7
 	    });
 
-	    $('#ingredients_data').dataTable({
+	    // Add tooltips
+	    $('.has_tooltip').each(function() {
+		addtooltip(this);
+	    });
+
+	    oTable = $('#ingredients_data').dataTable({
 		//"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"bServerSide": true,
@@ -144,21 +213,21 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		    ]
 	    });
 
-	    // Add tooltips
-	    $('.has_tooltip').each(function() {
-		addtooltip(this);
-	    });
-
 	    // Dialog                       
 	    $('#dialog').dialog({
 		autoOpen: false,
 		width: 600,
-		buttons: {
-		    "Add Ingredient": function() {
-			document.add_ingredient.submit();
-			$(this).dialog("close");
+		buttons: [
+		    {
+			id: "dialog-submit",
+			text: "Add Ingredient",
+			click: function() {
+			    $ret = $(document.add_ingredient).submit();
+			    if ($ret == true)
+				$(this).dialog("close");
+			}
 		    }
-		}
+		]
 	    });
 
 	    // Dialog Link
@@ -185,14 +254,20 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		    title: 'Add an ingredient',
 		    autoOpen: false,
 		    width: 600,
-		    buttons: {
-			"Add Ingredient": function() {
-			    document.add_ingredient.submit();
-			    $(this).dialog("close");
+		    buttons: [
+			{
+			    id: "dialog-submit",
+			    text: "Add Ingredient",
+			    click: function() {
+				$ret = $(document.add_ingredient).submit();
+				if ($ret == true)
+				    $(this).dialog("close");
+			    }
 			}
-		    }
+		    ]
 		});
 
+		clearmsgdiv(document.getElementById('dialog-messages'));
 		$('#dialog').dialog('open');
 		return false;
 	    });
@@ -218,117 +293,35 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 	    <h1>Ingredients<a class="boring" href="#" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Ingredient"></a></h1>
 	</div>
 	
-	<?php
-
-		function print_msg($msg) {
-			echo '<div class="ui-widget">
-					<div class="ui-state-highlight ui-corner-all" style="margin-top: 5px; padding: 0 .7em;"> 
-						<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>'.$msg.'</p>
-					</div>
-				</div>';
-		}
-
-		function print_error($msg) {
-			echo '<div class="ui-widget">
-				<div class="ui-state-error ui-corner-all" style="margin-top: 5px;padding: 0 .7em;"> 
-						<p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'.$msg.'</p>
-					</div>
-				</div>';
-		}
-
-		if ($_POST['ingredient_id']) {
-			try {
-				$form_type = $_POST['form_type'];
-				$ingredient_name = $_POST['ingredient_name'];
-				$ingredient_id = $_POST['ingredient_id'];
-
-				$ingredient_unit = trim($_POST['ingredient_unit']);
-				if (ord($ingredient_unit) == 194)
-				    $ingredient_unit = '';
-
-				$ingredient_qty = $_POST['ingredient_qty'];
-				$ingredient_typical_unit = $_POST['ingredient_typical_unit'];
-				$ingredient_typical_qty = $_POST['ingredient_typical_qty'];
-				$ingredient_kcal = $_POST['ingredient_kcal'];
-				$ingredient_carb = $_POST['ingredient_carb'];
-				$ingredient_sugar = $_POST['ingredient_sugar'];
-				$ingredient_fibre = $_POST['ingredient_fibre'];
-				$ingredient_protein = $_POST['ingredient_protein'];
-				$ingredient_fat = $_POST['ingredient_fat'];
-				$ingredient_sat_fat = $_POST['ingredient_sat_fat'];
-				$ingredient_sodium = $_POST['ingredient_sodium'];
-				$ingredient_cholesterol = $_POST['ingredient_cholesterol'];
-				$ingredient_others = $_POST['ingredient_others'];
-				if (($form_type == "add_ingredient") || ($form_type == "edit_ingredient"))
-					$new = 1;
-				else
-					$new = 0;
-
-				$ingredient = new Ingredient($ingredient_id, $ingredient_name, $new,
-				    $ingredient_unit, $ingredient_qty,
-				    $ingredient_typical_unit, $ingredient_typical_qty, $ingredient_kcal,
-				    $ingredient_carb, $ingredient_sugar, $ingredient_fibre,
-				    $ingredient_protein, $ingredient_fat, $ingredient_sat_fat,
-				    $ingredient_sodium, $ingredient_cholesterol,
-				    $ingredient_others);
-
-				if ($form_type == "add_ingredient") {
-					$n = $ingredient->save();
-					
-					if ($n > 0)
-						print_msg('Successfully added ingredient '.$ingredient_name);
-					print_msg("Rows affected: ".$n."<br/>");
-				}
-				else if ($form_type == "edit_ingredient") {
-					$n = $ingredient->save(1);
-
-					if ($n > 0)
-						print_msg('Successfully edited ingredient '.$ingredient_name);
-					print_msg("Rows affected: ".$n."<br/>");
-				}
-				else if ($form_type == "delete_ingredient") {
-					$n = $ingredient->delete();
-					if ($n > 0)
-						print_msg('Successfully deleted ingredient '.$ingredient_name);
-					print_msg("Rows affected: ".$n."<br/>");
-				}
-			
-			} catch (Exception $e) {
-				$code = $e->getCode();
-				$msg = $e->getMessage();
-				if (($code == "HY000") && (stripos($msg, 'foreign'))) {
-				    print_error('Cannot delete this ingredient, at least one recipe still depends on it.');
-				} else {
-				    print_error('Exception: '.$msg);
-				}
-			}
-		}
-
-		/* http://www.pengoworks.com/workshop/jquery/autocomplete.htm */
-		?>
-
-
+	<div id="global-messages"></div>
 	<form name="delete_ingredient" action="ingredients.php" method="post" id="delete_ingredient">
-	    <input type="hidden" name="ingredient_name" value=""> <input type="hidden" name="ingredient_id" value="-1"> <input type="hidden" name="form_type" value="delete_ingredient">
+	    <input type="hidden" name="ingredient_name" value="">
+	    <input type="hidden" name="ingredient_id" value="-1">
+	    <input type="hidden" name="form_type" value="delete_ingredient">
 	</form><!-- ui-dialog -->
 
 	<div id="dialog" title="Add an ingredient">
+	    <div id="dialog-messages"></div>
 	    <form name="add_ingredient" action="ingredients.php" method="post" id="add_ingredient">
 		<div class="row">
 		    <span class="left">
-			<span class="label">Name:</span>
+			<span class="label">
+			    <label for="ingredient_name">Name:</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_name">
+			    <input type="text" name="ingredient_name" id="ingredient_name">
 			</span>
 		    </span>
 		</div>
 
 		<div class="row">
 		    <span class="left">
-			<span class="label">Qty (100):</span>
+			<span class="label">
+			    <label for="ingredient_qty">Qty:</label>
+			</span>
 			<span class="formw">
-			    <input size="12" type="text" name="ingredient_qty" class="has_tooltip" title="The quantity of this ingredient that the nutritional information is for">
-			    <select name="ingredient_unit">
+			    <input size="5" type="text" name="ingredient_qty" id="ingredient_qty" class="has_tooltip" title="The quantity of this ingredient that the nutritional information is for">
+			    <select name="ingredient_unit" id="ingredient_unit">
 				<option>&nbsp;</option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option>
 			    </select>
 			</span>
@@ -337,10 +330,12 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		
 		<div class="row">
 		    <span class="left">
-			<span class="label">Typical unit weight:</span>
+			<span class="label">
+			    <label for="ingredient_typical_qty">Typical unit weight:</label>
+			</span>
 			<span class="formw">
-			    <input size="12" type="text" name="ingredient_typical_qty">
-			    <select name="ingredient_typical_unit" class="has_tooltip" title="The typical weight of one unit of this ingredient (i.e. the typical weight of 1 tomato)">
+			    <input size="5" type="text" name="ingredient_typical_qty" id="ingredient_typical_qty">
+			    <select name="ingredient_typical_unit" id="ingredient_typical_unit" class="has_tooltip" title="The typical weight of one unit of this ingredient (i.e. the typical weight of 1 tomato)">
 				<option>g</option><option>mg</option><option>kg</option>
 			    </select>
 			</span>
@@ -349,89 +344,108 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 
 		<div class="row">
 		    <span class="left">
-			<span class="label">kcal:</span>
+			<span class="label">
+			    <label for="ingredient_kcal">kcal:</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_kcal">
+			    <input type="text" name="ingredient_kcal" id="ingredient_kcal">
 			</span>
 		    </span>
 		</div>
 
 		<div class="row">
 		    <span class="left">
-			<span class="label">Carbohydrates (g):</span>
+			<span class="label">
+			    <label for="ingredient_carb">Carbohydrates (g):</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_carb">
+			    <input type="text" name="ingredient_carb" id="ingredient_carb">
 			</span>
 		    </span>
 		    <span class="right">
-			<span class="label">of which sugars (g):</span>
+			<span class="label">
+			    <label for="ingredient_sugar">of which sugars (g):</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_sugar">
+			    <input type="text" name="ingredient_sugar" id="ingredient_sugar">
 			</span>
 		    </span>
 		</div>
 
 		<div class="row">
 		    <span class="left">
-			<span class="label">Fat (g):</span>
+			<span class="label">
+			    <label for="ingredient_fat">Fat (g):</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_fat">
+			    <input type="text" name="ingredient_fat" id="ingredient_fat">
 			</span>
 		    </span>
 		    <span class="right">
-			<span class="label">of which saturates (g):</span>
+			<span class="label">
+			    <label for="ingredient_sat_fat">of which saturates (g):</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_sat_fat">
+			    <input type="text" name="ingredient_sat_fat" id="ingredient_sat_fat">
 			</span>
 		    </span>
 		</div>
 
 		<div class="row">
 		    <span class="left">
-			<span class="label">Protein (g):</span>
+			<span class="label">
+			    <label for="ingredient_protein">Protein (g):</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_protein">
+			    <input type="text" name="ingredient_protein" id="ingredient_protein">
 			</span>
 		    </span>
 		</div>
 
 		<div class="row">
 		    <span class="left">
-			<span class="label">Fibre (g):</span>
+			<span class="label">
+			    <label for="ingredient_fibre">Fibre (g):</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_fibre">
+			    <input type="text" name="ingredient_fibre" id="ingredient_fibre">
 			</span>
 		    </span>
 		</div>
 
 		<div class="row">
 		    <span class="left">
-			<span class="label">Sodium (mg):</span>
+			<span class="label">
+			    <label for="ingredient_sodium">Sodium (mg):</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_sodium">
+			    <input type="text" name="ingredient_sodium" id="ingredient_sodium">
 			</span>
 		    </span>
 		</div>
 
 		<div class="row">
 		    <span class="left">
-			<span class="label">Cholesterol (mg):</span>
+			<span class="label">
+			    <label for="ingredient_cholesterol">Cholesterol (mg):</label>
+			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_cholesterol">
+			    <input type="text" name="ingredient_cholesterol" id="ingredient_cholesterol">
 			</span>
 		    </span>
 		</div>
 
 		<div class="row">
-		    <span class="labelfull">Others (foo=bar, moh=meh):</span>
+		    <span class="labelfull">
+			<label for="ingredient_others">Others (foo=bar, moh=meh):</label>
+		    </span>
 		    <span class="formfull">
-			<textarea cols="100" rows="3" style="width: 90%;" name="ingredient_others"></textarea>
+			<textarea cols="100" rows="3" style="width: 90%;" name="ingredient_others" id="ingredient_others"></textarea>
 		    </span>
 		</div>
 
 		<input type="hidden" name="ingredient_id" value="-1">
 		<input type="hidden" name="form_type" value="add_ingredient">
-		<!--<input type="submit"/>-->
 	    </form>
 	</div>
 
@@ -488,6 +502,9 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			<th>Cholesterol (g)</th>
 		    </tr>
 		</tfoot>
+		<tbody>
+		    <tr><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td><td>dummy</td></tr>
+		</tbody>
 	    </table>
 	</div>
     </div>

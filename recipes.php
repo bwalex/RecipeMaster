@@ -36,7 +36,7 @@ TODO: tesupload or so
 TODO: config file for db and thumb size, paths, etc
 TODO: replace jquery ui dialog with jquery tools overlay thingie?
 TODO: ajaxify show ingredients
- -->
+-->
 
 <html>
 <head>
@@ -97,7 +97,8 @@ TODO: ajaxify show ingredients
 		    ['TextColor','BGColor'],
 		    ['Maximize', 'ShowBlocks','-','About']
 		];
-	    });	    $(function() {
+	    });
+	    $(function() {
 		$('#recipe_data').dataTable({
 		    //"bJQueryUI": true,
 		    "sPaginationType": "full_numbers",
@@ -311,24 +312,44 @@ TODO: ajaxify show ingredients
 
 	<div id="dialog" title="Add a recipe">
 	    <form name="add_recipe" id="add_recipe" action="recipes.php" method="POST" enctype="multipart/form-data">
-		<label for="add_recipe_name">Recipe Name:</label><br>
-		<input type="text" name="recipe_name" id="add_recipe_name" size="100"> <!-- This <div> holds alert messages to be display in the sample page. -->
-		<br>
+		<div class="row">
+		    <label for="add_recipe_name">Recipe Name:</label>
+		</div>
+		<div class="row">
+		    <input type="text" name="recipe_name" id="add_recipe_name" size="80"> <!-- This <div> holds alert messages to be display in the sample page. -->
+		</div>
 		<hr>
-		List of ingredients:
-
+		<div class="row">
+		    <label>List of ingredients:</label>
+		</div>
 		<div id="ingredient_add_inputs"></div>
-		<a class="boring" href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', null, '100', 'g', '', 'method (e.g. diced)');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
+
+		<div class="row">
+		    <a class="boring" href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', null, '100', 'g', '', 'method (e.g. diced)');">
+			<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+		    </a>
+		</div>
 		<hr>
 
-		<p><label for="add_instructions_editor">Instructions:</label><br>
-		<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">dummy</textarea></p>
+		<div class="row">
+		    <label for="add_instructions_editor">Instructions:</label>
+		</div>
+		<div class="row">
+		    <textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">dummy</textarea>
+		</div>
 
 		<hr>
-		List of photos:
+		<div class="row">
+		    <label>List of photos:</label>
+		</div>
 
 		<div id="photo_add_inputs"></div>
-		<a class="boring" href="#" onclick="addphoto('add_recipe', 'photo_add_inputs', null, '-1', '', '', 'Description');"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a><br>
+
+		<div class="row">
+		    <a class="boring" href="#" onclick="addphoto('add_recipe', 'photo_add_inputs', null, '-1', '', '', 'Description');">
+			<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+		    </a>
+		</div>
 		<input type="hidden" name="form_type" value="add_recipe">
 		<input type="hidden" name="ingredient_count" value="0">
 		<input type="hidden" name="recipe_id" value="-1">

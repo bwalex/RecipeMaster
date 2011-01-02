@@ -8,6 +8,34 @@ function db_connect()
 	return $db;
 }
 
+abstract class Model {
+   
+   public function toArray() {
+        return $this->processArray(get_object_vars($this));
+    }
+    
+    private function processArray($array) {
+        foreach($array as $key => $value) {
+            if (is_object($value)) {
+                $array[$key] = $value->toArray();
+            }
+            if (is_array($value)) {
+                $array[$key] = $this->processArray($value);
+            }
+        }
+        // If the property isn't an object or array, leave it untouched
+        return $array;
+    }
+    
+    public function __toString() {
+        return json_encode($this->toArray());
+    }
+    public function getJSON() {
+        return json_encode($this->toArray());
+    }
+}
+
+
 class Photo {
 	var $id;
 	var $parent_id;
@@ -19,6 +47,20 @@ class Photo {
 	var $new;
 	var $mime;
 	var $extension;
+
+	public function toArray() {
+		$export['type'] = $this->type;
+		$export['id'] = $this->id;
+		$export['parent_id'] = $this->parent_id;
+		$export['photo'] = $this->get();
+		$export['thumb'] = $this->getThumbnail();
+		$export['caption'] = $this->caption;
+		return $export;
+	}
+
+	public function getJSON() {
+	    return json_encode($this->toArray());
+	}
 
 	var $mime_types = array(
 		'image/gif' => 'gif',
@@ -298,7 +340,7 @@ function get_photos($type, $parent_id) {
 	return $photos;
 }
 
-class Ingredient {
+class Ingredient extends Model {
 	var $name;
 	var $id;
 	var $unit;
@@ -557,7 +599,7 @@ function get_ingredients_count($restrict_query = '', $tokens = NULL) {
 }
 
 
-class Recipe {
+class Recipe extends Model {
 	var $id;
 	var $name;
 	var $description;

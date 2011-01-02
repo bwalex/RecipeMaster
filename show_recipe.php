@@ -58,7 +58,8 @@ TODO: add print stuff
 </script>
     <script type="text/javascript">
 	hs.showCredits = false;
-	$(function() {
+
+	$(function() {
 	    //hide the all of the element with class msg_body
 	    $("#acc_content").hide();
 	    //toggle the componenet with class msg_body
