@@ -52,6 +52,11 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
 </script>
     <script type="text/javascript">
+	var oTable;
+	var fields = [ 'name', 'qty', 'unit', 'typical_qty', 'typical_unit', 'kcal', 'carb',
+		      'sugar', 'fibre', 'fat', 'sat_fat', 'protein', 'sodium',
+		      'cholesterol', 'others', 'id' ];
+
 	function addtooltip(input) {
 	    img = document.createElement("img");
 	    img.alt = '?';
@@ -80,28 +85,17 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		    return;
 		}
 
-		document.add_ingredient.ingredient_name.value = decodeURIComponent(ingredient.name);
-		document.add_ingredient.ingredient_qty.value = decodeURIComponent(ingredient.qty);
-		document.add_ingredient.ingredient_unit.value = decodeURIComponent(ingredient.unit);
-		document.add_ingredient.ingredient_typical_qty.value = decodeURIComponent(ingredient.typical_qty);
-		document.add_ingredient.ingredient_typical_unit.value = decodeURIComponent(ingredient.typical_unit);
-		document.add_ingredient.ingredient_kcal.value = decodeURIComponent(ingredient.kcal);
-		document.add_ingredient.ingredient_carb.value = decodeURIComponent(ingredient.carb);
-		document.add_ingredient.ingredient_sugar.value = decodeURIComponent(ingredient.sugar);
-		document.add_ingredient.ingredient_fat.value = decodeURIComponent(ingredient.fat);
-		document.add_ingredient.ingredient_sat_fat.value = decodeURIComponent(ingredient.sat_fat);
-		document.add_ingredient.ingredient_protein.value = decodeURIComponent(ingredient.protein);
-		document.add_ingredient.ingredient_fibre.value = decodeURIComponent(ingredient.fibre);
-		document.add_ingredient.ingredient_sodium.value = decodeURIComponent(ingredient.sodium);
-		document.add_ingredient.ingredient_cholesterol.value = decodeURIComponent(ingredient.cholesterol);
-		document.add_ingredient.ingredient_others.value = decodeURIComponent(ingredient.others);
-		document.add_ingredient.ingredient_id.value = decodeURIComponent(ingredient.id);
+		/* Populate form */
+		for (var i in fields) {
+		    document.add_ingredient['ingredient_' + fields[i]].value = ingredient[fields[i]];
+		}
 		document.add_ingredient.form_type.value = 'edit_ingredient';
 
 		$('#dialog').dialog('option',
 		{
 		    title: 'Edit ingredient',
 		    autoOpen: false,
+		    modal: true,
 		    width: 600,
 		    buttons: [
 			{
@@ -125,9 +119,8 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 	function deleteingredient(id) {
 	    document.delete_ingredient.ingredient_id.value = id;
 	    $(document.delete_ingredient).submit();
-	}</script>
+	}
 
-    <script type="text/javascript">
 	function printmsgdiv(container, msg, className) {
 	    var widget = document.createElement('div');
 	    widget.className = className;
@@ -145,7 +138,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		elem.removeChild(elem.firstChild);
 	    }
 	}
-	var oTable;
+
 	$(function() {
 
 	    $('form').submit(function() {
@@ -216,6 +209,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 	    // Dialog                       
 	    $('#dialog').dialog({
 		autoOpen: false,
+		modal: true,
 		width: 600,
 		buttons: [
 		    {
@@ -232,21 +226,10 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 
 	    // Dialog Link
 	    $('#dialog_link').click(function() {
-		document.add_ingredient.ingredient_name.value = '';
-		document.add_ingredient.ingredient_qty.value = '';
-		document.add_ingredient.ingredient_unit.value = '';
-		document.add_ingredient.ingredient_typical_qty.value = '';
-		document.add_ingredient.ingredient_typical_unit.value = '';
-		document.add_ingredient.ingredient_kcal.value = '';
-		document.add_ingredient.ingredient_carb.value = '';
-		document.add_ingredient.ingredient_sugar.value = '';
-		document.add_ingredient.ingredient_fat.value = '';
-		document.add_ingredient.ingredient_sat_fat.value = '';
-		document.add_ingredient.ingredient_protein.value = '';
-		document.add_ingredient.ingredient_fibre.value = '';
-		document.add_ingredient.ingredient_sodium.value = '';
-		document.add_ingredient.ingredient_cholesterol.value = '';
-		document.add_ingredient.ingredient_others.value = '';
+		/* Populate (or rather clear) form */
+		for (var i in fields) {
+		    document.add_ingredient['ingredient_' + fields[i]].value = '';
+		}
 		document.add_ingredient.ingredient_id.value = '-1';
 		document.add_ingredient.form_type.value = 'add_ingredient';
 		
@@ -294,12 +277,14 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 	</div>
 	
 	<div id="global-messages"></div>
+
 	<form name="delete_ingredient" action="ingredients.php" method="post" id="delete_ingredient">
 	    <input type="hidden" name="ingredient_name" value="">
 	    <input type="hidden" name="ingredient_id" value="-1">
 	    <input type="hidden" name="form_type" value="delete_ingredient">
-	</form><!-- ui-dialog -->
+	</form>
 
+	<!-- ui-dialog -->
 	<div id="dialog" title="Add an ingredient">
 	    <div id="dialog-messages"></div>
 	    <form name="add_ingredient" action="ingredients.php" method="post" id="add_ingredient">

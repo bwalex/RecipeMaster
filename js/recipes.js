@@ -1,3 +1,5 @@
+var seq = 0;
+
 function createselect(name, options) {
     var select = document.createElement("select");
     select.name = name;
@@ -131,6 +133,7 @@ function addingredient(form, id, before_node, qty, unit, name, method) {
 }
 
 function editrecipe(id) {
+    recipeId = -1;
     $.post("ajax_formdata.php", {
         recipe: id
     },
@@ -157,19 +160,27 @@ function editrecipe(id) {
             addphoto('add_recipe', 'photo_add_inputs', null, recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption);
         }
         document.add_recipe.recipe_id.value = recipe.id;
+	recipeId = recipe.id;
         document.add_recipe.form_type.value = 'edit_recipe';
 
 	$('#dialog').dialog('option',
 	{
 	    title: 'Edit recipe',
 	    autoOpen: false,
+	    modal: true,
 	    width: 800,
-	    buttons: {
-		"Submit changes": function() {
-		    document.add_recipe.submit();
-		    $(this).dialog("close");
+	    buttons: [
+		{
+		    id: "dialog-submit",
+		    text: "Submit changes",
+		    click: function() {
+			recipeId = -1;
+			$ret = $(document.add_recipe).submit();
+			if ($ret == true)
+			    $(this).dialog("close");
+		    }
 		}
-	    }
+	    ]
 	});
 	$('#dialog').dialog('open');
     },
@@ -178,7 +189,13 @@ function editrecipe(id) {
 
 function deleterecipe(id) {
     document.delete_recipe.recipe_id.value = id;
-    document.delete_recipe.submit();
+    $(document.delete_recipe).submit();
+}
+
+function deletePhoto(id) {
+    document.delete_photo.recipe_id.value = recipeId;
+    document.delete_photo.photo_id.value = id;
+    $(document.delete_photo).submit();
 }
 
 function deleteallphotos(form, id) {
@@ -235,7 +252,9 @@ function addphoto(form, id, before_node, photoid, photo, thumb, caption) {
     a = document.createElement("a");
     a.href = '#';
     a.className = 'boring';
+    a.photoId = photoid;
     a.onclick = function() {
+	deletePhoto(this.photoId);
         parentrow = this.parentNode;
         parentrow.parentNode.removeChild(parentrow);
     }
@@ -250,15 +269,12 @@ function addphoto(form, id, before_node, photoid, photo, thumb, caption) {
 
     row.appendChild(a);
 
+/*
     a = document.createElement("a");
     a.href = '#';
     a.className = 'boring';
     a.onclick = function() {
         elem = this.parentNode.nextSibling;
-        /*
-         * NOTE: elem = null is ok here since that's the
-         * case where we append an extra row at the end.
-         */
         addphoto(form, id, elem, '-1', '', '', 'Description');
     }
 
@@ -271,6 +287,7 @@ function addphoto(form, id, before_node, photoid, photo, thumb, caption) {
     a.appendChild(img);
 
     row.appendChild(a);
+*/
 
     var elem = document.getElementById(id);
     if (before_node == null) {
@@ -279,4 +296,93 @@ function addphoto(form, id, before_node, photoid, photo, thumb, caption) {
         elem.insertBefore(row, before_node);
     }
     input.focus();
+}
+
+
+function addUpload(container, recipeId) {
+    var outerdiv = document.createElement('div');
+    var iframe = document.createElement('iframe');
+    iframe.id = 'upload_target_'+seq;
+    iframe.name = 'upload_target_'+seq;
+    iframe.style.width = "0px";
+    iframe.style.height = "0px";
+    iframe.style.borderWidth = "0px";
+    
+    outerdiv.appendChild(iframe);
+    var form = document.createElement('form');
+    form.name = "photo_form";
+    form.action = "ajax_form_photos.php";
+    form.target = "upload_target_"+seq;
+    form.method = "post";
+    form.enctype = "multipart/form-data";
+
+    var div = document.createElement('div');
+    div.id = "process-div-"+seq;
+    div.style.height = '0px';
+    //var text = document.createTextNode('Uploading...');
+    //div.appendChild(text);
+    var img = document.createElement('img');
+    img.src = 'icons/load_bar2.gif';
+    div.appendChild(img);
+    div.style.visibility = 'hidden';
+    form.appendChild(div);
+    
+    var div = document.createElement('div');
+    div.id = "input-div-"+seq;
+    var input = document.createElement('input');
+    input.name = "recipe_photo";
+    input.type = "file";
+    input.seq = seq;
+    input.onchange = function() {
+        document.getElementById('process-div-'+this.seq).style.visibility = 'visible';
+        document.getElementById('process-div-'+this.seq).style.height = 'auto';
+        document.getElementById('input-div-'+this.seq).style.visibility = 'hidden';
+        document.getElementById('input-div-'+this.seq).style.height = '0px';
+        this.parentNode.parentNode.submit();
+    }
+    div.appendChild(input);
+
+    var input = document.createElement('input');
+    input.name = "sequence_id";
+    input.value = seq;
+    input.type = "hidden";
+    div.appendChild(input);
+
+    var input = document.createElement('input');
+    input.name = "recipe_id";
+    input.value = recipeId;
+    input.type = "hidden";
+    div.appendChild(input);
+
+    var input = document.createElement('input');
+    input.name = "form_type";
+    input.value = 'add_photo';
+    input.type = "hidden";
+    div.appendChild(input);
+
+    var input = document.createElement('input');
+    input.name = "photo_caption";
+    input.value = 'Edit me!';
+    input.type = "hidden";
+    div.appendChild(input);
+
+
+    form.appendChild(div);
+    
+    outerdiv.appendChild(form);
+    container.appendChild(outerdiv);
+    seq = seq+1;
+}
+
+function uploadDone(data) {
+    if (data.error) {
+        var div = document.getElementById('process-div-'+data.seq);
+        div.removeChild(div.firstChild);
+        text = document.createTextNode('Upload failed: ' + data.errmsg[0]);
+        div.appendChild(text);
+    } else {
+        var div = document.getElementById('process-div-'+data.seq);
+        div.removeChild(div.firstChild);
+        addphoto(null, 'process-div-'+data.seq, null, data.id, data.photo, data.thumb, data.caption);
+    }
 }

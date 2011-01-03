@@ -1,3 +1,38 @@
+
+/* scrollable root element */
+#wizard {	
+	font-size:12px;
+	height:500px;
+	margin:auto;	
+	width:100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	position:relative;
+	
+	/* rounded corners for modern browsers */
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+}  
+
+/* scrollable items */
+#wizard .items {
+	width:20000em;	
+	clear:both;	
+	position:absolute;	
+}
+
+/* single item */
+#wizard .page {	
+
+	width:800px;
+	float:left;	
+}
+
+
+
+
+
+
 /* simple css-based tooltip */
 .tooltip {
 	background-color:#000;

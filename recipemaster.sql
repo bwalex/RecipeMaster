@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `recipe_photos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) NOT NULL,
   `photo_path` text NOT NULL,
-  `photo_caption` text NOT NULL,
+  `photo_caption` text,
   `photo_mime` text NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (parent_id) references recipes(id)

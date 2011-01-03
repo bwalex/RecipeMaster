@@ -55,6 +55,7 @@ TODO: ajaxify show ingredients
 </script>
     <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">
     </script>
+    <script src="http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js"></script>
     
     <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
     </script>
@@ -77,80 +78,165 @@ TODO: ajaxify show ingredients
     <script type="text/javascript" src="js/recipes.js">
     </script>
     <script type="text/javascript">
-	    hs.showCredits = false;
-	    hs.zIndexCounter = 2000;
-	    $(document).ready(function() {
-		CKEDITOR.config.toolbar =
-		[
-		    ['Source','-','Preview','-','Templates'],
-		    ['Cut','Copy','Paste','PasteText','PasteFromWord','-','SpellChecker', 'Scayt'],
-		    ['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
-		    '/',
-		    ['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],
-		    ['NumberedList','BulletedList','-','Outdent','Indent','Blockquote','CreateDiv'],
-		    ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
-		    ['BidiLtr', 'BidiRtl' ],
-		    ['Link','Unlink','Anchor'],
-		    ['Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak'],
-		    '/',
-		    ['Styles','Format','Font','FontSize'],
-		    ['TextColor','BGColor'],
-		    ['Maximize', 'ShowBlocks','-','About']
-		];
-	    });
-	    $(function() {
-		$('#recipe_data').dataTable({
-		    //"bJQueryUI": true,
-		    "sPaginationType": "full_numbers",
-		    "bServerSide": true,
-		    "bProcessing": true,
-		    "sAjaxSource": 'ajax_recipes.php',
-		    "aoColumnDefs": [
-			{ "aTargets": [ 0 ], "sWidth": '200px' }
-		    ]
-		});
+	var oTable;
+	var api;
+	var recipeId = -1;
+	hs.showCredits = false;
+	hs.zIndexCounter = 2000;
 
-		// Dialog                       
-		$('#dialog').dialog({
-		    autoOpen: false,
-		    width: 800,
-		    buttons: {
-			"Add Recipe": function() {
-			    document.add_recipe.submit();
-			    $(this).dialog("close");
-			}
-		    }
-		});
+	function printmsgdiv(container, msg, className) {
+	    var widget = document.createElement('div');
+	    widget.className = className;
 
-		// Dialog Link
-		$('#dialog_link').click(function() {
-		    deleteallingredients('add_recipe', 'ingredient_add_inputs');
-		    deleteallphotos('add_recipe', 'photo_add_inputs');
-		    document.add_recipe.recipe_id.value = '-1';
-		    document.add_recipe.form_type.value = 'add_recipe';
-		    document.add_recipe.recipe_name.value = '';
-		    document.add_recipe.recipe_instructions.value = '';
-		    CKEDITOR.instances.add_instructions_editor.setData('',
-			function() {
-			    this.checkDirty(); // true
-		    });
+	    var p = document.createElement('p');
+	    var text = document.createTextNode(msg);
+	    p.appendChild(text);
+	    widget.appendChild(p);
 
-		    $('#dialog').dialog('option', {
-			title: 'Add a recipe',
-			autoOpen: false,
-			width: 800,
-			buttons: {
-			    "Add Recipe": function() {
-				document.add_recipe.submit();
-				$(this).dialog("close");
+	    container.appendChild(widget);
+	}
+
+	function clearmsgdiv(elem) {
+	    while (elem.hasChildNodes()) {
+		elem.removeChild(elem.firstChild);
+	    }
+	}
+
+	$(document).ready(function() {
+	    CKEDITOR.config.toolbar = [['Source', '-', 'Preview', '-', 'Templates'], ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'SpellChecker', 'Scayt'], ['Undo', 'Redo', '-', 'Find', 'Replace', '-', 'SelectAll', 'RemoveFormat'], '/', ['Bold', 'Italic', 'Underline', 'Strike', '-', 'Subscript', 'Superscript'], ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'Blockquote', 'CreateDiv'], ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], ['BidiLtr', 'BidiRtl'], ['Link', 'Unlink', 'Anchor'], ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'], '/', ['Styles', 'Format', 'Font', 'FontSize'], ['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks', '-', 'About']];
+	});
+	$(function() {
+	    // initialize scrollable
+            //var root = $("#wizard").scrollable();
+            //api = root.scrollable();
+
+	    $('form').submit(function() {
+		clearmsgdiv(document.getElementById('global-messages'));
+		clearmsgdiv(document.getElementById('dialog-messages'));
+		alert($(this).serialize());
+
+		$("#dialog-submit").button("disable");
+		$.ajax({
+		    type: "POST",
+		    timeout: 30000,
+		    /* in ms */
+		    url: this.action/* "ajax_form_recipes.php" */,
+		    dataType: "json",
+		    data: $(this).serialize(),
+		    success: function(data) {
+			if (data.error == 0) {
+			    for (var i in data.msg) {
+				printmsgdiv(document.getElementById('global-messages'), data.msg[i], 'form-ok');
+			    }
+
+			    if ((data.type == 'add_recipe') || (data.type == 'edit_recipe')) {
+				recipeId = data.id;
+				$('#dialog').dialog('close');
+			    }
+			    if (data.type == 'add_recipe')
+				$('#dialog-photos').dialog('open');
+			} else {
+			    recipeId = -1;
+			    for (var i in data.errmsg) {
+				printmsgdiv(document.getElementById(data.where), data.errmsg[i], 'form-error');
 			    }
 			}
-		    });
-		    $('#dialog').dialog('open');
-		    return false;
+
+			/* Refresh table */
+			oTable.fnDraw();
+		    },
+		    error: function(req, textstatus) {
+			alert('Request failed: ' + textstatus);
+		    }
+		});
+		$("#dialog-submit").button("enable");
+		return false;
+	    });
+
+	    oTable = $('#recipe_data').dataTable({
+		//"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"bServerSide": true,
+		"bProcessing": true,
+		"sAjaxSource": 'ajax_recipes.php',
+		"aoColumnDefs": [{
+		    "aTargets": [0],
+		    "sWidth": '200px'
+		}]
+	    });
+
+	    // Dialog
+	    
+	    
+	    
+	    $('#dialog-photos').dialog({
+		autoOpen: false,
+		width: 800,
+		buttons: []
+	    });
+
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    $('#dialog').dialog({
+		autoOpen: false,
+		width: 800,
+		buttons: {
+		    "Add Recipe": function() {
+			document.add_recipe.submit();
+			$(this).dialog("close");
+		    }
+		}
+	    });
+
+	    // Dialog Link
+	    $('#dialog_link').click(function() {
+		recipeId = -1;
+		deleteallingredients('add_recipe', 'ingredient_add_inputs');
+		deleteallphotos('add_recipe', 'photo_add_inputs');
+		document.add_recipe.recipe_id.value = '-1';
+		document.add_recipe.form_type.value = 'add_recipe';
+		document.add_recipe.recipe_name.value = '';
+		document.add_recipe.recipe_instructions.value = '';
+		CKEDITOR.instances.add_instructions_editor.setData('',
+		function() {
+		    this.checkDirty(); // true
 		});
 
-	    });</script>
+		$('#dialog').dialog('option', {
+		    title: 'Add a recipe',
+		    modal: true,
+		    autoOpen: false,
+		    width: 800,
+		    buttons: [
+			{
+			    id: "dialog-submit",
+			    text: "Add Recipe",
+			    click: function() {
+				recipeId = -1;
+				$ret = $(document.add_recipe).submit();
+				if ($ret == true)
+				    $(this).dialog("close");
+			    }
+			}
+		    ]
+		});
+		$('#dialog').dialog('open');
+		return false;
+	    });
+
+	});</script>
     <style type="text/css">
 
 			/*demo page css*/
@@ -171,190 +257,82 @@ TODO: ajaxify show ingredients
 	<div class="container_16">
 	    <h1>Recipes<a href="#" class="boring" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Recipe"></a></h1>
 	</div>
-	<?php
 
-			function print_msg($msg) {
-				echo '<div class="ui-widget">
-						<div class="ui-state-highlight ui-corner-all" style="margin-top: 5px; padding: 0 .7em;"> 
-							<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>'.$msg.'</p>
-						</div>
-					</div>';
-			}
+	<div id="global-messages"></div>
 
-			function print_error($msg) {
-				echo '<div class="ui-widget">
-					<div class="ui-state-error ui-corner-all" style="margin-top: 5px;padding: 0 .7em;"> 
-							<p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'.$msg.'</p>
-						</div>
-					</div>';
-			}
-
-			if ($_POST['recipe_id']) {
-				try {
-					$form_type = $_POST['form_type'];
-					$recipe_name = $_POST['recipe_name'];
-					$recipe_id = $_POST['recipe_id'];
-					$recipe_instructions = $_POST['recipe_instructions'];
-					$recipe_description = '';
-					$recipe_time_estimate = 60;
-					$ingredient_count = $_POST['ingredient_count'];
-					if (($form_type == "add_recipe") || ($form_type == "edit_recipe"))
-						$new = 1;
-					else
-						$new = 0;
-
-					$recipe = new Recipe($recipe_id, $recipe_name, $new,
-					    $recipe_description, $recipe_instructions,
-					    $recipe_time_estimate);
-					
-					if ($form_type == "add_recipe") {
-						if (!empty($_POST['ing_name'])) {
-						    foreach ($_POST['ing_name'] as $key => $ingredient_name) {
-							    if (empty($ingredient_name))
-								continue;
-							    $ingredient_id = -1;
-							    $ingredient_qty = $_POST['ing_qty'][$key];
-							    $ingredient_unit = $_POST['ing_unit'][$key];
-							    $method = $_POST['ing_method'][$key];
-							    
-							    $recipe->addIngredient($ingredient_qty, $ingredient_unit,
-								$method, $ingredient_id, $ingredient_name);
-						    }
-						    /* XXX: maybe throw error */
-						}
-
-						$n = $recipe->save();
-
-						if (!empty($_FILES['recipe_photo']['tmp_name'])) {
-						    foreach ($_FILES['recipe_photo']['tmp_name'] as $key => $file) {
-							$photo = new Photo("recipe", -1, $recipe->id, $_POST['photo_caption'][$key], $file);
-							$m = $photo->store();
-							if ($m == 0) {
-							    $types = '';
-							    foreach($photo->mime_types as $mime) {
-								$types .= $mime . ', ';
-							    }
-							    $types = substr_replace( $types, "", -2 );
-							    print_error("Error processing image '".$_FILES['recipe_photo']['name'][$key]."', supported image types are: ".$types);
-							}
-						    }
-						}
-						if ($n > 0)
-							print_msg('Successfully added recipe '.$recipe_name);
-						print_msg("Rows affected: ".($n + $m)."<br/>");
-					} else if ($form_type == "edit_recipe") {
-						if (!empty($_POST['ing_name'])) {
-						    foreach ($_POST['ing_name'] as $key => $ingredient_name) {
-							    if (empty($ingredient_name))
-								continue;
-							    $ingredient_id = -1;
-							    $ingredient_qty = $_POST['ing_qty'][$key];
-							    $ingredient_unit = $_POST['ing_unit'][$key];
-							    $method = $_POST['ing_method'][$key];
-							    
-							    $recipe->addIngredient($ingredient_qty, $ingredient_unit,
-								$method, $ingredient_id, $ingredient_name);
-						    }
-						    /* XXX: maybe throw error? */
-						}
-						$n = $recipe->save(1);
-
-						$keep = array();
-						if (!empty($_POST['photo_id'])) {
-						    foreach ($_POST['photo_id'] as $key => $photo_id) {
-							if ($photo_id >= 0) {
-							    /* Edit caption and keep */
-							    $photo = new Photo("recipe", $photo_id);
-							    $photo->updateCaption($_POST['photo_caption'][$key]);
-							    array_push($keep, $photo_id);
-							}
-						    }
-						    delete_photos("recipe", $recipe->id, $keep);
-    
-						    /* No, we don't do this in the same loop as to avoid deleting the new photos whose ids we don't have at that point */
-						    $file_no = 0;
-						    foreach ($_POST['photo_id'] as $key => $photo_id) {
-							if ($photo_id == -1) {
-							    /* new photo */
-							    $photo = new Photo("recipe", -1, $recipe->id, $_POST['photo_caption'][$key], $_FILES['recipe_photo']['tmp_name'][$file_no++]);
-							    $m = $photo->store();
-							    if ($m == 0) {
-								$types = '';
-								foreach($photo->mime_types as $mime) {
-								    $types .= $mime . ', ';
-								}
-								$types = substr_replace( $types, "", -2 );
-								print_error("Error processing image '".$_FILES['recipe_photo']['name'][$file_no-1]."', supported image types are: ".$types);
-							    }
-							}
-						    }
-						}
-
-						if ($n > 0)
-							print_msg('Successfully edited recipe '.$recipe_name);
-						print_msg("Rows affected: ".$n."<br/>");
-					} else if ($form_type == "delete_recipe") {
-						$n = $recipe->delete();
-						if ($n > 0)
-							print_msg('Successfully deleted recipe '.$recipe_name);
-						print_msg("Rows affected: ".$n."<br/>");
-					}
-				} catch (Exception $e) {
-					print_error('Exception: '.$e->getMessage());
-				}
-			}
-			/* http://www.pengoworks.com/workshop/jquery/autocomplete.htm */
-			?>
-
-	<form name="delete_recipe" action="recipes.php" method="post" id="delete_recipe">
+	<form name="delete_recipe" action="ajax_form_recipes.php" method="post" id="delete_recipe">
 	    <input type="hidden" name="recipe_name" value=""> <input type="hidden" name="recipe_id" value="-1"> <input type="hidden" name="form_type" value="delete_recipe">
+	</form>
+	<form name="delete_photo" action="ajax_form_photos.php" method="post" id="delete_photo">
+	    <input type="hidden" name="recipe_id" value="-1">
+	    <input type="hidden" name="photo_id" value="-1">
+	    <input type="hidden" name="form_type" value="delete_photo">
 	</form>
 
 	<div id="dialog" title="Add a recipe">
-	    <form name="add_recipe" id="add_recipe" action="recipes.php" method="POST" enctype="multipart/form-data">
-		<div class="row">
-		    <label for="add_recipe_name">Recipe Name:</label>
-		</div>
-		<div class="row">
-		    <input type="text" name="recipe_name" id="add_recipe_name" size="80"> <!-- This <div> holds alert messages to be display in the sample page. -->
-		</div>
-		<hr>
-		<div class="row">
-		    <label>List of ingredients:</label>
-		</div>
-		<div id="ingredient_add_inputs"></div>
+			<div id="dialog-messages"></div>
+			<form name="add_recipe" id="add_recipe" action="ajax_form_recipes.php" method="POST" enctype="multipart/form-data">
+			    <div class="row">
+				<label for="add_recipe_name">Recipe Name:</label>
+			    </div>
+			    <div class="row">
+				<input type="text" name="recipe_name" id="add_recipe_name" size="80"> <!-- This <div> holds alert messages to be display in the sample page. -->
+			    </div>
+			    <hr>
+			    <div class="row">
+				<label>List of ingredients:</label>
+			    </div>
+			    <div id="ingredient_add_inputs"></div>
+	    
+			    <div class="row">
+				<a class="boring" href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', null, '100', 'g', '', 'method (e.g. diced)');">
+				    <img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+				</a>
+			    </div>
+			    <hr>
+	    
+			    <div class="row">
+				<label for="add_instructions_editor">Instructions:</label>
+			    </div>
+			    <div class="row">
+				<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">dummy</textarea>
+			    </div>
+	    
+			    <hr>
 
-		<div class="row">
-		    <a class="boring" href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', null, '100', 'g', '', 'method (e.g. diced)');">
-			<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
-		    </a>
-		</div>
-		<hr>
+			    <div>
+				<div class="row">
+				    <label>List of photos:</label>
+				</div>
+    
+				<div id="photo_add_inputs"></div>
+		
+				<div class="row">
+				    <a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), recipeId);">
+					<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+				    </a>
+				</div>
+			    </div>
+			    <input type="hidden" name="form_type" value="add_recipe">
+			    <input type="hidden" name="ingredient_count" value="0">
+			    <input type="hidden" name="recipe_id" value="-1">
+			</form>
 
-		<div class="row">
-		    <label for="add_instructions_editor">Instructions:</label>
-		</div>
-		<div class="row">
-		    <textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">dummy</textarea>
-		</div>
 
-		<hr>
-		<div class="row">
-		    <label>List of photos:</label>
-		</div>
 
-		<div id="photo_add_inputs"></div>
+	</div>    
+	<div id="dialog-photos" title="Add photos">
+	    <div class="row">
+		<label>List of photos:</label>
+	    </div>
 
-		<div class="row">
-		    <a class="boring" href="#" onclick="addphoto('add_recipe', 'photo_add_inputs', null, '-1', '', '', 'Description');">
-			<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
-		    </a>
-		</div>
-		<input type="hidden" name="form_type" value="add_recipe">
-		<input type="hidden" name="ingredient_count" value="0">
-		<input type="hidden" name="recipe_id" value="-1">
-	    </form>
+	    <div id="photo_new_inputs"></div><a class="boring" href="#" onclick="addUpload(document.getElementById('photo_new_inputs'), recipeId);"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a>
 	</div>
+<!--
+<a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), 17);">
+    <img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+</a>
+-->
 
 	<div id="demo">
 	    <table cellpadding="0" cellspacing="0" border="0" class="display" id="recipe_data">

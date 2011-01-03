@@ -54,9 +54,9 @@ function recipe_sort($a, $b)
     switch ($sort_col) {
 	case "name":
 	    if ($sort_dir == 'ASC')
-		return strcmp($a->name, $b->name);
+		return strcasecmp($a->name, $b->name);
 	    else {
-		$ret = strcmp($a->name, $b->name);
+		$ret = strcasecmp($a->name, $b->name);
 		if ($ret > 0)
 		    $ret = -1;
 		else if ($ret < 0)
@@ -105,7 +105,7 @@ if (!empty($recipes)) {
 			    if ($sort_dir != 'ASC' && $sort_dir != 'DESC')
 				continue;
 			    $sort_col = $aColumns[ intval( $_REQUEST['iSortCol_'.$i] ) ];
-    
+			    
 			    usort($recipes, "recipe_sort");
 		    }
 	    }

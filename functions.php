@@ -82,6 +82,24 @@ class Photo {
 	*/
 	);
 
+	function getAllowedMIMETypesString() {
+		$types = '';
+		foreach($this->mime_types as $mime => $ext) {
+		    $types .= $mime . ', ';
+		}
+		$types = substr_replace( $types, "", -2 );
+		return $types;
+	}
+
+	function getAllowedExtensionsString() {
+		$exts = '';
+		foreach($this->mime_types as $ext) {
+			$exts .= $ext . ', ';
+		}
+		$exts = substr_replace( $exts, "", -2 );
+		return $exts;
+	}
+
 	function Photo($type, $id = -1, $parent_id = -1, $caption = '', $data = NULL) {
 		$photo_table = '';
 
@@ -114,6 +132,8 @@ class Photo {
 			$this->photo_data = NULL;
 			$this->new = 0;
 		} else {
+			if ($data == NULL || $parent_id == NULL)
+				throw new Exception('New photo needs data/file and a parent_id!');
 			$this->id = -1;
 			$this->parent_id = $parent_id;
 			$this->caption = $caption;

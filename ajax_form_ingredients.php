@@ -29,6 +29,7 @@ $output = array();
 $output['error'] = 0;
 $output['msg'] = array();
 $output['errmsg'] = array();
+$output['rowsaffected'] = 0;
 
 function print_error($msg) {
 	global $output;
@@ -81,6 +82,7 @@ if ($_REQUEST['ingredient_id']) {
 
 		if ($form_type == "add_ingredient") {
 			$n = $ingredient->save();
+			$output['rowsaffected'] = $n;
 			
 			if ($n > 0)
 				print_msg('Successfully added ingredient '.$ingredient_name);
@@ -88,6 +90,7 @@ if ($_REQUEST['ingredient_id']) {
 		}
 		else if ($form_type == "edit_ingredient") {
 			$n = $ingredient->save(1);
+			$output['rowsaffected'] = $n;
 
 			if ($n > 0)
 				print_msg('Successfully edited ingredient '.$ingredient_name);
@@ -95,6 +98,7 @@ if ($_REQUEST['ingredient_id']) {
 		}
 		else if ($form_type == "delete_ingredient") {
 			$n = $ingredient->delete();
+			$output['rowsaffected'] = $n;
 			if ($n > 0)
 				print_msg('Successfully deleted ingredient '.$ingredient_name);
 			print_msg("Rows affected: ".$n);

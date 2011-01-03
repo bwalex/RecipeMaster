@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+
+<html>
+<head>
+    <link type="text/css" href="css/style.css" rel="stylesheet">
+    <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet">
+    <script type="text/javascript" src="js/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">    </script>
+    <script src="http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js"></script>
+    
+    <title></title>
+    <script type="text/javascript" src="js/recipes.js"></script>
+    <script type="text/javascript">
+        var seq = 0;
+        var api;
+	function printmsgdiv(container, msg, className) {
+	    var widget = document.createElement('div');
+	    widget.className = className;
+
+	    var p = document.createElement('p');
+	    var text = document.createTextNode(msg);
+	    p.appendChild(text);
+	    widget.appendChild(p);
+
+	    container.appendChild(widget);
+	}
+
+	function clearmsgdiv(elem) {
+	    while (elem.hasChildNodes()) {
+		elem.removeChild(elem.firstChild);
+	    }
+	}
+        $(function() {
+        
+                // initialize scrollable
+                var root = $(".scrollable").scrollable();
+                api = root.scrollable()
+        
+        });
+    </script>
+</head>
+
+<body>
+    <div id="content" class="container_16">
+
+	<div id="global-messages"></div>
+
+	<form name="delete_recipe" action="recipes.php" method="post" id="delete_recipe">
+	    <input type="hidden" name="recipe_name" value=""> <input type="hidden" name="recipe_id" value="-1"> <input type="hidden" name="form_type" value="delete_recipe">
+	</form>
+
+<!--
+	<div id="dialog" title="Add a recipe">
+	    <div id="dialog-messages"></div>
+	    <form name="add_recipe" id="add_recipe" action="recipes.php" method="POST" enctype="multipart/form-data">
+
+		<hr>
+		<div class="row">
+		    <label>List of photos:</label>
+		</div>
+
+		<div id="photo_add_inputs"></div>
+
+		<div class="row">
+		    <a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), 17);">
+			<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+		    </a>
+		</div>
+                <hr>
+		<input type="text" name="form_type" value="add_recipe">
+		<input type="hidden" name="ingredient_count" value="0">
+		<input type="text" name="recipe_id" value="-1">
+	    </form>
+	</div>
+-->
+    
+    
+    
+    
+    
+	    <div id="wizard" class="scrollable"> 
+		<div class="items">
+		    <div class="page">
+			<div id="dialog-messages"></div>
+			<form name="add_recipe" id="add_recipe" action="recipes.php" method="POST" enctype="multipart/form-data">
+			    <div class="row">
+				<label for="add_recipe_name">Recipe Name:</label>
+			    </div>
+			    <div class="row">
+				<input type="text" name="recipe_name" id="add_recipe_name" size="80"> <!-- This <div> holds alert messages to be display in the sample page. -->
+			    </div>
+			    <hr>
+			    <div class="row">
+				<label>List of ingredients:</label>
+			    </div>
+			    <div id="ingredient_add_inputs"></div>
+	    
+			    <div class="row">
+				<a class="boring" href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', null, '100', 'g', '', 'method (e.g. diced)');">
+				    <img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+				</a>
+			    </div>
+			    <hr>
+	    
+			    <div class="row">
+				<label for="add_instructions_editor">Instructions:</label>
+			    </div>
+			    <div class="row">
+				<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">dummy</textarea>
+			    </div>
+	    
+			    <hr>
+			    <div class="row">
+				<label>List of photos:</label>
+			    </div>
+	    
+			    <div id="photo_add_inputs"></div>
+	    
+			    <div class="row">
+				<a class="boring" href="#" onclick="addphoto('add_recipe', 'photo_add_inputs', null, '-1', '', '', 'Description');">
+				    <img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+				</a>
+			    </div>
+			    <input type="hidden" name="form_type" value="add_recipe">
+			    <input type="hidden" name="ingredient_count" value="0">
+			    <input type="hidden" name="recipe_id" value="-1">
+			</form>
+		    </div>
+		    <div class="page">Test page2
+		    </div>
+		</div>
+		
+	    </div>
+            
+            
+            
+            <a href="#" onclick="api.next();">wwww</a>
+        </div>
+</body>
+</html>
