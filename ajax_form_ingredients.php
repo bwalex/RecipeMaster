@@ -1,28 +1,5 @@
 <?php
 
-
-/*
-$.ajax({
-   type: "POST",
-   url: "ajax_form_ingredients.php",
-   dataType: "json",
-   data: {
-       type: "ingredients",
-       maxRows: 12,
-       term: request.term
-   },
-   success: function(data) {
-       if (data.exception) {
-           response([]);
-           alert(data.exception);
-           return;
-       }
-
-       response(data.objects);
-   }
-});
-*/
-
 include('functions.php');
 
 $output = array();
@@ -46,6 +23,8 @@ if ($_REQUEST['ingredient_id']) {
 		$form_type = $_REQUEST['form_type'];
 		$ingredient_name = $_REQUEST['ingredient_name'];
 		$ingredient_id = $_REQUEST['ingredient_id'];
+                $output['whereOk'] = $_REQUEST['where_ok'];
+                $output['whereError'] = $_REQUEST['where_error'];
 
 		$ingredient_unit = trim($_REQUEST['ingredient_unit']);
 		if (ord($ingredient_unit) == 194)
@@ -66,10 +45,8 @@ if ($_REQUEST['ingredient_id']) {
 		$ingredient_others = $_REQUEST['ingredient_others'];
 		if (($form_type == "add_ingredient") || ($form_type == "edit_ingredient")) {
 			$new = 1;
-			$output['where'] = 'dialog-messages';
 		} else {
 			$new = 0;
-			$output['where'] = 'global-messages';
 		}
 
 		$ingredient = new Ingredient($ingredient_id, $ingredient_name, $new,

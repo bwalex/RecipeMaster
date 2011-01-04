@@ -915,7 +915,7 @@ function print_footer() {
 	    </div>
 	    <div class="grid_14">
 		<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />&copy; <span xmlns:cc="http://creativecommons.org/ns#">Alex Hornung</span> <!-- span: property="cc:attributionName" -->
-		<!--<h4>&copy; 2010, Alex Hornung</h4>-->
+		<!--<h4>&copy; 2010, 2011 Alex Hornung</h4>-->
 	    </div>
 	    <div id="lastfooter" class="container_16">
 	    built using <a href="http://960.gs/">960 gs</a>,
@@ -924,7 +924,7 @@ function print_footer() {
 	    <a href="http://highslide.com/">Highslide</a>,
 	    <a href="http://www.jquery.com/">jQuery</a>,
 	    <a href="http://flowplayer.org/tools/index.html">jQuery Tools</a>,
-	    <a href="http://jqueryui.com/">jQuery user interface</a>
+	    <a href="http://jqueryui.com/">jQuery UI</a>
 	    </div>
 	</div>
     ';

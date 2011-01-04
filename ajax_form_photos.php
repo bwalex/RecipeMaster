@@ -39,10 +39,10 @@ if ($_REQUEST['recipe_id']) {
 		$recipe_id = $_REQUEST['recipe_id'];
 		$form_type = $_REQUEST['form_type'];
 		$photo_id = $_REQUEST['photo_id'];
-                $output['where'] = 'dialog-messages';
 		$output['seq'] = $_REQUEST['sequence_id'];
 		$output['type'] = $form_type;
-
+                $output['whereOk'] = $_REQUEST['where_ok'];
+                $output['whereError'] = $_REQUEST['where_error'];
 
 		$recipe = new Recipe($recipe_id);
 		if ($form_type == 'delete_photo') {
@@ -59,6 +59,9 @@ if ($_REQUEST['recipe_id']) {
 			$photo = new Photo("recipe", $photo_id, $recipe->id);
 			$n = $photo->updateCaption($photo_caption);
 			$output['rowsaffected'] = $n;
+			if ($n > 0)
+				print_msg('Successfully updated photo caption');
+			print_msg("Rows affected: ".$n);
 			print_json($output);
 		}
 		else if ($form_type == 'add_photo') {
@@ -79,13 +82,13 @@ if ($_REQUEST['recipe_id']) {
 			}
 			print_msg("Rows affected: ".$n);
 			print_javascript($output);
-			/* XXX: need to feedback via javascript from iframe */
+			/* need to feedback via javascript from iframe */
 		}
 	} catch (Exception $e) {
 		print_error('Exception: '.$e->getMessage());
                 $output['error'] = 1;
 		if ($form_type == 'add_photo') {
-			/* XXX: need to feedback via javascript from iframe */
+			/* need to feedback via javascript from iframe */
 			print_javascript($output);
 		} else {
 			print_json($output);

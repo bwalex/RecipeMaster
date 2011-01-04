@@ -1,28 +1,5 @@
 <?php
 
-/*
-$.ajax({
-   type: "POST",
-   url: "ajax_form_recipes.php",
-   dataType: "json",
-   data: {
-       type: "ingredients",
-       maxRows: 12,
-       term: request.term
-   },
-   success: function(data) {
-       if (data.exception) {
-           response([]);
-           alert(data.exception);
-           return;
-       }
-
-       response(data.objects);
-   }
-});
-*/
-
-
 include('functions.php');
 
 $output = array();
@@ -54,12 +31,12 @@ if ($_REQUEST['recipe_id']) {
 		$recipe_time_estimate = 60;
 		$ingredient_count = $_REQUEST['ingredient_count'];
                 $output['type'] = $form_type;
+                $output['whereOk'] = $_REQUEST['where_ok'];
+                $output['whereError'] = $_REQUEST['where_error'];
 		if (($form_type == "add_recipe") || ($form_type == "edit_recipe")) {
 			$new = 1;
-                        $output['where'] = 'dialog-messages';
                 } else {
 			$new = 0;
-                        $output['where'] = 'global-messages';
                 }
 
 		$recipe = new Recipe($recipe_id, $recipe_name, $new,
@@ -85,22 +62,7 @@ if ($_REQUEST['recipe_id']) {
 			$n = $recipe->save();
                         $output['id'] = $recipe->id;
                         $output['rowsaffected'] = $n;
-/*
-			if (!empty($_FILES['recipe_photo']['tmp_name'])) {
-			    foreach ($_FILES['recipe_photo']['tmp_name'] as $key => $file) {
-				$photo = new Photo("recipe", -1, $recipe->id, $_REQUEST['photo_caption'][$key], $file);
-				$m = $photo->store();
-				if ($m == 0) {
-				    $types = '';
-				    foreach($photo->mime_types as $mime) {
-					$types .= $mime . ', ';
-				    }
-				    $types = substr_replace( $types, "", -2 );
-				    print_error("Error processing image '".$_FILES['recipe_photo']['name'][$key]."', supported image types are: ".$types);
-				}
-			    }
-			}
-*/
+
 			if ($n > 0)
 				print_msg('Successfully added recipe '.$recipe_name);
 			print_msg("Rows affected: ".($n + $m));
@@ -122,38 +84,16 @@ if ($_REQUEST['recipe_id']) {
 			$n = $recipe->save(/* update = */1);
                         $output['id'] = $recipe->id;
                         $output['rowsaffected'] = $n;
-/*
-			$keep = array();
+
 			if (!empty($_REQUEST['photo_id'])) {
 			    foreach ($_REQUEST['photo_id'] as $key => $photo_id) {
 				if ($photo_id >= 0) {
 				    // Edit caption and keep
 				    $photo = new Photo("recipe", $photo_id);
 				    $photo->updateCaption($_REQUEST['photo_caption'][$key]);
-				    array_push($keep, $photo_id);
 				}
 			    }
-			    delete_photos("recipe", $recipe->id, $keep);
-
-			    // No, we don't do this in the same loop as to avoid deleting the new photos whose ids we don't have at that point
-			    $file_no = 0;
-			    foreach ($_REQUEST['photo_id'] as $key => $photo_id) {
-				if ($photo_id == -1) {
-				    // new photo
-				    $photo = new Photo("recipe", -1, $recipe->id, $_REQUEST['photo_caption'][$key], $_FILES['recipe_photo']['tmp_name'][$file_no++]);
-				    $m = $photo->store();
-				    if ($m == 0) {
-					$types = '';
-					foreach($photo->mime_types as $mime) {
-					    $types .= $mime . ', ';
-					}
-					$types = substr_replace( $types, "", -2 );
-					print_error("Error processing image '".$_FILES['recipe_photo']['name'][$file_no-1]."', supported image types are: ".$types);
-				    }
-				}
-			    }
-			}
-*/
+                        }
 
 			if ($n > 0)
 				print_msg('Successfully edited recipe '.$recipe_name);

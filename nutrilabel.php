@@ -21,21 +21,24 @@ $fat_cal = intval($fat*9);
 /* https://www.purelifestyle.co.uk/Article.aspx?Id=37 */
 /* http://www.food.gov.uk/multimedia/pdfs/nutrientinstitution.pdf */
 /* http://www.food.gov.uk/multimedia/pdfs/nutguideuk.pdf */
-$fat_rdi = 55;
+/* Jamie Oliver Magazine, Guideline Daily Amounts for UK only */
+$fat_rdi = 70;
 $sat_fat_rdi = 20;
 $cholesterol_rdi = 300;
-$sodium_rdi = 2000;
-$carbs_rdi = 200;
-$fibre_rdi = 32;
-$protein_rdi = 55;
+$sodium_rdi = 2400;
+$carbs_rdi = 230;
+$sugars_rdi = 90;
+$fibre_rdi = 24;
+$protein_rdi = 45;
 
 $fat_rdi_pct = intval($fat/$fat_rdi*100);
 $sat_fat_rdi_pct = intval($sat_fat/$sat_fat_rdi*100);
 $cholesterol_rdi_pct = intval($cholesterol/$cholesterol_rdi*100);
 $sodium_rdi_pct = intval($sodium/$sodium_rdi*100);
-$carbs_rdi_pct = intval($carbs/$carbs_rdi*100);;
-$fibre_rdi_pct = intval($fibre/$fibre_rdi*100);;
-$protein_rdi_pct = intval($protein/$protein_rdi*100);;
+$carbs_rdi_pct = intval($carbs/$carbs_rdi*100);
+$sugars_rdi_pct = intval($sugars/$sugars_rdi*100);
+$fibre_rdi_pct = intval($fibre/$fibre_rdi*100);
+$protein_rdi_pct = intval($protein/$protein_rdi*100);
 
 function bbox_get_height($bbox) {
 	return -($bbox[7] + $bbox[1]);
@@ -170,6 +173,9 @@ imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);
 $y += 5 + $normal_height;
 
 imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_regular, '     Sugars '.$sugars.'g');
+
+$bbox = imagettfbbox($font_size_normal, 0, $file_font_regular, $sugars_rdi_pct.'%');
+imagettftext($im, $font_size_normal, 0, $width-6-bbox_get_width($bbox), $y, $text_color, $file_font_regular, $sugars_rdi_pct.'%');
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);

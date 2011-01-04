@@ -84,35 +84,40 @@ TODO: ajaxify show ingredients
 	hs.showCredits = false;
 	hs.zIndexCounter = 2000;
 
-	function printmsgdiv(container, msg, className) {
-	    var widget = document.createElement('div');
-	    widget.className = className;
+	function printMsgs(data, type) {
+	    if (type == 'ok') {
+		msgSet = data.msg;
+		className = 'form-ok';
+		where = data.whereOk;
+	    } else if (type == 'error') {
+		msgSet = data.errmsg;
+		className = 'form-error';
+		where = data.whereError;
+	    } else {
+		return;
+	    }
 
-	    var p = document.createElement('p');
-	    var text = document.createTextNode(msg);
-	    p.appendChild(text);
-	    widget.appendChild(p);
-
-	    container.appendChild(widget);
+	    for (var i in msgSet) {
+		$('.' + where).append('<div class="' + className + '"><p>' + msgSet[i] + '</p></div>');
+	    }
 	}
 
-	function clearmsgdiv(elem) {
-	    while (elem.hasChildNodes()) {
-		elem.removeChild(elem.firstChild);
-	    }
+	function clearMsgDivs() {
+	    $('.dialog-messages, .global-messages').empty();
 	}
 
 	$(document).ready(function() {
 	    CKEDITOR.config.toolbar = [['Source', '-', 'Preview', '-', 'Templates'], ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'SpellChecker', 'Scayt'], ['Undo', 'Redo', '-', 'Find', 'Replace', '-', 'SelectAll', 'RemoveFormat'], '/', ['Bold', 'Italic', 'Underline', 'Strike', '-', 'Subscript', 'Superscript'], ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'Blockquote', 'CreateDiv'], ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], ['BidiLtr', 'BidiRtl'], ['Link', 'Unlink', 'Anchor'], ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'], '/', ['Styles', 'Format', 'Font', 'FontSize'], ['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks', '-', 'About']];
 	});
+
 	$(function() {
 	    // initialize scrollable
             //var root = $("#wizard").scrollable();
             //api = root.scrollable();
 
 	    $('form').submit(function() {
-		clearmsgdiv(document.getElementById('global-messages'));
-		clearmsgdiv(document.getElementById('dialog-messages'));
+		clearMsgDivs();
+
 		alert($(this).serialize());
 
 		$("#dialog-submit").button("disable");
@@ -125,9 +130,7 @@ TODO: ajaxify show ingredients
 		    data: $(this).serialize(),
 		    success: function(data) {
 			if (data.error == 0) {
-			    for (var i in data.msg) {
-				printmsgdiv(document.getElementById('global-messages'), data.msg[i], 'form-ok');
-			    }
+			    printMsgs(data, 'ok');
 
 			    if ((data.type == 'add_recipe') || (data.type == 'edit_recipe')) {
 				recipeId = data.id;
@@ -137,9 +140,7 @@ TODO: ajaxify show ingredients
 				$('#dialog-photos').dialog('open');
 			} else {
 			    recipeId = -1;
-			    for (var i in data.errmsg) {
-				printmsgdiv(document.getElementById(data.where), data.errmsg[i], 'form-error');
-			    }
+			    printMsgs(data, 'error');
 			}
 
 			/* Refresh table */
@@ -156,7 +157,7 @@ TODO: ajaxify show ingredients
 	    oTable = $('#recipe_data').dataTable({
 		//"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
-		"bServerSide": true,
+		//"bServerSide": true, /* XXX: temporary workaround, since ordering is broken on serverside */
 		"bProcessing": true,
 		"sAjaxSource": 'ajax_recipes.php',
 		"aoColumnDefs": [{
@@ -203,8 +204,8 @@ TODO: ajaxify show ingredients
 	    // Dialog Link
 	    $('#dialog_link').click(function() {
 		recipeId = -1;
-		deleteallingredients('add_recipe', 'ingredient_add_inputs');
-		deleteallphotos('add_recipe', 'photo_add_inputs');
+		$('#ingredient_add_inputs').empty();
+		$('#photo_add_inputs').empty();
 		document.add_recipe.recipe_id.value = '-1';
 		document.add_recipe.form_type.value = 'add_recipe';
 		document.add_recipe.recipe_name.value = '';
@@ -225,6 +226,7 @@ TODO: ajaxify show ingredients
 			    text: "Add Recipe",
 			    click: function() {
 				recipeId = -1;
+				$('[name="ing_method[]"]').trigger('focus');
 				$ret = $(document.add_recipe).submit();
 				if ($ret == true)
 				    $(this).dialog("close");
@@ -232,6 +234,8 @@ TODO: ajaxify show ingredients
 			}
 		    ]
 		});
+		document.getElementById('form-photoset').style.visibility = 'hidden';
+		clearMsgDivs();
 		$('#dialog').dialog('open');
 		return false;
 	    });
@@ -258,75 +262,88 @@ TODO: ajaxify show ingredients
 	    <h1>Recipes<a href="#" class="boring" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Recipe"></a></h1>
 	</div>
 
-	<div id="global-messages"></div>
+	<div class="global-messages"></div>
 
 	<form name="delete_recipe" action="ajax_form_recipes.php" method="post" id="delete_recipe">
-	    <input type="hidden" name="recipe_name" value=""> <input type="hidden" name="recipe_id" value="-1"> <input type="hidden" name="form_type" value="delete_recipe">
+	    <input type="hidden" name="recipe_name" value="">
+	    <input type="hidden" name="recipe_id" value="-1">
+	    <input type="hidden" name="form_type" value="delete_recipe">
+	    <input type="hidden" name="where_ok" value="global-messages">
+	    <input type="hidden" name="where_error" value="global-messages">
 	</form>
 	<form name="delete_photo" action="ajax_form_photos.php" method="post" id="delete_photo">
 	    <input type="hidden" name="recipe_id" value="-1">
 	    <input type="hidden" name="photo_id" value="-1">
 	    <input type="hidden" name="form_type" value="delete_photo">
+	    <input type="hidden" name="where_ok" value="dialog-messages">
+	    <input type="hidden" name="where_error" value="dialog-messages">
 	</form>
 
 	<div id="dialog" title="Add a recipe">
-			<div id="dialog-messages"></div>
-			<form name="add_recipe" id="add_recipe" action="ajax_form_recipes.php" method="POST" enctype="multipart/form-data">
-			    <div class="row">
-				<label for="add_recipe_name">Recipe Name:</label>
-			    </div>
-			    <div class="row">
-				<input type="text" name="recipe_name" id="add_recipe_name" size="80"> <!-- This <div> holds alert messages to be display in the sample page. -->
-			    </div>
-			    <hr>
-			    <div class="row">
-				<label>List of ingredients:</label>
-			    </div>
-			    <div id="ingredient_add_inputs"></div>
-	    
-			    <div class="row">
-				<a class="boring" href="#" onclick="addingredient('add_recipe', 'ingredient_add_inputs', null, '100', 'g', '', 'method (e.g. diced)');">
-				    <img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
-				</a>
-			    </div>
-			    <hr>
-	    
-			    <div class="row">
-				<label for="add_instructions_editor">Instructions:</label>
-			    </div>
-			    <div class="row">
-				<textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">dummy</textarea>
-			    </div>
-	    
-			    <hr>
+	    <div class="dialog-messages"></div>
 
-			    <div>
-				<div class="row">
-				    <label>List of photos:</label>
-				</div>
-    
-				<div id="photo_add_inputs"></div>
-		
-				<div class="row">
-				    <a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), recipeId);">
-					<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
-				    </a>
-				</div>
-			    </div>
-			    <input type="hidden" name="form_type" value="add_recipe">
-			    <input type="hidden" name="ingredient_count" value="0">
-			    <input type="hidden" name="recipe_id" value="-1">
-			</form>
+	    <form name="add_recipe" id="add_recipe" action="ajax_form_recipes.php" method="post" enctype="multipart/form-data">
+		<div class="row">
+		    <label for="add_recipe_name">Recipe Name:</label>
+		</div>
 
+		<div class="row">
+		    <input type="text" name="recipe_name" id="add_recipe_name" size="80"> <!-- This <div> holds alert messages to be display in the sample page. -->
+		</div>
+		<hr>
 
+		<div class="row">
+		    <label>List of ingredients:</label>
+		</div>
 
-	</div>    
+		<div id="ingredient_add_inputs"></div>
+
+		<div class="row">
+		    <a class="boring" href="#" onclick="$('#ingredient_add_inputs').append(createIngredientRow('100', 'g', '', 'method (e.g. diced)'));"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a>
+		</div>
+		<hr>
+
+		<div class="row">
+		    <label for="add_instructions_editor">Instructions:</label>
+		</div>
+
+		<div class="row">
+		    <textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">dummy</textarea>
+		</div>
+
+		<div id="form-photoset">
+		    <hr>
+
+		    <div class="row">
+			<label>List of photos:</label>
+		    </div>
+
+		    <div id="photo_add_inputs"></div>
+
+		    <div class="row">
+			<a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), recipeId);"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a>
+		    </div>
+		</div>
+		<input type="hidden" name="form_type" value="add_recipe">
+		<input type="hidden" name="ingredient_count" value="0">
+		<input type="hidden" name="recipe_id" value="-1">
+		<input type="hidden" name="where_ok" value="global-messages">
+		<input type="hidden" name="where_error" value="dialog-messages">
+	    </form>
+	</div>
+
+  
 	<div id="dialog-photos" title="Add photos">
+	    <div class="dialog-messages"></div>
+
 	    <div class="row">
 		<label>List of photos:</label>
 	    </div>
 
-	    <div id="photo_new_inputs"></div><a class="boring" href="#" onclick="addUpload(document.getElementById('photo_new_inputs'), recipeId);"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a>
+	    <div id="photo_new_inputs"></div>
+	    <a class="boring" href="#" onclick="addUpload(document.getElementById('photo_new_inputs'), recipeId);">
+		<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+	    </a>
 	</div>
 <!--
 <a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), 17);">

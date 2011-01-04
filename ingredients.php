@@ -58,20 +58,14 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		      'cholesterol', 'others', 'id' ];
 
 	function addtooltip(input) {
-	    img = document.createElement("img");
-	    img.alt = '?';
-	    img.height = '16';
-	    img.width = '16';
-	    img.src = 'icons/help.png';
-	    img.className = 'boring';
-	    img.onmouseover = function() {
+	    var img = $('<img alt="?" height="16" width="16" src="icons/help.png" class="boring">');
+	    img.mouseover(function() {
 		$(input).data('tooltip').show();
-	    }
-	    img.onmouseout = function() {
+	    });
+	    img.mouseout(function() {
 		$(input).data('tooltip').hide();
-	    }
-	    parent = input.parentNode;
-	    parent.appendChild(img);
+	    });
+	    $(input).parent().append(img);
 	}
 
 	function editingredient(id) {
@@ -110,7 +104,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		    ]
 		});
 
-		clearmsgdiv(document.getElementById('dialog-messages'));
+		clearMsgDivs();
 		$('#dialog').dialog('open');
 	    },
 	    'json');
@@ -121,29 +115,32 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 	    $(document.delete_ingredient).submit();
 	}
 
-	function printmsgdiv(container, msg, className) {
-	    var widget = document.createElement('div');
-	    widget.className = className;
-	    
-	    var p = document.createElement('p');
-	    var text = document.createTextNode(msg);
-	    p.appendChild(text);
-	    widget.appendChild(p);
-    
-	    container.appendChild(widget);
+	function printMsgs(data, type) {
+	    if (type == 'ok') {
+		msgSet = data.msg;
+		className = 'form-ok';
+		where = data.whereOk;
+	    } else if (type == 'error') {
+		msgSet = data.errmsg;
+		className = 'form-error';
+		where = data.whereError;
+	    } else {
+		return;
+	    }
+
+	    for (var i in msgSet) {
+		$('.' + where).append('<div class="' + className + '"><p>' + msgSet[i] + '</p></div>');
+	    }
 	}
 
-	function clearmsgdiv(elem) {
-	    while (elem.hasChildNodes()) {
-		elem.removeChild(elem.firstChild);
-	    }
+	function clearMsgDivs() {
+	    $('.dialog-messages, .global-messages').empty();
 	}
 
 	$(function() {
 
 	    $('form').submit(function() {
-		clearmsgdiv(document.getElementById('global-messages'));
-		clearmsgdiv(document.getElementById('dialog-messages'));
+		clearMsgDivs();
 
 		$("#dialog-submit").button("disable");
 		$.ajax({
@@ -154,15 +151,10 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		    data: $(this).serialize(),
 		    success: function(data) {
 			if (data.error == 0) {
-			    for (var i in data.msg) {
-				printmsgdiv(document.getElementById('global-messages'), data.msg[i], 'form-ok');
-			    }
-
+			    printMsgs(data, 'ok');
 			    $('#dialog').dialog('close');
 			} else {
-			    for (var i in data.errmsg) {
-				printmsgdiv(document.getElementById(data.where), data.errmsg[i], 'form-error');
-			    }
+			    printMsgs(data, 'error');
 			}
 
 			/* Refresh table */
@@ -250,7 +242,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		    ]
 		});
 
-		clearmsgdiv(document.getElementById('dialog-messages'));
+		clearMsgDivs();
 		$('#dialog').dialog('open');
 		return false;
 	    });
@@ -276,17 +268,19 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 	    <h1>Ingredients<a class="boring" href="#" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Ingredient"></a></h1>
 	</div>
 	
-	<div id="global-messages"></div>
+	<div class="global-messages"></div>
 
 	<form name="delete_ingredient" action="ingredients.php" method="post" id="delete_ingredient">
 	    <input type="hidden" name="ingredient_name" value="">
 	    <input type="hidden" name="ingredient_id" value="-1">
 	    <input type="hidden" name="form_type" value="delete_ingredient">
+	    <input type="hidden" name="where_ok" value="global-messages">
+	    <input type="hidden" name="where_error" value="global-messages">
 	</form>
 
 	<!-- ui-dialog -->
 	<div id="dialog" title="Add an ingredient">
-	    <div id="dialog-messages"></div>
+	    <div class="dialog-messages"></div>
 	    <form name="add_ingredient" action="ingredients.php" method="post" id="add_ingredient">
 		<div class="row">
 		    <span class="left">
@@ -431,6 +425,8 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 
 		<input type="hidden" name="ingredient_id" value="-1">
 		<input type="hidden" name="form_type" value="add_ingredient">
+		<input type="hidden" name="where_ok" value="global-messages">
+		<input type="hidden" name="where_error" value="dialog-messages">
 	    </form>
 	</div>
 

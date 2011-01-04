@@ -14,39 +14,37 @@ function createselect(name, options) {
     return select;
 }
 
-function deleteallingredients(form, id) {
-    document.getElementById(form).ingredient_count.value = 0;
-    var elem = document.getElementById(id);
-    while (elem.hasChildNodes()) {
-        elem.removeChild(elem.firstChild);
-    }
-}
+function createIngredientRow(qty, unit, name, method) {
+    var row = $('<div class="row"></div>');
 
-function addingredient(form, id, before_node, qty, unit, name, method) {
-    var row = document.createElement("div");
-    row.className = 'row';
-
-    var input = document.createElement("input");
-    input.type = "text";
-    input.size = "5";
-    input.name = "ing_qty[]";
-    input.value = qty;
-
-    row.appendChild(input);
+    row.append('<input type="text" size="5" name="ing_qty[]" value="'+ qty +'">');
 
     select = createselect("ing_unit[]", ["", "g", "ml", "mg", "kg", "l"]);
     select.value = unit;
-    row.appendChild(select);
+    row.append(select);
 
-    var input = document.createElement("input");
-    input.type = "text";
-    input.size = "35";
-    input.name = "ing_name[]";
-    input.value = name;
+    var nameInput = $('<input type="text" size="35" name="ing_name[]" value="'+ name +'">').appendTo(row);
+    var methodInput = $('<input type="text" size="20" name="ing_method[]" value="'+ method +'">').appendTo(row);
 
-    row.appendChild(input);
+    methodInput.one('focus', function() {
+        if (this.value == 'method (e.g. diced)')
+            this.value="";
+    });
 
-    $(input).autocomplete({
+    var a = $('<a href="#" class="boring"></a>').appendTo(row);
+    a.click(function() {
+	$(this).parent().remove();
+    });
+    a.append('<img alt="remove ingredient field" width="16" height="16" src="icons/cross.png" class="boring">');
+
+    var a = $('<a href="#" class="boring"></a>').appendTo(row);
+    a.click(function() {
+	$('[name="ing_method[]"]').trigger('focus');
+	$(this).parent().after(createIngredientRow('100', 'g', '', 'method (e.g. diced)'));
+    });
+    a.append('<img alt="add ingredient field" width="16" height="16" src="icons/add.png" class="boring">');
+    
+    nameInput.autocomplete({
         source: function(request, response) {
             $.ajax({
                 url: "ajax_autocomplete.php",
@@ -70,66 +68,7 @@ function addingredient(form, id, before_node, qty, unit, name, method) {
         minLength: 2
     });
 
-    var input2 = document.createElement("input");
-    input2.type = "text";
-    input2.size = "20";
-    input2.name = "ing_method[]";
-    input2.value = method;
-    $(input2).one('focus', function() {
-        if (this.value == 'method (e.g. diced)')
-            this.value="";
-    });
-
-    row.appendChild(input2);
-
-    a = document.createElement("a");
-    a.href = '#';
-    a.className = 'boring';
-    a.onclick = function() {
-        parentrow = this.parentNode;
-        parentrow.parentNode.removeChild(parentrow);
-    }
-
-    img = document.createElement("img");
-    img.alt = 'remove ingredient field';
-    img.height = '16';
-    img.width = '16';
-    img.src = 'icons/cross.png';
-    img.className = 'boring';
-    a.appendChild(img);
-
-    row.appendChild(a);
-
-    a = document.createElement("a");
-    a.href = '#';
-    a.className = 'boring';
-    a.onclick = function() {
-        elem = this.parentNode.nextSibling;
-        /*
-         * NOTE: elem = null is ok here since that's the
-         * case where we append an extra row at the end.
-         */
-        addingredient(form, id, elem, '100', 'g', '', 'method (e.g. diced)');
-    }
-
-    img = document.createElement("img");
-    img.alt = 'add ingredient field';
-    img.height = '16';
-    img.width = '16';
-    img.src = 'icons/add.png';
-    img.className = 'boring';
-    a.appendChild(img);
-
-    row.appendChild(a);
-
-    var elem = document.getElementById(id);
-    if (before_node == null) {
-        elem.appendChild(row);
-    } else {
-        elem.insertBefore(row, before_node);
-    }
-
-    input.focus();
+    return row;
 }
 
 function editrecipe(id) {
@@ -144,8 +83,8 @@ function editrecipe(id) {
             return;
         }
 
-        deleteallingredients('add_recipe', 'ingredient_add_inputs');
-        deleteallphotos('add_recipe', 'photo_add_inputs');
+        $('#ingredient_add_inputs').empty();
+	$('#photo_add_inputs').empty();
 
         document.add_recipe.recipe_name.value = recipe.name;
         document.add_recipe.recipe_instructions.value = recipe.instructions;
@@ -154,10 +93,10 @@ function editrecipe(id) {
             this.checkDirty(); // true
         });
         for (var i in recipe.ingredients) {
-            addingredient('add_recipe', 'ingredient_add_inputs', null, recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].Ingredient.name, recipe.ingredients[i].method);
+	    $('#ingredient_add_inputs').append(createIngredientRow(recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].Ingredient.name, recipe.ingredients[i].method));
         }
         for (var i in recipe.photos) {
-            addphoto('add_recipe', 'photo_add_inputs', null, recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption);
+	    $('#photo_add_inputs').append(createPhotoRow(recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption));
         }
         document.add_recipe.recipe_id.value = recipe.id;
 	recipeId = recipe.id;
@@ -175,6 +114,7 @@ function editrecipe(id) {
 		    text: "Submit changes",
 		    click: function() {
 			recipeId = -1;
+			$('[name="ing_method[]"]').trigger('focus');
 			$ret = $(document.add_recipe).submit();
 			if ($ret == true)
 			    $(this).dialog("close");
@@ -182,6 +122,8 @@ function editrecipe(id) {
 		}
 	    ]
 	});
+	document.getElementById('form-photoset').style.visibility = 'visible';
+	clearMsgDivs();
 	$('#dialog').dialog('open');
     },
     'json');
@@ -198,191 +140,71 @@ function deletePhoto(id) {
     $(document.delete_photo).submit();
 }
 
-function deleteallphotos(form, id) {
-    var elem = document.getElementById(id);
-    while (elem.hasChildNodes()) {
-        elem.removeChild(elem.firstChild);
-    }
-}
 
-function addphoto(form, id, before_node, photoid, photo, thumb, caption) {
-    var row = document.createElement("div");
-    row.className = 'row';
+function createPhotoRow(photoId, photo, thumb, caption) {
+    var row = $('<div class="row"></div>');
 
-    var input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "photo_id[]";
-    input.value = photoid;
-    row.appendChild(input);
-
-    if (photo != '') {
-        a = document.createElement("a");
-        a.href = photo;
-        a.title = caption;
-
-        // Highslide
-        a.className = 'highslide';
-        a.onclick = function() {
+    row.append('<input type="hidden" name="photo_id[]" value="' + photoId + '">');
+    var a = $('<a href="'+ photo +'" title="'+ caption +'" class="highslide">').appendTo(row);
+    a.click(function() {
             return hs.expand(this, config1 )
-        }
-        // Fancybox
-        //$(a).fancybox();
+    });
+    // Fancybox
+    //a.fancybox();
 
-    
-        img = document.createElement("img");
-        img.alt = 'photo of dish';
-        img.src = thumb;
-        a.appendChild(img);
-    
-        row.appendChild(a);
-    } else {
-        var input = document.createElement("input");
-        input.type="file";
-        input.name = "recipe_photo[]";
-        row.appendChild(input);
-    }
+    a.append('<img src="'+ thumb +'" alt="photo of dish">');
 
-    var input = document.createElement("input");
-    input.type = "text";
-    input.size = "30";
-    input.name = "photo_caption[]";
-    input.value = caption;
-    row.appendChild(input);
+    row.append('<input type="text" size="30" name="photo_caption[]" value="' + caption +'">');
 
-    a = document.createElement("a");
-    a.href = '#';
-    a.className = 'boring';
-    a.photoId = photoid;
-    a.onclick = function() {
-	deletePhoto(this.photoId);
-        parentrow = this.parentNode;
-        parentrow.parentNode.removeChild(parentrow);
-    }
+    var a = $('<a href="#" class="boring"></a>').appendTo(row);
+    a.data('photoId', photoId);
+    a.click(function() {
+	deletePhoto($(this).data('photoId'));
+	$(this).parent().remove();
+    });
+    a.append('<img alt="remove photo field" width="16" height="16" src="icons/cross.png" class="boring">');
 
-    img = document.createElement("img");
-    img.alt = 'remove photo field';
-    img.height = '16';
-    img.width = '16';
-    img.src = 'icons/cross.png';
-    img.className = 'boring';
-    a.appendChild(img);
-
-    row.appendChild(a);
-
-/*
-    a = document.createElement("a");
-    a.href = '#';
-    a.className = 'boring';
-    a.onclick = function() {
-        elem = this.parentNode.nextSibling;
-        addphoto(form, id, elem, '-1', '', '', 'Description');
-    }
-
-    img = document.createElement("img");
-    img.alt = 'add photo field';
-    img.height = '16';
-    img.width = '16';
-    img.src = 'icons/add.png';
-    img.className = 'boring';
-    a.appendChild(img);
-
-    row.appendChild(a);
-*/
-
-    var elem = document.getElementById(id);
-    if (before_node == null) {
-        elem.appendChild(row);
-    } else {
-        elem.insertBefore(row, before_node);
-    }
-    input.focus();
+    return row;
 }
 
 
 function addUpload(container, recipeId) {
-    var outerdiv = document.createElement('div');
-    var iframe = document.createElement('iframe');
-    iframe.id = 'upload_target_'+seq;
-    iframe.name = 'upload_target_'+seq;
-    iframe.style.width = "0px";
-    iframe.style.height = "0px";
-    iframe.style.borderWidth = "0px";
+    var outerdiv = $('<div></div>');
+    $('<iframe id="'+'upload_target_'+seq+'" name="'+'upload_target_'+seq+'" style="width: 0px; height: 0px; border-width: 0px;">').appendTo(outerdiv);
     
-    outerdiv.appendChild(iframe);
-    var form = document.createElement('form');
-    form.name = "photo_form";
-    form.action = "ajax_form_photos.php";
-    form.target = "upload_target_"+seq;
-    form.method = "post";
-    form.enctype = "multipart/form-data";
+    var div = $('<div id="process-div-'+seq +'" style="height: 0px; visibility: hidden;">').appendTo(outerdiv);
+    div.append('<img src="icons/load_bar2.gif" alt="Uploading...">');
 
-    var div = document.createElement('div');
-    div.id = "process-div-"+seq;
-    div.style.height = '0px';
-    //var text = document.createTextNode('Uploading...');
-    //div.appendChild(text);
-    var img = document.createElement('img');
-    img.src = 'icons/load_bar2.gif';
-    div.appendChild(img);
-    div.style.visibility = 'hidden';
-    form.appendChild(div);
+    var div = $('<div id="input-div-'+seq +'">').appendTo(outerdiv);
+    var form = $('<form name="photo_form" target="upload_target_'+seq+'" action="ajax_form_photos.php" method="post" enctype="multipart/form-data">').appendTo(div);
+    var input = $('<input type="file" name="recipe_photo">').appendTo(form);
+    input.data('seq', seq);
+    input.change(function() {
+	var id = $(this).data('seq');
+	$('#process-div-'+id).css({'visibility' : 'visible', 'height' : 'auto'});
+	$('#input-div-'+id).css({'visibility' : 'hidden', 'height' : '0px'});
+        this.parentNode.submit();
+    });
     
-    var div = document.createElement('div');
-    div.id = "input-div-"+seq;
-    var input = document.createElement('input');
-    input.name = "recipe_photo";
-    input.type = "file";
-    input.seq = seq;
-    input.onchange = function() {
-        document.getElementById('process-div-'+this.seq).style.visibility = 'visible';
-        document.getElementById('process-div-'+this.seq).style.height = 'auto';
-        document.getElementById('input-div-'+this.seq).style.visibility = 'hidden';
-        document.getElementById('input-div-'+this.seq).style.height = '0px';
-        this.parentNode.parentNode.submit();
-    }
-    div.appendChild(input);
+    form.append('<input type="hidden" name="sequence_id" value="'+seq+'">');
+    form.append('<input type="hidden" name="recipe_id" value="'+recipeId+'">');
+    form.append('<input type="hidden" name="form_type" value="add_photo">');
+    form.append('<input type="hidden" name="photo_caption" value="Edit me!">');
+    form.append('<input type="hidden" name="where_ok" value="dialog_messages">');
+    form.append('<input type="hidden" name="where_error" value="dialog_messages">');
 
-    var input = document.createElement('input');
-    input.name = "sequence_id";
-    input.value = seq;
-    input.type = "hidden";
-    div.appendChild(input);
-
-    var input = document.createElement('input');
-    input.name = "recipe_id";
-    input.value = recipeId;
-    input.type = "hidden";
-    div.appendChild(input);
-
-    var input = document.createElement('input');
-    input.name = "form_type";
-    input.value = 'add_photo';
-    input.type = "hidden";
-    div.appendChild(input);
-
-    var input = document.createElement('input');
-    input.name = "photo_caption";
-    input.value = 'Edit me!';
-    input.type = "hidden";
-    div.appendChild(input);
-
-
-    form.appendChild(div);
-    
-    outerdiv.appendChild(form);
-    container.appendChild(outerdiv);
+    /* Clear failed outerdivs/uploads */
+    $('.photo-form-error').each(function() {
+	$(this).remove();
+    });
+    $(container).append(outerdiv);
     seq = seq+1;
 }
 
 function uploadDone(data) {
     if (data.error) {
-        var div = document.getElementById('process-div-'+data.seq);
-        div.removeChild(div.firstChild);
-        text = document.createTextNode('Upload failed: ' + data.errmsg[0]);
-        div.appendChild(text);
+	$('#process-div-'+data.seq).parent().replaceWith('<div class="form-error photo-form-error"><p>Upload failed: ' + data.errmsg[0] + '</p></div>');
     } else {
-        var div = document.getElementById('process-div-'+data.seq);
-        div.removeChild(div.firstChild);
-        addphoto(null, 'process-div-'+data.seq, null, data.id, data.photo, data.thumb, data.caption);
+	$('#process-div-'+data.seq).parent().replaceWith(createPhotoRow(data.id, data.photo, data.thumb, data.caption));
     }
 }
