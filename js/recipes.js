@@ -87,6 +87,7 @@ function editrecipe(id) {
 	$('#photo_add_inputs').empty();
 
         document.add_recipe.recipe_name.value = recipe.name;
+	document.add_recipe.recipe_serves.value = recipe.serves;
         document.add_recipe.recipe_instructions.value = recipe.instructions;
         CKEDITOR.instances.add_instructions_editor.setData(recipe.instructions,
         function() {

@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS `ingredients` (
   `sodium` int(11),
   `cholesterol` int(11),
   `others` text,
+  `mtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -40,6 +41,8 @@ CREATE TABLE IF NOT EXISTS `recipes` (
   `description` text,
   `instructions` text,
   `time_estimate` int(11),
+  `serves` int(11) NOT NULL DEFAULT '1',
+  `mtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 

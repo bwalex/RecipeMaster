@@ -1,14 +1,14 @@
 <?php
 
-$carbs = round($_GET['carbs'], 0);
+$carbs = round($_GET['carb'], 1);
 $protein = $_GET['protein'];
 $fat = $_GET['fat'];
 $sat_fat = $_GET['sat_fat'];
-$calories = intval($_GET['calories']);
+$calories = intval($_GET['kcal']);
 $cholesterol = intval($_GET['cholesterol']);
 $sodium = intval($_GET['sodium']);
 $fibre = $_GET['fibre'];
-$sugars = $_GET['sugars'];
+$sugars = $_GET['sugar'];
 
 /* nutrilabel.php?carbs=74&protein=45&fat=27&sat_fat=6&calories=720&cholesterol=90&sodium=1790&fibre=5&sugars=16 */
 

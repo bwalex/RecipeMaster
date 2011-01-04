@@ -16,6 +16,12 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 		exec : function( editor )
 		{
 			var $form = editor.element.$.form;
+			var config = editor.config;
+			
+			if (typeof config.saveFunction == 'function') {
+				config.saveFunction(editor.getData());
+				return;
+			}
 
 			if ( $form )
 			{
@@ -43,7 +49,9 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 		init : function( editor )
 		{
 			var command = editor.addCommand( pluginName, saveCmd );
-			command.modes = { wysiwyg : !!( editor.element.$.form ) };
+			var config = editor.config;
+			alert('AUEFEAFIEAAI!');
+			command.modes = { wysiwyg : (!!( editor.element.$.form ) || (typeof config.saveFunction == 'function')) };
 
 			editor.ui.addButton( 'Save',
 				{

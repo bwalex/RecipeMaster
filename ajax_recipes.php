@@ -119,7 +119,8 @@ if (!empty($recipes)) {
 				   '<a class="boring" href="#" onclick="editrecipe(\''.$recipe->id.'\');" ><img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
 				   '<a class="boring" href="#" onclick="deleterecipe(\''.$recipe->id.'\');" ><img class="boring" src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
 				    ).'",';
-	$output .= '"'.str_replace('"', '\"',$recipe->getTimeEstimate()).'",';
+	//$output .= '"'.str_replace('"', '\"',$recipe->getTimeEstimate()).'",';
+	
 	$output .= '"'.$nutri_info['kcal'].'",';
 	$output .= '"'.$nutri_info['carb'].'",';
 	$output .= '"'.$nutri_info['sugar'].'",';
@@ -128,7 +129,8 @@ if (!empty($recipes)) {
 	$output .= '"'.$nutri_info['fat'].'",';
 	$output .= '"'.$nutri_info['sat_fat'].'",';
 	$output .= '"'.$nutri_info['sodium'].'",';
-	$output .= '"'.$nutri_info['cholesterol'].'"';
+	$output .= '"'.$nutri_info['cholesterol'].'",';
+	$output .= '"'.str_replace('"', '\"',$recipe->getMTime()).'"';
 	$output .= '],';
     }
     /* Remove last comma */

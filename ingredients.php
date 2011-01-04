@@ -179,7 +179,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			
 		    },
 		    effect: "fade",
-		    opacity: 0.7
+		    opacity: 0.9
 	    });
 
 	    // Add tooltips

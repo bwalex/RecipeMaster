@@ -29,7 +29,17 @@
 }
 
 
+tr.error-row {
+	background-color: red;
+}
 
+.error-field {
+	background-color: red;
+}
+
+tr.error-row td.sorting_1 {
+	background-color: red;
+}
 
 
 
@@ -49,6 +59,47 @@
 	-moz-box-shadow:0 0 10px #000;
 	-webkit-box-shadow:0 0 10px #000;
 }
+
+/* simple css-based tooltip */
+.tooltip-two {
+	background-color:#000;
+	border:1px solid #fff;
+	padding:10px 15px;
+	width:140px;
+	display:none;
+	color:#fff;
+	text-align:left;
+	font-size:14px;
+	z-index:10000;
+
+	/* outline radius for mozilla/firefox only */
+	-moz-box-shadow:0 0 10px #000;
+	-webkit-box-shadow:0 0 10px #000;
+}
+
+/* tooltip styling. by default the element to be styled is .tooltip  */
+.tooltip-arrow-black {
+	display:none;
+	background: transparent url(../icons/tooltip/black_arrow.png);
+	font-size:14px;
+	font-weight: bold;
+	height:70px;
+	width:160px;
+	padding:25px;
+	color: white;	
+}
+
+.tooltip-arrow-white {
+	display:none;
+	background: transparent url(../icons/tooltip/white_arrow.png);
+	font-size:14px;
+	height:70px;
+	width:160px;
+	padding:25px;
+	color:#000;	
+}
+
+
 
 div.form-ok {
 	background-color: #90EE90;

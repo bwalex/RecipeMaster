@@ -377,10 +377,12 @@ class Ingredient extends Model {
 	var $sodium;
 	var $cholesterol;
 	var $others;
+	var $mtime;
 
 	function Ingredient($id, $name = '', $new = 0, $unit = '', $qty = 0, $typical_unit = '', $typical_qty = 0, $kcal = 0, $carb = 0, $sugar = 0, $fibre = 0, $protein = 0, $fat = 0, $sat_fat = 0, $sodium = 0, $cholesterol = 0, $others = '') {
 		$db = db_connect();
 		$result = 0;
+		$this->mtime = 0;
 
 		if (!$new) {
 			if ($name != '') {
@@ -415,6 +417,7 @@ class Ingredient extends Model {
 			$this->sodium = $result['sodium'];
 			$this->cholesterol = $result['cholesterol'];
 			$this->others = $result['others'];
+			$this->mtime = strtotime($result['mtime']);
 		} else {
 			$this->name = $name;
 			$this->id = $id;
@@ -435,7 +438,7 @@ class Ingredient extends Model {
 		}
 	}
 
-	function getNutriInfo($qty, $unit, $dont_except = 0, $fractional_precision = 1) {
+	function getNutriInfo($qty, $unit, $serves = 1, $dont_except = 0, $fractional_precision = 1) {
 		$info = array();
 		$info['kcal'] = 0;
 		$info['carb'] = 0;
@@ -456,6 +459,7 @@ class Ingredient extends Model {
 				return NULL;
 			$multiplier = $qty/$this->qty;
 		}
+		$multiplier /= $serves;
 		if ($unit == 'l') {
 			$unit = 'ml';
 			$multiplier *= 1000;
@@ -569,10 +573,11 @@ class Ingredient extends Model {
 				':ingredient_others' => $this->others
 				));
 			$n = $preparedStatement->rowCount();
-			$preparedStatement = $db->prepare('SELECT id FROM ingredients WHERE name LIKE :name');
+			$preparedStatement = $db->prepare('SELECT id, mtime FROM ingredients WHERE name LIKE :name');
 			$preparedStatement->execute(array(':name' => $this->name));
 			if ($row = $preparedStatement->fetch()) {
 				$this->id = $row['id'];
+				$this->mtime = strtotime($row['mtime']);
 			} else {
 				throw new Exception('Error adding new ingredient');
 			}
@@ -625,6 +630,8 @@ class Recipe extends Model {
 	var $description;
 	var $instructions;
 	var $time_estimate;
+	var $mtime;
+	var $serves;
 
 	/*
 	 * array of maps such as:
@@ -636,9 +643,10 @@ class Recipe extends Model {
 	 */
 	var $ingredients;
 
-	function Recipe($id, $name = '', $new = 0, $description = '', $instructions = '', $time_estimate = 0, $ingredients = NULL) {
+	function Recipe($id, $name = '', $new = 0, $description = '', $instructions = '', $time_estimate = 0, $serves = 1, $ingredients = NULL) {
 		$db = db_connect();
 		$result = 0;
+		$this->mtime = 0;
 
 		if (!$new) {
 			if ($name != '') {
@@ -662,6 +670,8 @@ class Recipe extends Model {
 			$this->description = $result['description'];
 			$this->instructions = $result['instructions'];
 			$this->time_estimate = $result['time_estimate'];
+			$this->serves = $result['serves'];
+			$this->mtime = strtotime($result['mtime']);
 
 			$ings = array();
 			$i = 0;
@@ -693,6 +703,7 @@ class Recipe extends Model {
 			$this->description = $description;
 			$this->instructions = $instructions;
 			$this->time_estimate = $time_estimate;
+			$this->serves = $serves;
 			if ($ingredients == NULL)
 				$this->ingredients = array();
 			else
@@ -707,6 +718,11 @@ class Recipe extends Model {
 		$elem['method'] = $method;
 		$elem['Ingredient'] = new Ingredient($id, $name);
 		array_push($this->ingredients, $elem);
+		return $elem;
+	}
+
+	function clearIngredients() {
+		$this->ingredients = array();
 	}
 
 	function delete() {
@@ -723,6 +739,13 @@ class Recipe extends Model {
 		$n += $preparedStatement->rowCount();
 
 		return $n;
+	}
+
+	function setName($name) {
+		if (empty($name))
+			throw new Exception('Empty recipe names are not valid');
+		else
+			$this->name = $name;
 	}
 
 	function getTimeEstimate() {
@@ -752,7 +775,7 @@ class Recipe extends Model {
 		$info['cholesterol'] = 0;
 
 		foreach ($this->ingredients as $elem) {
-			$ingredient_info = $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit'], $dont_except);
+			$ingredient_info = $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit'], $this->serves, $dont_except);
 
 			$info['kcal'] += $ingredient_info['kcal'];
 			$info['carb'] += $ingredient_info['carb'];
@@ -768,13 +791,24 @@ class Recipe extends Model {
 		return $info;
 	}
 
+	function getMTime() {
+		$ftime = '';
+		//H:i
+		if ($this->mtime != 0)
+			$ftime = date('d M Y', $this->mtime);
+		else
+			$ftime = 'N/A';
+
+		return $ftime;
+	}
+
 	function save($update = 0) {
 		$db = db_connect();
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$preparedStatement = $db->prepare('SELECT * FROM recipes WHERE name LIKE :name');
 		$preparedStatement->execute(array(':name' => $this->name));
 		$result = $preparedStatement->fetch();
-		if ($result && $update == 0) {
+		if ($result && (($update == 0) || (($update == 1) && ($result['id'] != $this->id)))) {
 			throw new Exception('Tried to add new recipe, but recipe \''.$this->name.'\' already exists');
 			return -1;
 		}
@@ -787,12 +821,13 @@ class Recipe extends Model {
 				return -1;
 			}
 			
-			$preparedStatement = $db->prepare("UPDATE recipes SET name=:recipe_name, description=:recipe_description, instructions=:recipe_instructions, time_estimate=:time_estimate WHERE id=:recipe_id");
+			$preparedStatement = $db->prepare("UPDATE recipes SET name=:recipe_name, description=:recipe_description, instructions=:recipe_instructions, time_estimate=:time_estimate, serves=:serves WHERE id=:recipe_id");
 			$preparedStatement->execute(array(
 				':recipe_name' => $this->name,
 				':recipe_description' => $this->description,
 				':recipe_instructions' => $this->instructions,
 				':time_estimate' => $this->time_estimate,
+				':serves' => $this->serves,
 				':recipe_id' => $this->id
 				));
 
@@ -817,21 +852,23 @@ class Recipe extends Model {
 			return $n;
 		} else {
 			/* Add new recipe */
-			$preparedStatement = $db->prepare("INSERT INTO recipes (name, description, instructions, time_estimate) ".
-				"VALUES (:recipe_name, :recipe_description, :recipe_instructions, :time_estimate);");
+			$preparedStatement = $db->prepare("INSERT INTO recipes (name, description, instructions, time_estimate, serves) ".
+				"VALUES (:recipe_name, :recipe_description, :recipe_instructions, :time_estimate, :serves);");
 			$preparedStatement->execute(array(
 				':recipe_name' => $this->name,
 				':recipe_description' => $this->description,
 				':recipe_instructions' => $this->instructions,
-				':time_estimate' => $this->time_estimate
+				':time_estimate' => $this->time_estimate,
+				':serves' => $this->serves
 				));
 			
 			$n = $preparedStatement->rowCount();
 
-			$preparedStatement = $db->prepare('SELECT id FROM recipes WHERE name LIKE :name');
+			$preparedStatement = $db->prepare('SELECT id, mtime FROM recipes WHERE name LIKE :name');
 			$preparedStatement->execute(array(':name' => $this->name));
 			if ($row = $preparedStatement->fetch()) {
 				$this->id = $row['id'];
+				$this->mtime = strtotime($row['mtime']);
 			} else {
 				throw new Exception('Error adding new recipe');
 			}
@@ -911,7 +948,7 @@ function print_footer() {
 	echo '
 	<div id="footer" class="container_16 clearfix">
 	    <div style="text-align: left;" class="grid_2">
-		<a class="boring" href="http://validator.w3.org/check?uri=referer"><img class="boring" src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Transitional" height="31" width="88"></a>
+		<a class="boring" href="http://validator.w3.org/check?uri=referer"><img class="boring" src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Transitional" height="31" width="88"/></a>
 	    </div>
 	    <div class="grid_14">
 		<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />&copy; <span xmlns:cc="http://creativecommons.org/ns#">Alex Hornung</span> <!-- span: property="cc:attributionName" -->

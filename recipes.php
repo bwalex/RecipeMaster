@@ -163,6 +163,10 @@ TODO: ajaxify show ingredients
 		"aoColumnDefs": [{
 		    "aTargets": [0],
 		    "sWidth": '200px'
+		},
+		{
+		    "aTargets": [10],
+		    "sWidth": '100px'
 		}]
 	    });
 
@@ -288,8 +292,16 @@ TODO: ajaxify show ingredients
 		</div>
 
 		<div class="row">
-		    <input type="text" name="recipe_name" id="add_recipe_name" size="80"> <!-- This <div> holds alert messages to be display in the sample page. -->
+		    <input type="text" name="recipe_name" id="add_recipe_name" size="80">
 		</div>
+
+		<hr>
+
+		<div class="row">
+		    <label for="add_recipe_serves">serves:</label>
+		    <input type="text" name="recipe_serves" id="add_recipe_serves" size="2">
+		</div>
+
 		<hr>
 
 		<div class="row">
@@ -301,6 +313,7 @@ TODO: ajaxify show ingredients
 		<div class="row">
 		    <a class="boring" href="#" onclick="$('#ingredient_add_inputs').append(createIngredientRow('100', 'g', '', 'method (e.g. diced)'));"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a>
 		</div>
+
 		<hr>
 
 		<div class="row">
@@ -357,8 +370,6 @@ TODO: ajaxify show ingredients
 		    <tr>
 			<th>Recipe</th>
 
-			<th>Time Estimate</th><!--<th>Unit</th> -->
-
 			<th>kcal</th>
 
 			<th>Carbs (g)</th>
@@ -376,6 +387,8 @@ TODO: ajaxify show ingredients
 			<th>Sodium (mg)</th>
 
 			<th>Cholesterol (mg)</th>
+
+			<th>Last modified</th><!--<th>Unit</th> -->
 		    </tr>
 		</thead>
 
@@ -383,8 +396,6 @@ TODO: ajaxify show ingredients
 		    <tr>
 			<th>Recipe</th>
 
-			<th>Time Estimate</th><!--<th>Unit</th> -->
-
 			<th>kcal</th>
 
 			<th>Carbs (g)</th>
@@ -402,6 +413,8 @@ TODO: ajaxify show ingredients
 			<th>Sodium (mg)</th>
 
 			<th>Cholesterol (mg)</th>
+
+			<th>Last modified</th><!--<th>Unit</th> -->
 		    </tr>
 		</tfoot>
 		<tbody>

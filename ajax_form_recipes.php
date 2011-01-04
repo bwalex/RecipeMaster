@@ -29,6 +29,7 @@ if ($_REQUEST['recipe_id']) {
 		$recipe_instructions = $_REQUEST['recipe_instructions'];
 		$recipe_description = '';
 		$recipe_time_estimate = 60;
+                $recipe_serves = $_REQUEST['recipe_serves'];
 		$ingredient_count = $_REQUEST['ingredient_count'];
                 $output['type'] = $form_type;
                 $output['whereOk'] = $_REQUEST['where_ok'];
@@ -41,7 +42,7 @@ if ($_REQUEST['recipe_id']) {
 
 		$recipe = new Recipe($recipe_id, $recipe_name, $new,
 		    $recipe_description, $recipe_instructions,
-		    $recipe_time_estimate);
+		    $recipe_time_estimate, $recipe_serves);
 		
 		if ($form_type == "add_recipe") {
 			if (!empty($_REQUEST['ing_name'])) {
@@ -53,8 +54,9 @@ if ($_REQUEST['recipe_id']) {
 				    $ingredient_unit = $_REQUEST['ing_unit'][$key];
 				    $method = $_REQUEST['ing_method'][$key];
 				    
-				    $recipe->addIngredient($ingredient_qty, $ingredient_unit,
+				    $elem = $recipe->addIngredient($ingredient_qty, $ingredient_unit,
 					$method, $ingredient_id, $ingredient_name);
+                                    $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
 			    }
 			    /* XXX: maybe throw error */
 			}
@@ -76,8 +78,9 @@ if ($_REQUEST['recipe_id']) {
 				    $ingredient_unit = $_REQUEST['ing_unit'][$key];
 				    $method = $_REQUEST['ing_method'][$key];
 				    
-				    $recipe->addIngredient($ingredient_qty, $ingredient_unit,
+				    $elem = $recipe->addIngredient($ingredient_qty, $ingredient_unit,
 					$method, $ingredient_id, $ingredient_name);
+                                    $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
 			    }
 			    /* XXX: maybe throw error? */
 			}
