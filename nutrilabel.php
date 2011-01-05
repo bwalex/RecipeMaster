@@ -12,10 +12,13 @@ $sugars = $_GET['sugar'];
 
 /* nutrilabel.php?carbs=74&protein=45&fat=27&sat_fat=6&calories=720&cholesterol=90&sodium=1790&fibre=5&sugars=16 */
 
-
-$carb_pct = intval(100*$carbs*4/($carbs*4 + $protein*4 + $fat*9));
-$protein_pct = intval(100*$protein*4/($carbs*4 + $protein*4 + $fat*9));
-$fat_pct = intval(100*$fat*9/($carbs*4 + $protein*4 + $fat*9));
+if (($carbs == 0) && ($protein == 0) && ($fat == 0)) {
+	$carb_pct = $protein_pct = $fat_pct = 0;
+} else {
+	$carb_pct = intval(100*$carbs*4/($carbs*4 + $protein*4 + $fat*9));
+	$protein_pct = intval(100*$protein*4/($carbs*4 + $protein*4 + $fat*9));
+	$fat_pct = intval(100*$fat*9/($carbs*4 + $protein*4 + $fat*9));
+}
 $fat_cal = intval($fat*9);
 
 /* https://www.purelifestyle.co.uk/Article.aspx?Id=37 */
@@ -272,8 +275,11 @@ $big_triangle_height = $lower_y - $y_initial;
 $y_pos = $lower_y - $big_triangle_height/100 * $fat_pct;
 
 $x_range = tan(0.52359)*($y_pos - $y_initial)*2;
-$x = $width/2 + $x_range/2*(($protein_pct - $carb_pct)/($protein_pct + $carb_pct));
-
+if ($protein_pct == 0 && $carb_pct == 0) {
+	$x = $width/2;	
+} else {
+	$x = $width/2 + $x_range/2*(($protein_pct - $carb_pct)/($protein_pct + $carb_pct));
+}
 
 $color = imagecolorallocate($im, 255, 255, 255);
 imagerectangle($im, $x-10, $y_pos-10, $x+10, $y_pos+10, $color);
