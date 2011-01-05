@@ -5,7 +5,11 @@ include('config.php');
 function db_connect()
 {
 	global $globalConfig;
-	$db = new PDO($globalConfig['dbPDOString'], $globalConfig['dbPDOUser'], $globalConfig['dbPDOPassword']);
+	$db = new PDO($globalConfig['db']['PDOString'],
+		      $globalConfig['db']['PDOUser'],
+		      $globalConfig['db']['PDOPassword']);
+
+	/* Set it so that db errors throw exceptions */
 	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	return $db;
@@ -149,10 +153,11 @@ class Photo {
 	}
 
 	function get() {
+		global $globalConfig;
 		if ($this->new == 1)
 			return NULL;
 
-		return 'photos/'.$this->id.'.'.$this->extension;
+		return $globalConfig['photo']['Path'].$this->id.'.'.$this->extension;
 	}
 
 	function updateCaption($caption) {
@@ -176,10 +181,11 @@ class Photo {
 	}
 
 	function getThumbnail() {
+		global $globalConfig;
 		if ($this->new == 1)
 			return NULL;
 
-		return 'thumbs/'.$this->id.'.jpg';
+		return $globalConfig['photo']['ThumbPath'].$this->id.'.jpg';
 	}
 
 	function validate($photo = NULL) {
@@ -225,6 +231,7 @@ class Photo {
 	}
 
 	function store() {
+		global $globalConfig;
 		if ($this->photo_data == NULL)
 			return 0;
 
@@ -254,13 +261,13 @@ class Photo {
 		}
 
 		$this->id = $db->lastInsertId('id');
-		$path = 'photos/'.$this->id.'.'.$this->extension;
+		$path = $globalConfig['photo']['Path'].$this->id.'.'.$this->extension;
 
 		if(copy($this->photo_data, $path)) {
 			/* Generate thumbnail */
 			// Set a maximum height and width
-			$width = 200;
-			$height = 200;
+			$width = $globalConfig['photo']['ThumbMaxWidth'];
+			$height = $globalConfig['photo']['ThumbMaxHeight'];
 			$info = getimagesize($path);
 			$width_orig = $info[0];
 			$height_orig = $info[1];
@@ -288,7 +295,7 @@ class Photo {
 					throw new Exception('Unknown mime type in Photo->store(), this should have never happened!');
 			}
 			imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
-			imagejpeg($image_p, 'thumbs/'.$this->id.'.jpg');
+			imagejpeg($image_p, $globalConfig['photo']['ThumbPath'].$this->id.'.jpg');
 			$this->new = 0;
 		} else {
 			throw new Exception('copying image failed');

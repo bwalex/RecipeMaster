@@ -65,7 +65,7 @@ TODO: add print stuff
     <script type="text/javascript" src="js/jquery.tools.min.js"></script>
 
 <?php
-    if($globalConfig['photoViewer'] == "highslide") {
+    if($globalConfig['photo']['Viewer'] == "highslide") {
 	echo '
 	    <!-- Highslide -->
 	    <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
@@ -77,19 +77,19 @@ TODO: add print stuff
 		<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
 	    <![endif]-->
 	    ';
-    } else if($globalConfig['photoViewer'] == "fancybox") {
+    } else if($globalConfig['photo']['Viewer'] == "fancybox") {
 	echo '
 	    <!-- Fancybox -->
 	    <script type="text/javascript" src="fancybox/jquery.fancybox-1.3.4.js"></script>
 	    <link rel="stylesheet" href="fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
 	    ';
-    } if($globalConfig['photoViewer'] == "colorbox") {
+    } if($globalConfig['photo']['Viewer'] == "colorbox") {
 	echo '
 	    <!-- Colorbox -->
 	    <script type="text/javascript" src="colorbox/colorbox/jquery.colorbox-min.js"></script>
-	    <link rel="stylesheet" href="colorbox/example'.$globalConfig['colorboxStyle'].'/colorbox.css" type="text/css" media="screen" />
+	    <link rel="stylesheet" href="colorbox/example'.$globalConfig['photo']['Colorbox']['Style'].'/colorbox.css" type="text/css" media="screen" />
 	';
-    } else if($globalConfig['photoViewer'] == "prettyPhoto") {
+    } else if($globalConfig['photo']['Viewer'] == "prettyPhoto") {
 	echo '
 	    <!-- prettyPhoto -->
 	    <script type="text/javascript" src="prettyphoto/js/jquery.prettyPhoto.js"></script>
@@ -122,7 +122,7 @@ TODO: add print stuff
 	var isIngredientEditing = 0;
 	var origHTML = '';
 	var RMConfig = {
-	    photoViewer : "<?php echo $globalConfig['photoViewer'] ?>",
+	    photoViewer : "<?php echo $globalConfig['photo']['Viewer'] ?>",
 	}
 
 
