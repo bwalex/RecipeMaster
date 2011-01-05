@@ -1,0 +1,150 @@
+h2 .editsection {
+	font-size: 80%;
+}
+
+h2 {
+	border-bottom: none;
+	padding-top: 10px;
+}
+.editsection {
+	display: none;
+}
+
+.loading-modal {
+	display:none;
+}
+
+tr.error-row {
+	background-color: red;
+}
+
+.error-field {
+	background-color: red;
+}
+
+tr.error-row td.sorting_1 {
+	background-color: red;
+}
+
+.noprint {
+	display: none;
+}
+
+/* simple css-based tooltip */
+.tooltip {
+	display:none;
+}
+
+/* simple css-based tooltip */
+.tooltip-two {
+	display:none;
+}
+
+/* tooltip styling. by default the element to be styled is .tooltip  */
+.tooltip-arrow-black {
+	display:none;
+}
+
+.tooltip-arrow-white {
+	display:none;
+}
+
+
+
+div.form-ok {
+	display:none;
+}
+
+div.form-error {
+	display:none;	
+}
+
+div.spacer {
+  margin-top: 10px;
+}
+
+div#navigation {
+	display:none;
+}
+
+div#header {
+	display:none;
+}	
+div#content {
+	width: 100%;
+	border: none;
+}
+div#footer {
+	display:none;
+}
+
+div#lastfooter {
+	display:none;
+}
+
+body {
+	
+	font: 80.5% "Trebuchet MS", sans-serif;
+	
+	/*font-family: Cantarell,"Droid Sans",Verdana,sans-serif;
+	font-size: 75.5%;*/
+	/*margin: 50px;*/
+	background-color: #CCCCCC;
+}
+
+#navbar ul {
+  list-style: none;
+  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  display:inline;
+}
+
+#navbar li {
+  display:inline;
+  margin-left: 1px;
+  margin-right: 1px;
+}
+
+#navbar a {
+  text-decoration: none;
+  /*color: #0077CC;*/
+  color: black;
+  font-weight: bold;
+}
+
+div#navbar {
+	display:none;
+}
+
+#navbar div {
+	display:none;
+}
+
+a.recipe {
+  text-decoration: underline;
+  color: #000000;
+}
+
+a.boring {
+  text-decoration: none;
+  border-style: none;
+  outline-style: hidden;
+  border: none;
+  outline: none;
+  color: #000000;
+}
+
+img.boring {
+  border: none;
+  outline: none;
+}
+
+/*
+	Variable Grid System.
+	Learn more ~ http://www.spry-soft.com/grids/
+	Based on 960 Grid System - http://960.gs/
+
+	Licensed under GPL and MIT.
+*/
+

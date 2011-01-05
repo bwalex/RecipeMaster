@@ -40,6 +40,7 @@ TODO: add print stuff
 
 
     <link type="text/css" href="css/style.css" rel="stylesheet"/>
+    <link type="text/css" href="css/print.css" rel="stylesheet" media="print"/>
     <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet"/>
     <script type="text/javascript" src="js/jquery-1.4.4.min.js">
 </script>
@@ -352,7 +353,10 @@ TODO: add print stuff
 		if (leftCount > 0) {
 		    var list = $('<ul style="margin-top: 0px;"></ul>').appendTo(div);
 		    for (var i = 0; i < leftCount; i = i+1) {
-			list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name +'</li>');
+			if (recipe.ingredients[i].method != '')
+			    list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name + ' (' + recipe.ingredients[i].method +')</li>');
+			else
+			    list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name + '</li>');
 		    }
 		}
 
@@ -360,7 +364,10 @@ TODO: add print stuff
 		if (rightCount > 0) {
 		    var list = $('<ul style="margin-top: 0px;"></ul>').appendTo(div);
 		    for (var i = leftCount; i < count; i = i+1) {
-			list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name +'</li>');
+			if (recipe.ingredients[i].method != '')
+			    list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name + ' (' + recipe.ingredients[i].method +')</li>');
+			else
+			    list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name + '</li>');
 		    }
 		}
 
@@ -989,8 +996,15 @@ TODO: add print stuff
 
 
 	<div class="container_16">
-	    <div class="grid_16">
+	    <div class="grid_15">
 		<h1 id="recipe_name" style="margin-bottom: 8px">DUMMY_RECIPE_NAME</h1>
+	    </div>
+	    <div class="grid_1" style="padding-top: 20px">
+		<span class="noprint">
+		    <a class="boring" href="#" onclick="window.print();" title="Print this page">
+			<img class="boring" src="icons/printer.png" alt="Print"/>
+		    </a>
+		</span>
 	    </div>
 	</div>
 
@@ -1040,7 +1054,7 @@ TODO: add print stuff
 		<div id="recipe_nutrilabel">
 		    DUMMY_RECIPE_NUTRI_LABEL
 		</div>
-		<p align="center"><a href="#detailednutri" class="recipe detailed_nutri_link">View detailed nutritional information</a></p>
+		<p class="noprint" align="center"><a href="#detailednutri" class="recipe detailed_nutri_link">View detailed nutritional information</a></p>
 	    </div>
 	</div>
 
@@ -1094,7 +1108,7 @@ TODO: add print stuff
 
 
 
-	<div class="container_16 clearfix">
+	<div class="container_16 clearfix noprint">
 	    <a name="detailednutri" id="detailednutri"></a>
 	    <h2 id="acc_head">
 		    <span class="editsection">
