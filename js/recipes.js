@@ -23,8 +23,8 @@ function createIngredientRow(qty, unit, name, method) {
     select.value = unit;
     row.append(select);
 
-    var nameInput = $('<input type="text" size="35" name="ing_name[]" value="'+ name +'">').appendTo(row);
-    var methodInput = $('<input type="text" size="20" name="ing_method[]" value="'+ method +'">').appendTo(row);
+    var nameInput = $('<input type="text" size="30" name="ing_name[]" value="'+ name +'">').appendTo(row);
+    var methodInput = $('<input type="text" size="15" name="ing_method[]" value="'+ method +'">').appendTo(row);
 
     methodInput.one('focus', function() {
         if (this.value == 'method (e.g. diced)')
