@@ -1,23 +1,7 @@
 <?php
 include('functions.php');
-
-function tidyhtml($input)
-{
-    $config = array(
-	   'indent'         => true,
-	   'output-xhtml'   => true,
-	   'wrap'           => 200);
-
-    $tidy = new tidy();
-    $tidy->parseString($input, $config, 'utf8');
-    $tidy->cleanRepair();
-
-    // Output
-    return $tidy;
-}
-
-//ob_start('tidyhtml');
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
@@ -990,11 +974,11 @@ TODO: add print stuff
 
 
 	<form name="delete_photo" action="ajax_form_photos.php" method="post" id="delete_photo">
-	    <input type="hidden" name="recipe_id" value="-1">
-	    <input type="hidden" name="photo_id" value="-1">
-	    <input type="hidden" name="form_type" value="delete_photo">
-	    <input type="hidden" name="where_ok" value="dialog-messages">
-	    <input type="hidden" name="where_error" value="dialog-messages">
+	    <input type="hidden" name="recipe_id" value="-1"/>
+	    <input type="hidden" name="photo_id" value="-1"/>
+	    <input type="hidden" name="form_type" value="delete_photo"/>
+	    <input type="hidden" name="where_ok" value="dialog-messages"/>
+	    <input type="hidden" name="where_error" value="dialog-messages"/>
 	</form>
 
 
@@ -1019,8 +1003,8 @@ TODO: add print stuff
 	    <div class="grid_11">
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
-			<a class="boring" href="#" id="recipe_ingredients_header" class='editsection' onclick="switchIngredientsToEdit();" title="Edit">
-			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">
+			<a class="boring editsection" href="#" id="recipe_ingredients_header" onclick="switchIngredientsToEdit();" title="Edit">
+			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
 		    <span>Ingredients</span>
@@ -1039,8 +1023,8 @@ TODO: add print stuff
 		<!--<h2 id="recipe_preparation_header" style="clear: left; padding-top: 15px;">Preparation</h2>-->
 		<h2>
 		    <span class="editsection">
-			<a class="boring" href="#" id="recipe_preparation_header" class='editsection' title="Edit">
-			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">
+			<a class="boring editsection" href="#" id="recipe_preparation_header" title="Edit">
+			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
 		    <span>Preparation</span>
@@ -1062,7 +1046,7 @@ TODO: add print stuff
 	    <h2>
 	    	<span class="editsection">
 		    <a class="boring editsection" href="#" id="recipe_photo_header" onclick="switchPhotosToEdit();" title="Edit">
-		        <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">
+		        <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 		    </a>
 		</span>
 		<span>Photos</span>

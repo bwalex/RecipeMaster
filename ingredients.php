@@ -1,23 +1,7 @@
 <?php
 include('functions.php');
-
-function tidyhtml($input)
-{
-    $config = array(
-	   'indent'         => true,
-	   'output-xhtml'   => true,
-	   'wrap'           => 200);
-
-    $tidy = new tidy();
-    $tidy->parseString($input, $config, 'utf8');
-    $tidy->cleanRepair();
-
-    // Output
-    return $tidy;
-}
-
-ob_start('tidyhtml');
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
@@ -26,32 +10,28 @@ TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
 TODO: add optional ingredients as dynamic list of extras, like ingredients in a recipe
  -->
  
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta name="generator" content="HTML Tidy for Windows (vers 11 August 2008), see www.w3.org">
-    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii"/>
 
     <title>Ingredients : RecipeMaster</title>
     <style type="text/css" title="currentStyle">
 
 			@import "css/demo_table.css";
     </style>
-    <link type="text/css" href="css/style.css" rel="stylesheet">
-    <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet">
-    <script type="text/javascript" src="js/jquery-1.4.4.min.js">
-</script>
-    <script src="http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js"></script>
+    <link type="text/css" href="css/style.css" rel="stylesheet"/>
+    <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet"/>
+    <script type="text/javascript" src="js/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="js/jquery.tools.min.js"></script>
     
     
     
     
     
-    
-    <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">
-</script>
-    <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
-</script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js"></script>
+    <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
     <script type="text/javascript">
+    //<![CDATA[
 	var oTable;
 	var fields = [ 'name', 'qty', 'unit', 'typical_qty', 'typical_unit', 'kcal', 'carb',
 		      'sugar', 'fibre', 'fat', 'sat_fat', 'protein', 'sodium',
@@ -247,9 +227,12 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		return false;
 	    });
 
-	});</script>
-    <style type="text/css">
+	});
+    //]]>
+    </script>
 
+    <style type="text/css">
+    //<![CDATA[
 			/*demo page css*/
 			.demoHeaders { margin-top: 2em; }
 			#dialog_link {padding: .4em 1em .4em 20px;text-decoration: none;position: relative;}
@@ -257,6 +240,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			ul#icons {margin: 0; padding: 0;}
 			ul#icons li {margin: 2px; position: relative; padding: 4px 0; cursor: pointer; float: left;  list-style: none;}
 			ul#icons span.ui-icon {float: left; margin: 0 4px;}
+    //]]>
     </style>
 </head>
 
@@ -265,17 +249,17 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
     <div class="spacer container_16"></div>
     <div id="content" class="container_16">
 	<div class="container_16">
-	    <h1>Ingredients<a class="boring" href="#" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Ingredient"></a></h1>
+	    <h1>Ingredients<a class="boring" href="#" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Ingredient"/></a></h1>
 	</div>
 	
 	<div class="global-messages"></div>
 
 	<form name="delete_ingredient" action="ingredients.php" method="post" id="delete_ingredient">
-	    <input type="hidden" name="ingredient_name" value="">
-	    <input type="hidden" name="ingredient_id" value="-1">
-	    <input type="hidden" name="form_type" value="delete_ingredient">
-	    <input type="hidden" name="where_ok" value="global-messages">
-	    <input type="hidden" name="where_error" value="global-messages">
+	    <input type="hidden" name="ingredient_name" value=""/>
+	    <input type="hidden" name="ingredient_id" value="-1"/>
+	    <input type="hidden" name="form_type" value="delete_ingredient"/>
+	    <input type="hidden" name="where_ok" value="global-messages"/>
+	    <input type="hidden" name="where_error" value="global-messages"/>
 	</form>
 
 	<!-- ui-dialog -->
@@ -288,7 +272,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_name">Name:</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_name" id="ingredient_name">
+			    <input type="text" name="ingredient_name" id="ingredient_name"/>
 			</span>
 		    </span>
 		</div>
@@ -299,7 +283,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_qty">Qty:</label>
 			</span>
 			<span class="formw">
-			    <input size="5" type="text" name="ingredient_qty" id="ingredient_qty" class="has_tooltip" title="The quantity of this ingredient that the nutritional information is for">
+			    <input size="5" type="text" name="ingredient_qty" id="ingredient_qty" class="has_tooltip" title="The quantity of this ingredient that the nutritional information is for"/>
 			    <select name="ingredient_unit" id="ingredient_unit">
 				<option>&nbsp;</option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option>
 			    </select>
@@ -313,7 +297,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_typical_qty">Typical unit weight:</label>
 			</span>
 			<span class="formw">
-			    <input size="5" type="text" name="ingredient_typical_qty" id="ingredient_typical_qty">
+			    <input size="5" type="text" name="ingredient_typical_qty" id="ingredient_typical_qty"/>
 			    <select name="ingredient_typical_unit" id="ingredient_typical_unit" class="has_tooltip" title="The typical weight of one unit of this ingredient (i.e. the typical weight of 1 tomato)">
 				<option>g</option><option>mg</option><option>kg</option>
 			    </select>
@@ -327,7 +311,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_kcal">kcal:</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_kcal" id="ingredient_kcal">
+			    <input type="text" name="ingredient_kcal" id="ingredient_kcal"/>
 			</span>
 		    </span>
 		</div>
@@ -338,7 +322,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_carb">Carbohydrates (g):</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_carb" id="ingredient_carb">
+			    <input type="text" name="ingredient_carb" id="ingredient_carb"/>
 			</span>
 		    </span>
 		    <span class="right">
@@ -346,7 +330,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_sugar">of which sugars (g):</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_sugar" id="ingredient_sugar">
+			    <input type="text" name="ingredient_sugar" id="ingredient_sugar"/>
 			</span>
 		    </span>
 		</div>
@@ -357,7 +341,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_fat">Fat (g):</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_fat" id="ingredient_fat">
+			    <input type="text" name="ingredient_fat" id="ingredient_fat"/>
 			</span>
 		    </span>
 		    <span class="right">
@@ -365,7 +349,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_sat_fat">of which saturates (g):</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_sat_fat" id="ingredient_sat_fat">
+			    <input type="text" name="ingredient_sat_fat" id="ingredient_sat_fat"/>
 			</span>
 		    </span>
 		</div>
@@ -376,7 +360,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_protein">Protein (g):</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_protein" id="ingredient_protein">
+			    <input type="text" name="ingredient_protein" id="ingredient_protein"/>
 			</span>
 		    </span>
 		</div>
@@ -387,7 +371,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_fibre">Fibre (g):</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_fibre" id="ingredient_fibre">
+			    <input type="text" name="ingredient_fibre" id="ingredient_fibre"/>
 			</span>
 		    </span>
 		</div>
@@ -398,7 +382,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_sodium">Sodium (mg):</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_sodium" id="ingredient_sodium">
+			    <input type="text" name="ingredient_sodium" id="ingredient_sodium"/>
 			</span>
 		    </span>
 		</div>
@@ -409,7 +393,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 			    <label for="ingredient_cholesterol">Cholesterol (mg):</label>
 			</span>
 			<span class="formw">
-			    <input type="text" name="ingredient_cholesterol" id="ingredient_cholesterol">
+			    <input type="text" name="ingredient_cholesterol" id="ingredient_cholesterol"/>
 			</span>
 		    </span>
 		</div>
@@ -423,10 +407,10 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 		    </span>
 		</div>
 
-		<input type="hidden" name="ingredient_id" value="-1">
-		<input type="hidden" name="form_type" value="add_ingredient">
-		<input type="hidden" name="where_ok" value="global-messages">
-		<input type="hidden" name="where_error" value="dialog-messages">
+		<input type="hidden" name="ingredient_id" value="-1"/>
+		<input type="hidden" name="form_type" value="add_ingredient"/>
+		<input type="hidden" name="where_ok" value="global-messages"/>
+		<input type="hidden" name="where_error" value="dialog-messages"/>
 	    </form>
 	</div>
 

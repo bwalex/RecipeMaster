@@ -1,23 +1,7 @@
 <?php
 include('functions.php');
-
-function tidyhtml($input)
-{
-    $config = array(
-	   'indent'         => true,
-	   'output-xhtml'   => true,
-	   'wrap'           => 200);
-
-    $tidy = new tidy();
-    $tidy->parseString($input, $config, 'utf8');
-    $tidy->cleanRepair();
-
-    // Output
-    return $tidy;
-}
-
-ob_start('tidyhtml');
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
@@ -30,7 +14,7 @@ TODO: add serves N field
 TODO: add time estimate field
 TODO: add copy button
 
--- misc: apply to all files --
+
 TODO: Ketchup validation
 TODO: tesupload or so
 TODO: config file for db and thumb size, paths, etc
@@ -38,10 +22,9 @@ TODO: replace jquery ui dialog with jquery tools overlay thingie?
 TODO: ajaxify show ingredients
 -->
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta name="generator" content="HTML Tidy for Windows (vers 11 August 2008), see www.w3.org">
-    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii"/>
 
     <title>Recipes : RecipeMaster</title>
     <style type="text/css" title="currentStyle">
@@ -49,12 +32,10 @@ TODO: ajaxify show ingredients
     </style>
     
     
-    <link type="text/css" href="css/style.css" rel="stylesheet">
-    <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet">
-    <script type="text/javascript" src="js/jquery-1.4.4.min.js">
-</script>
-    <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">
-    </script>
+    <link type="text/css" href="css/style.css" rel="stylesheet"/>
+    <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet"/>
+    <script type="text/javascript" src="js/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js"></script>
     <script type="text/javascript" src="js/jquery.tools.min.js"></script>
 
 <?php
@@ -91,14 +72,12 @@ TODO: ajaxify show ingredients
     }
 ?>
 
-    <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
-</script>
-    <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
-    <script type="text/javascript" src="ckeditor/ckeditor.js">
-</script>
-    <script type="text/javascript" src="js/recipes.js">
-    </script>
+    <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+    <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js"></script>
+    <script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+    <script type="text/javascript" src="js/recipes.js"></script>
     <script type="text/javascript">
+    //<![CDATA[
 	var oTable;
 	var api;
 	var recipeId = -1;
@@ -268,9 +247,11 @@ TODO: ajaxify show ingredients
 		return false;
 	    });
 
-	});</script>
+	});
+    //]]>	
+    </script>
     <style type="text/css">
-
+    /*<![CDATA[*/
 			/*demo page css*/
 			.demoHeaders { margin-top: 2em; }
 			#dialog_link {padding: .4em 1em .4em 20px;text-decoration: none;position: relative;}
@@ -278,6 +259,7 @@ TODO: ajaxify show ingredients
 			ul#icons {margin: 0; padding: 0;}
 			ul#icons li {margin: 2px; position: relative; padding: 4px 0; cursor: pointer; float: left;  list-style: none;}
 			ul#icons span.ui-icon {float: left; margin: 0 4px;}
+    //]]>
     </style>
 </head>
 
@@ -287,24 +269,24 @@ TODO: ajaxify show ingredients
 
     <div id="content" class="container_16">
 	<div class="container_16">
-	    <h1>Recipes<a href="#" class="boring" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Recipe"></a></h1>
+	    <h1>Recipes<a href="#" class="boring" id="dialog_link" name="dialog_link"><img class="boring" src="icons/add.png" width="16" height="16" alt="Add Recipe"/></a></h1>
 	</div>
 
 	<div class="global-messages"></div>
 
 	<form name="delete_recipe" action="ajax_form_recipes.php" method="post" id="delete_recipe">
-	    <input type="hidden" name="recipe_name" value="">
-	    <input type="hidden" name="recipe_id" value="-1">
-	    <input type="hidden" name="form_type" value="delete_recipe">
-	    <input type="hidden" name="where_ok" value="global-messages">
-	    <input type="hidden" name="where_error" value="global-messages">
+	    <input type="hidden" name="recipe_name" value=""/>
+	    <input type="hidden" name="recipe_id" value="-1"/>
+	    <input type="hidden" name="form_type" value="delete_recipe"/>
+	    <input type="hidden" name="where_ok" value="global-messages"/>
+	    <input type="hidden" name="where_error" value="global-messages"/>
 	</form>
 	<form name="delete_photo" action="ajax_form_photos.php" method="post" id="delete_photo">
-	    <input type="hidden" name="recipe_id" value="-1">
-	    <input type="hidden" name="photo_id" value="-1">
-	    <input type="hidden" name="form_type" value="delete_photo">
-	    <input type="hidden" name="where_ok" value="dialog-messages">
-	    <input type="hidden" name="where_error" value="dialog-messages">
+	    <input type="hidden" name="recipe_id" value="-1"/>
+	    <input type="hidden" name="photo_id" value="-1"/>
+	    <input type="hidden" name="form_type" value="delete_photo"/>
+	    <input type="hidden" name="where_ok" value="dialog-messages"/>
+	    <input type="hidden" name="where_error" value="dialog-messages"/>
 	</form>
 
 	<div id="dialog" title="Add a recipe">
@@ -316,17 +298,17 @@ TODO: ajaxify show ingredients
 		</div>
 
 		<div class="row">
-		    <input type="text" name="recipe_name" id="add_recipe_name" size="80">
+		    <input type="text" name="recipe_name" id="add_recipe_name" size="80"/>
 		</div>
 
-		<hr>
+		<hr/>
 
 		<div class="row">
 		    <label for="add_recipe_serves">serves:</label>
-		    <input type="text" name="recipe_serves" id="add_recipe_serves" size="2">
+		    <input type="text" name="recipe_serves" id="add_recipe_serves" size="2"/>
 		</div>
 
-		<hr>
+		<hr/>
 
 		<div class="row">
 		    <label>List of ingredients:</label>
@@ -335,10 +317,10 @@ TODO: ajaxify show ingredients
 		<div id="ingredient_add_inputs"></div>
 
 		<div class="row">
-		    <a class="boring" href="#" onclick="$('#ingredient_add_inputs').append(createIngredientRow('100', 'g', '', 'method (e.g. diced)'));"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a>
+		    <a class="boring" href="#" onclick="$('#ingredient_add_inputs').append(createIngredientRow('100', 'g', '', 'method (e.g. diced)'));"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"/></a>
 		</div>
 
-		<hr>
+		<hr/>
 
 		<div class="row">
 		    <label for="add_instructions_editor">Instructions:</label>
@@ -349,7 +331,7 @@ TODO: ajaxify show ingredients
 		</div>
 
 		<div id="form-photoset">
-		    <hr>
+		    <hr/>
 
 		    <div class="row">
 			<label>List of photos:</label>
@@ -358,14 +340,14 @@ TODO: ajaxify show ingredients
 		    <div id="photo_add_inputs"></div>
 
 		    <div class="row">
-			<a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), recipeId);"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"></a>
+			<a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), recipeId);"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"/></a>
 		    </div>
 		</div>
-		<input type="hidden" name="form_type" value="add_recipe">
-		<input type="hidden" name="ingredient_count" value="0">
-		<input type="hidden" name="recipe_id" value="-1">
-		<input type="hidden" name="where_ok" value="global-messages">
-		<input type="hidden" name="where_error" value="dialog-messages">
+		<input type="hidden" name="form_type" value="add_recipe"/>
+		<input type="hidden" name="ingredient_count" value="0"/>
+		<input type="hidden" name="recipe_id" value="-1"/>
+		<input type="hidden" name="where_ok" value="global-messages"/>
+		<input type="hidden" name="where_error" value="dialog-messages"/>
 	    </form>
 	</div>
 
@@ -379,12 +361,12 @@ TODO: ajaxify show ingredients
 
 	    <div id="photo_new_inputs"></div>
 	    <a class="boring" href="#" onclick="addUpload(document.getElementById('photo_new_inputs'), recipeId);">
-		<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+		<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"/>
 	    </a>
 	</div>
 <!--
 <a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), 17);">
-    <img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">
+    <img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"/>
 </a>
 -->
 
