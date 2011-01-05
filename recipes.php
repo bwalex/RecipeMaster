@@ -55,22 +55,42 @@ TODO: ajaxify show ingredients
 </script>
     <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">
     </script>
-    <script src="http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js"></script>
-    
-    <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
-    </script>
-    <script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8">
-    </script>
-    <link rel="stylesheet" type="text/css" href="highslide/highslide.css">
-    <!--[if lt IE 7]>
-	<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
-    <![endif]-->
+    <script type="text/javascript" src="js/jquery.tools.min.js"></script>
 
-<!--
-    <script type="text/javascript" src="fancybox/jquery.fancybox-1.3.4.pack.js"></script>
-    <link rel="stylesheet" href="fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
--->
-    
+<?php
+    if($globalConfig['photoViewer'] == "highslide") {
+	echo '
+	    <!-- Highslide -->
+	    <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
+	    </script>
+	    <script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8">
+	    </script>
+	    <link rel="stylesheet" type="text/css" href="highslide/highslide.css"/>
+	    <!--[if lt IE 7]>
+		<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
+	    <![endif]-->
+	    ';
+    } else if($globalConfig['photoViewer'] == "fancybox") {
+	echo '
+	    <!-- Fancybox -->
+	    <script type="text/javascript" src="fancybox/jquery.fancybox-1.3.4.js"></script>
+	    <link rel="stylesheet" href="fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
+	    ';
+    } if($globalConfig['photoViewer'] == "colorbox") {
+	echo '
+	    <!-- Colorbox -->
+	    <script type="text/javascript" src="colorbox/colorbox/jquery.colorbox-min.js"></script>
+	    <link rel="stylesheet" href="colorbox/example'.$globalConfig['colorboxStyle'].'/colorbox.css" type="text/css" media="screen" />
+	';
+    } else if($globalConfig['photoViewer'] == "prettyPhoto") {
+	echo '
+	    <!-- prettyPhoto -->
+	    <script type="text/javascript" src="prettyphoto/js/jquery.prettyPhoto.js"></script>
+	    <link rel="stylesheet" href="prettyphoto/css/prettyPhoto.css" type="text/css" media="screen" />
+	';
+    }
+?>
+
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
 </script>
     <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
@@ -82,6 +102,9 @@ TODO: ajaxify show ingredients
 	var oTable;
 	var api;
 	var recipeId = -1;
+	var RMConfig = {
+	    photoViewer : "<?php echo $globalConfig['photoViewer'] ?>",
+	}
 	hs.showCredits = false;
 	hs.zIndexCounter = 2000;
 

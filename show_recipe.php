@@ -126,11 +126,6 @@ TODO: add print stuff
 	}
 
 
-
-
-
-
-
 	function switchIngredientsToNormal() {
 	    if (isIngredientEditing == 0)
 		return;

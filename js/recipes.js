@@ -147,13 +147,21 @@ function createPhotoRow(photoId, photo, thumb, caption) {
 
     var span = $('<span></span>').appendTo(row);
     var a = $('<a href="'+ photo +'" title="'+ caption +'" class="highslide">').appendTo(span);
-    a.click(function() {
-            return hs.expand(this);
-    });
-    // Fancybox
-    //a.fancybox();
-
     a.append('<img src="'+ thumb +'" alt="photo of dish">');
+
+    if (RMConfig.photoViewer == 'highslide') {
+	a.each(function() {
+	    this.onclick = function() {
+		return hs.expand(this, config1);
+	    };
+	});
+    } else if (RMConfig.photoViewer == 'fancybox') {
+	a.fancybox();
+    } else if (RMConfig.photoViewer == 'colorbox') {
+	a.colorbox({maxHeight:"100%", maxWidth:"100%"});
+    } else if (RMConfig.photoViewer == 'prettyPhoto') {
+	a.prettyPhoto({theme:'facebook'});
+    }
 
 
     // with jeditable:
