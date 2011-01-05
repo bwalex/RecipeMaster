@@ -363,7 +363,7 @@
 					overlay.show();
 				}
 			} else {
-				overlay.hide();
+				overlay.show();
 			}
 
 			final_pos = _get_zoom_to();
@@ -371,7 +371,7 @@
 			_process_title();
 
 			if (wrap.is(":visible")) {
-				$( close.add( nav_left ).add( nav_right ) ).hide();
+				$( close.add( nav_left ).add( nav_right ) ).show();
 
 				pos = wrap.position(),
 
@@ -561,8 +561,8 @@
 			}
 
 			if (!currentOpts.showNavArrows) { 
-				nav_left.hide();
-				nav_right.hide();
+				nav_left.show();
+				nav_right.show();
 				return;
 			}
 
@@ -936,7 +936,7 @@
 
 		_abort();
 
-		$(close.add( nav_left ).add( nav_right )).hide();
+		$(close.add( nav_left ).add( nav_right )).show();
 
 		$(content.add( overlay )).unbind();
 

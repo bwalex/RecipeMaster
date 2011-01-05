@@ -73,6 +73,7 @@ TODO: ajaxify show ingredients
     
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
 </script>
+    <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
     <script type="text/javascript" src="ckeditor/ckeditor.js">
 </script>
     <script type="text/javascript" src="js/recipes.js">

@@ -39,14 +39,22 @@ TODO: add print stuff
 			@import "css/demo_table.css";
     /*]]>*/
     </style>
-    <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
-    </script>
-    <script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8">
-    </script>
-    <link rel="stylesheet" type="text/css" href="highslide/highslide.css"/>
-    <!--[if lt IE 7]>
-	<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
-    <![endif]-->
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
     <link type="text/css" href="css/style.css" rel="stylesheet"/>
     <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.7.custom.css" rel="stylesheet"/>
     <script type="text/javascript" src="js/jquery-1.4.4.min.js">
@@ -54,22 +62,148 @@ TODO: add print stuff
     <script type="text/javascript" src="http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">
 </script>
+
+<?php
+    if($globalConfig['photoViewer'] == "highslide") {
+	echo '
+	    <!-- Highslide -->
+	    <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
+	    </script>
+	    <script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8">
+	    </script>
+	    <link rel="stylesheet" type="text/css" href="highslide/highslide.css"/>
+	    <!--[if lt IE 7]>
+		<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
+	    <![endif]-->
+	    ';
+    } else if($globalConfig['photoViewer'] == "fancybox") {
+	echo '
+	    <!-- Fancybox -->
+	    <script type="text/javascript" src="fancybox/jquery.fancybox-1.3.4.js"></script>
+	    <link rel="stylesheet" href="fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
+	    ';
+    } if($globalConfig['photoViewer'] == "colorbox") {
+	echo '
+	    <!-- Colorbox -->
+	    <script type="text/javascript" src="colorbox/colorbox/jquery.colorbox-min.js"></script>
+	    <link rel="stylesheet" href="colorbox/example'.$globalConfig['colorboxStyle'].'/colorbox.css" type="text/css" media="screen" />
+	';
+    } else if($globalConfig['photoViewer'] == "prettyPhoto") {
+	echo '
+	    <!-- prettyPhoto -->
+	    <script type="text/javascript" src="prettyphoto/js/jquery.prettyPhoto.js"></script>
+	    <link rel="stylesheet" href="prettyphoto/css/prettyPhoto.css" type="text/css" media="screen" />
+	';
+    }
+?>
+
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
 </script>
     <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
     </script>
+    <!--
     <script type="text/javascript" src="ckeditor/ckeditor.js">
 </script>
     <script type="text/javascript" src="ckeditor/adapters/jquery.js"></script>
     <script type="text/javascript" src="ckeditor/plugins/save/plugin.js"></script>
+    -->
+    <script type="text/javascript" src="tinymce/jscripts/tiny_mce/jquery.tinymce.js"></script>
+    <script type="text/javascript" src="tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
+    <script type="text/javascript" src="js/recipes.js">
+    </script>
     <script type="text/javascript">
     //<![CDATA[
-	hs.showCredits = false;
 	var oTable = null;
 	var addingRow = 0;
 	var recipeId = <?php echo $_REQUEST['recipe_id'] ?>;
+	var isEditing = 0;
+	var origHTML = '';
+	var RMConfig = {
+	    photoViewer : "<?php echo $globalConfig['photoViewer'] ?>",
+	}
 
+	function includeCSS(url) {
+	    var headID = document.getElementsByTagName("head")[0];         
+	    var cssNode = document.createElement('link');
+	    cssNode.type = 'text/css';
+	    cssNode.rel = 'stylesheet';
+	    cssNode.href = url;
+	    cssNode.media = 'screen';
+	    headID.appendChild(cssNode);
+	}
 
+	function includeJS(url) {
+	    var headID = document.getElementsByTagName("head")[0];         
+	    var newScript = document.createElement('script');
+	    newScript.type = 'text/javascript';
+	    newScript.src = url;
+	    headID.appendChild(newScript);
+	}
+
+	function populatePage() {
+	    $.post("ajax_formdata.php", {
+		recipe: recipeId
+	    },
+	    function(recipe) {
+		// format and output result
+		if (recipe.exception) {
+		    alert(recipe.exception);
+		    return;
+		}
+
+		$('#recipe_name').empty();
+		$('#recipe_serves').empty();
+		$('#recipe_ingredients').empty();
+		$('#recipe_preparation').empty();
+		$('#recipe_photos').empty();
+		$('#recipe_nutrilabel').empty();
+
+		$('#recipe_name').append(recipe.name);
+		$('#recipe_serves').append('Serves ' + recipe.serves);
+		$('#recipe_preparation').append(recipe.instructions);
+
+		$('#recipe_nutrilabel').append('<img src="nutrilabel.php?'+ $.param(recipe.nutri_info_keyval) +'" alt="Nutritional Information Label">');
+
+		for (var i in recipe.ingredients) {
+		    //$('#ingredient_add_inputs').append(createIngredientRow(recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].Ingredient.name, recipe.ingredients[i].method));
+		}
+
+		if (recipe.photos.length > 0) {
+		    $('#recipe_photos').append('<h2>Photos</h2>');
+		    if (RMConfig.photoViewer == 'highslide') {
+			var list = $('<ul></ul>').appendTo('#recipe_photos');
+			for (var i in recipe.photos) {
+			    //recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption));
+			    var li = $('<li></li>').appendTo(list);
+			    var a = $('<a id="'+recipe.photos[i].id+'" href="'+recipe.photos[i].photo+'" title="'+recipe.photos[i].caption+'" class="highslide">').appendTo(li);
+			    a.append('<img src="'+recipe.photos[i].thumb+'" alt="photo of dish">');
+			    a.each(function() {
+				this.onclick = function() {
+				    return hs.expand(this, config1);
+				};
+			    });
+			}
+		    } else {
+			for (var i in recipe.photos) {
+			    var a;
+			    if (RMConfig.photoViewer == 'prettyPhoto')
+				a = $('<a id="'+recipe.photos[i].id+'" href="'+recipe.photos[i].photo+'" title="'+recipe.photos[i].caption+'" rel="prettyPhoto[gallery1]">').appendTo('#recipe_photos');
+			    else
+				a = $('<a id="'+recipe.photos[i].id+'" href="'+recipe.photos[i].photo+'" title="'+recipe.photos[i].caption+'" rel="gallery1">').appendTo('#recipe_photos');
+			    
+			    a.append('<img src="'+recipe.photos[i].thumb+'" alt="photo of dish">');
+			    if (RMConfig.photoViewer == 'fancybox')
+				a.fancybox();
+			    if (RMConfig.photoViewer == 'colorbox')
+				a.colorbox({maxHeight:"100%", maxWidth:"100%"});
+			}
+			if (RMConfig.photoViewer == 'prettyPhoto')
+			    $('#recipe_photos a').prettyPhoto({theme:'facebook'});
+		    }
+		}
+	    },
+	    'json');
+	}
 
 	function saveChanges() {
 	    /* Clear errors */
@@ -158,20 +292,110 @@ TODO: add print stuff
 	    oTable.fnAddData( ['', '', '', '', '','','','','','','',''] );
 	}
 
-	$(function() {
+
+	function savePreparation(data) {
+	    if (data != null) {
+		var sendData = {
+		    "recipe_id": recipeId,
+		    "edit_type": "edit_preparation",
+		    "edit_val" : data
+		};
 	    
+		$.ajax({
+		    "dataType": 'json',
+		    "type": "GET",
+		    "url": "ajax_editable.php",
+		    "data": sendData,
+		    "success": function(data) {
+			if (data.error == 0) {
+			} else {
+			    alert(data.errmsg);
+			}
+		    }
+		});
+	    }
+
+	    $('#recipe_preparation').empty();
+
+	    if (data == null)
+		data = origHTML;
+
+	    $('#recipe_preparation').append(data);
+
+	    isEditing = 0;
+	}
+
+
+	$(function() {
+	    populatePage();
 	    
 	    $('#recipe_preparation_header').click(function() {
+		if (isEditing)
+		    return false;
+
+		isEditing = 1;
 		var html = $('#recipe_preparation').html();
+		origHTML = html;
 		$('#recipe_preparation').empty();
-		var textarea = $('<textarea>'+ html + '</textarea>').appendTo('#recipe_preparation');
+		var textarea = $('<textarea style="width: 100%; height: 400px;">'+ html + '</textarea>').appendTo('#recipe_preparation');
+		
+		$(textarea).tinymce({
+		    //script_url : 'tinymce/tiny_mce.js',
+		    plugins : "safari,spellchecker,pagebreak,style,layer,table,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
+		    //imagemanager, filemanager
+
+		    theme : "advanced",
+		    theme_advanced_buttons1 : "mysave,myclose,|,preview,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
+		    theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,forecolor,backcolor",
+		    theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+		    theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,spellchecker,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,blockquote,pagebreak,|,insertfile,insertimage",
+		    theme_advanced_toolbar_location : "top",
+		    theme_advanced_toolbar_align : "left",
+		    theme_advanced_statusbar_location : "bottom",
+		    theme_advanced_resizing : true,
+
+		    //theme_advanced_buttons3_add : "myclose",
+
+		    setup : function(ed) {
+                        ed.addButton('mysave', {
+                                title : 'Apply/Save and Close',
+                                //image : 'themes/default/img/icons/save.gif',
+				image : 'icons/page_save.png',
+                                onclick : function() {
+					console.debug($(this).html());
+					html = $(this).html();
+                                        this.remove();
+					savePreparation(html);
+                                }
+                        });
+                        ed.addButton('myclose', {
+                                title : 'Close without saving',
+                                //image : 'themes/default/img/icons/save.gif',
+				image : 'icons/cancel.png',
+                                onclick : function() {
+					this.remove();
+					savePreparation(null);
+                                }
+                        });
+		    }
+    
+
+		});
+		
+
+		/*
 		$(textarea).ckeditor(function() {},
 		    {
-			"saveFunction" : function(data) {
-					    alert(data);
+			// needs: http://dev.ckeditor.com/ticket/4507
+			"saveFunction" : function(data, editor) {
+					    //console.log(editor);
+					    editor.destroy();
+					    savePreparation(data);
+					    
 					}
 		    }
 		);
+		*/
 	    });
 	    
 	    
@@ -232,11 +456,74 @@ TODO: add print stuff
 		    return(value);
 		},
 		{
+		    onblur : 'ignore',
 		    tooltip   : 'Click to edit...'
 		}
 	    );
 
-	    
+	    $('#recipe_serves').editable(
+		function(value, settings) {
+    		    /* Clear errors */
+
+		    if ($('#recipe_serves').data('tooltip')) {
+			$('#recipe_serves').data('tooltip').hide();
+			$('#recipe_serves').data('tooltip', null);
+		    }
+
+		    $('.error-field').removeClass('error-field');
+		    
+		    var sendData = {
+			"recipe_id": recipeId,
+			"edit_type": "edit_serves",
+			"edit_val" : value
+		    };
+
+		    $.ajax( {
+			"dataType": 'json',
+			"type": "GET",
+			"url": "ajax_editable.php",
+			"data": sendData,
+			"success": function(data) {
+			    //console.log(data);
+    
+			    if (data.error == 0) {
+				populatePage();
+			    } else {
+				$('#recipe_serves').addClass('error-field');
+
+				$('#recipe_serves').attr('title', data.errmsg);
+				$('#recipe_serves').tooltip({
+					position: "top center",
+					//offset: [10, 150],
+					events: {
+					    def: ',',
+					    input: ',',
+					    widget: ',',
+					    tooltip: ','
+					    
+					},
+					effect: "fade",
+					tipClass: "tooltip-arrow-black",
+					opacity: 1
+				});
+				$('#recipe_serves').data('tooltip').show();
+				//console.log(data.errorRow);
+				//console.log(oTable.fnGetNodes(data.errorRow));
+			    }
+			    
+			}
+		    } );
+		    return 'Serves ' + value;
+		},
+		{
+		    onblur : 'ignore',
+		    tooltip   : 'Click to edit...',
+		        data: function(value, settings) {
+			    /* Convert <br> to newline. */
+			    return value.replace('Serves ', '');
+			}
+		}
+	    );
 	    
 	    
 	    //hide the all of the element with class msg_body
@@ -386,6 +673,7 @@ TODO: add print stuff
 			    {
 				//onblur : ignore  -- Click outside editable area is ignored. Pressing ESC cancels changes. Clicking submit button submits changes.
 				height    : "14px",
+				onblur : 'ignore',
 				type      : "autocomplete",
 				tooltip   : 'Click to edit...',
 				autocomplete : {
@@ -420,78 +708,51 @@ TODO: add print stuff
     <div class="spacer container_16"></div>
 
     <div id="content" class="container_16">
-	<?php
+	<div class="container_16">
+	    <div class="grid_16">
+		<h1 id="recipe_name" style="margin-bottom: 8px">DUMMY_RECIPE_NAME</h1>
+	    </div>
+	</div>
 
-	function print_msg($msg) {
-		echo '<div class="ui-widget">
-				<div class="ui-state-highlight ui-corner-all" style="margin-top: 5px; padding: 0 .7em;"> 
-					<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>'.$msg.'</p>
-				</div>
-			</div>';
-	}
+	<div class="container_16 clearfix">
+	    <div class="grid_11">
+		<div id="recipe_serves">
+		    DUMMY_SERVES_N
+		</div>
+	    </div>
 
-	function print_error($msg) {
-		echo '<div class="ui-widget">
-			<div class="ui-state-error ui-corner-all" style="margin-top: 5px;padding: 0 .7em;"> 
-					<p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'.$msg.'</p>
-				</div>
-			</div>';
-	}
+	    <div class="grid_11">
+		<h2>Ingredients</h2>
 
-	if ($_GET['recipe_id']) {
-		try {
-			$recipe = new Recipe($_GET['recipe_id']);
-			$info = $recipe->getNutriInfo();
-			echo '<div class="container_16">';
-			echo '<div class="grid_16">';
-			echo '<h1 id="recipe_name" style="margin-bottom: 8px">'.$recipe->name.'</h1>';
-			echo '</div>';
-			echo '</div>';
+		<div id="recipe_ingredients" class="row clearfix">
+		    <div class="leftfixed">
+			&bull;&nbsp;DUMMY_INGREDIENT 100g foo (foobar)
+		    </div>
 
+		    <div class="rightfixed">
+			&bull;&nbsp;DUMMY_INGREDIENT 100g foo (foobar)
+		    </div>
+		</div>
 
-			echo '<div class="container_16 clearfix">';
-			echo '<div class="grid_11">Serves ';
-			echo $recipe->serves;
-			echo '</div>';
-			echo '<div class="grid_11">';
+		<h2 id="recipe_preparation_header" style="clear: left; padding-top: 15px;">Preparation</h2>
 
-			echo '<h2>Ingredients</h2>';
-			
-			//echo '<h2 id="acc_head"><a style="text-decoration: none; color: #000000;" href="#">Ingredients</a></h2>';
-			//echo '<div id ="acc_content">';
-			
-			//echo '<div style="width: 520px;">';
-			$i = 0;
-			foreach ($recipe->ingredients as $ingredient) {
-				if ($i % 2 == 0) {
-					echo '<div class="row clearfix">';
-					$class = "leftfixed";
-				} else {
-					$class = "rightfixed";
-				}
-				if ($ingredient['method'])
-				    echo '<div class="'.$class.'">&bull;&nbsp;'.$ingredient['qty'].$ingredient['unit'].' '.$ingredient['Ingredient']->name.' ('.$ingredient['method'].')</div>';
-				else
-				    echo '<div class="'.$class.'">&bull;&nbsp;'.$ingredient['qty'].$ingredient['unit'].' '.$ingredient['Ingredient']->name.'</div>';
+		<div id="recipe_preparation">
+		    DUMMY_RECIPE_PREPARATION
+		</div>
+	    </div>
 
-				if ($i % 2 != 0)
-					echo '</div>';
-				$i++;
-			}
-			if ($i % 2 != 0)
-			    echo '</div>';
-			
-			echo '<h2 id="recipe_preparation_header" style="clear: left; padding-top: 15px;">Preparation</h2>';
-			echo '<div id="recipe_preparation">';
-			echo $recipe->instructions;
-			echo '</div>';
-			echo '</div>';
+	    <div class="grid_5">
+		<div id="recipe_nutrilabel">
+		    DUMMY_RECIPE_NUTRI_LABEL
+		</div>
+	    </div>
+	</div>
 
-			echo '<div class="grid_5">';
-			echo '<img alt="Nutritional Information Label" src="nutrilabel.php?carb='.$info['carb'].'&amp;protein='.$info['protein'].'&amp;fat='.$info['fat'].'&amp;sat_fat='.$info['sat_fat'].'&amp;kcal='.$info['kcal'].'&amp;cholesterol='.$info['cholesterol'].'&amp;sodium='.$info['sodium'].'&amp;fibre='.$info['fibre'].'&amp;sugar='.$info['sugar'].'"/>';
-			
-			echo '</div>';
-			echo '</div>';
+	<div class="container_16 clearfix">
+	    <div id="recipe_photos" class="highslide-gallery" style="clear: both;">
+		DUMMY_RECIPE_PHOTOS
+	    </div>
+	</div>
 
 
 
@@ -505,84 +766,30 @@ TODO: add print stuff
 
 
 
-		    if (count($recipe->photos) > 0) {
-			echo '<div class="container_16 clearfix">
-				 <div class="highslide-gallery" style="clear: both;">
-				    <h2>Photos</h2>
-    
-				    <ul>';
-			
-
-
-			foreach ($recipe->photos as $photo) {
-			    echo '<li>';
-			    echo '<a href="'.$photo->get().'" class="highslide" title="'.$photo->caption.'" onclick="return hs.expand(this, config1 )">';
-			    echo '<img src="'.$photo->getThumbnail().'" alt="photo of dish"/>';
-			    echo '</a>';
-			    echo '</li>';
-			}
-    
 
 
 
-			echo '
-				    </ul>
-				    <div style="clear:both"></div>
-				</div>
-			    </div>';
-		    }
 
 
-		} catch (Exception $e) {
-			print_error('Exception: '.$e->getMessage());
-		}
-	} else {
-		print_error('No recipe id specified!');
-	}
-	/*
-	CREATE TABLE  `recipemaster`.`ingredients` (
-	`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-	`name` TEXT NOT NULL ,
-	`unit` TEXT NOT NULL ,
-	`qty` INT NOT NULL ,
-	`kcal` INT NOT NULL ,
-	`carb` FLOAT NOT NULL ,
-	`sugar` FLOAT NOT NULL ,
-	`fibre` FLOAT NOT NULL ,
-	`protein` FLOAT NOT NULL ,
-	`fat` FLOAT NOT NULL ,
-	`sat_fat` FLOAT NOT NULL ,
-	`sodium` INT NOT NULL ,
-	`cholesterol` INT NOT NULL ,
-	`others` TEXT NOT NULL
-	) ENGINE = MYISAM ;
 
 
-	CREATE TABLE  `recipemaster`.`recipes` (
-	`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-	`name` TEXT NOT NULL ,
-	`description` TEXT NOT NULL ,
-	`instructions` TEXT NOT NULL ,
-	`main_photo_id` INT NOT NULL
-	) ENGINE = MYISAM ;
 
 
-	CREATE TABLE  `recipemaster`.`rec_ing` (
-	`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-	`recipe_id` INT NOT NULL ,
-	`ingredient_id` INT NOT NULL ,
-	`ingredient_qty` INT NOT NULL ,
-	`method` INT NOT NULL
-	) ENGINE = MYISAM ;
 
 
-	*/
-
-	/* http://www.pengoworks.com/workshop/jquery/autocomplete.htm */
-	?>
 
 
-		
+
+
+
+
+
+
+
+
+
+
+
 	<div class="container_16 clearfix">
 	    <a name="detailednutri" id="detailednutri"></a>
 	    <h3 id="acc_head"><a style="text-decoration: none; color: #000000;" href="#detailednutri">Detailed Nutrition Facts and Sandbox</a></h3>

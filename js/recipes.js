@@ -145,17 +145,58 @@ function deletePhoto(id) {
 function createPhotoRow(photoId, photo, thumb, caption) {
     var row = $('<div class="row"></div>');
 
-    row.append('<input type="hidden" name="photo_id[]" value="' + photoId + '">');
-    var a = $('<a href="'+ photo +'" title="'+ caption +'" class="highslide">').appendTo(row);
+    var span = $('<span></span>').appendTo(row);
+    var a = $('<a href="'+ photo +'" title="'+ caption +'" class="highslide">').appendTo(span);
     a.click(function() {
-            return hs.expand(this, config1 )
+            return hs.expand(this);
     });
     // Fancybox
     //a.fancybox();
 
     a.append('<img src="'+ thumb +'" alt="photo of dish">');
 
-    row.append('<input type="text" size="30" name="photo_caption[]" value="' + caption +'">');
+
+    // with jeditable:
+    var editCaption = $('<span>'+caption+'</span>').appendTo(row);
+    editCaption.data('photoId', photoId);
+    $(editCaption).editable(
+	function(value, settings) {   
+	    var sendData = {
+		"recipe_id": recipeId,
+		"form_type": "edit_photo",
+		"photo_id" : $(this).data('photoId'),
+		"where_ok" : "dialog-messages",
+		"where_error" : "dialog-messages",
+		"sequence_id" : -1,
+		"photo_caption": value
+	    };
+	    //console.log(sendData);
+	    $.ajax( {
+		"dataType": 'json',
+		"type": "GET",
+		"url": "ajax_form_photos.php",
+		"data": sendData,
+		"success": function(data) {
+		    console.log(this);
+		    if (data.error == 0) {
+		    } else {
+			alert(data.errmsg);
+		    }
+		}
+	    } );
+	    return value;
+	},
+	{
+	    width: '460px',
+	    tooltip   : 'Click to edit...'
+	}
+    );
+
+    // without jeditable:
+    //row.append('<input type="text" size="30" name="photo_caption[]" value="' + caption +'">');
+    //row.append('<input type="hidden" name="photo_id[]" value="' + photoId + '">');
+
+
 
     var a = $('<a href="#" class="boring"></a>').appendTo(row);
     a.data('photoId', photoId);

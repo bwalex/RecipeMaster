@@ -1,8 +1,11 @@
 <?php
 
+include('config.php');
+
 function db_connect()
 {
-	$db = new PDO("mysql:host=localhost;dbname=recipemaster", "root", "");
+	global $globalConfig;
+	$db = new PDO($globalConfig['dbPDOString'], $globalConfig['dbPDOUser'], $globalConfig['dbPDOPassword']);
 	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	return $db;
@@ -624,7 +627,7 @@ function get_ingredients_count($restrict_query = '', $tokens = NULL) {
 }
 
 
-class Recipe extends Model {
+class Recipe {
 	var $id;
 	var $name;
 	var $description;
@@ -642,6 +645,61 @@ class Recipe extends Model {
 	 * http://nutritiondata.self.com/facts/spices-and-herbs/225/2?mbid=ndhp
 	 */
 	var $ingredients;
+
+
+
+
+	public function toArray() {
+		$nutri_info = $this->getNutriInfo();
+		$arr = get_object_vars($this);
+		$arr['nutri_info'] = $nutri_info;
+	    
+		$parseMe = array();
+		foreach ($nutri_info as $name => $val) {
+		    $cur = array();
+		    $cur['name'] = $name;
+		    $cur['value'] = $val;
+		    array_push($parseMe, $cur);
+		}
+		$arr['nutri_info_keyval'] = $parseMe;
+
+		return $this->processArray($arr);
+	}
+	
+	private function processArray($array) {
+	    foreach($array as $key => $value) {
+		if (is_object($value)) {
+		    $array[$key] = $value->toArray();
+		}
+		if (is_array($value)) {
+		    $array[$key] = $this->processArray($value);
+		}
+	    }
+	    // If the property isn't an object or array, leave it untouched
+	    return $array;
+	}
+	
+	public function __toString() {
+	    return json_encode($this->toArray());
+	}
+	public function getJSON() {
+	    return json_encode($this->toArray());
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	function Recipe($id, $name = '', $new = 0, $description = '', $instructions = '', $time_estimate = 0, $serves = 1, $ingredients = NULL) {
 		$db = db_connect();
@@ -699,11 +757,11 @@ class Recipe extends Model {
 			$this->id = $id;
 			if ($name == '')
 				throw new Exception('No recipe name specified!');
-			$this->name = $name;
+			$this->setName($name);
 			$this->description = $description;
 			$this->instructions = $instructions;
 			$this->time_estimate = $time_estimate;
-			$this->serves = $serves;
+			$this->setServes($serves);
 			if ($ingredients == NULL)
 				$this->ingredients = array();
 			else
@@ -711,12 +769,18 @@ class Recipe extends Model {
 		}
 	}
 
-	function addIngredient($qty, $unit, $method, $id, $name = '') {
+	function addIngredient($qty, $unit, $method, $id, $name = '', $validate = 1) {
 		$elem = array();
 		$elem['qty'] = $qty;
 		$elem['unit'] = $unit;
 		$elem['method'] = $method;
 		$elem['Ingredient'] = new Ingredient($id, $name);
+
+		if ($validate) {
+			/* Validate units and qty */
+			$elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
+		}
+
 		array_push($this->ingredients, $elem);
 		return $elem;
 	}
@@ -746,6 +810,14 @@ class Recipe extends Model {
 			throw new Exception('Empty recipe names are not valid');
 		else
 			$this->name = $name;
+	}
+
+	function setServes($serves) {
+		if ((!is_numeric($serves)) || ($serves <= 0) || (round($serves, 0) != $serves)) {
+			throw new Exception('"Serves" needs to be a positive integer');
+		}
+		else
+			$this->serves = $serves;
 	}
 
 	function getTimeEstimate() {

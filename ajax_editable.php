@@ -19,6 +19,12 @@ try {
     if ($edit_type == 'edit_name') {
         $recipe_name = $_REQUEST['edit_val'];
         $recipe->setName($recipe_name);
+    } else if ($edit_type == 'edit_preparation') {
+        $recipe_preparation = $_REQUEST['edit_val'];
+        $recipe->instructions = $recipe_preparation;
+    }  else if ($edit_type == 'edit_serves') {
+        $recipe_serves = $_REQUEST['edit_val'];
+        $recipe->setServes($recipe_serves);
     }
 
     $output['rowsaffected'] = $recipe->save(1);

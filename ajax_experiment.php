@@ -53,7 +53,7 @@ try {
                 continue;
             }
             list($qty, $unit) = split(' ', $row[1]);
-            $elem = $recipe->addIngredient($qty, $unit, $row[2], -1, $row[0]);
+            $elem = $recipe->addIngredient($qty, $unit, $row[2], -1, $row[0], 0 /* don't validate units */);
             $error_col = 1;
             /* validate units, etc */
             $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
