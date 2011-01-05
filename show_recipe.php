@@ -793,8 +793,8 @@ TODO: add print stuff
 	    //hide the all of the element with class msg_body
 	    $("#acc_content").hide();
 	    //toggle the componenet with class msg_body
-	    $("#acc_head").click(function() {
-		$(this).next("#acc_content").slideToggle(100);
+	    $("#acc_head").add(".detailed_nutri_link").click(function() {
+		$("#acc_content").slideToggle(0);
 	    });
 
 	    $.editable.addInputType('autocomplete', {
@@ -1040,6 +1040,7 @@ TODO: add print stuff
 		<div id="recipe_nutrilabel">
 		    DUMMY_RECIPE_NUTRI_LABEL
 		</div>
+		<p align="center"><a href="#detailednutri" class="recipe detailed_nutri_link">View detailed nutritional information</a></p>
 	    </div>
 	</div>
 
