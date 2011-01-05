@@ -115,7 +115,7 @@ function editrecipe(id) {
 		    text: "Submit changes",
 		    click: function() {
 			recipeId = -1;
-			$('[name="ing_method[]"]').trigger('focus');
+			$('input[name^="ing_method"]').trigger('focus');
 			$ret = $(document.add_recipe).submit();
 			if ($ret == true)
 			    $(this).dialog("close");

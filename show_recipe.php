@@ -174,6 +174,7 @@ TODO: add print stuff
 			$(this).data('tooltip', null);
 			$(this).removeClass('error-ingredients-tooltip');
 		    });
+		    $('input[name^="ing_method"]').trigger('focus');
 		    $.ajax({
 			"dataType": 'json',
 			"type": "GET",
