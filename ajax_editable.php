@@ -9,6 +9,8 @@ $output['errmsg'] = '';
 $output['rowsaffected'] = 0;
 $output['id'] = -1;
 $output['type'] = '';
+$output['errorCol'] = -1;
+$output['errorRow'] = -1;
 
 try {
     $recipe_id = $_REQUEST['recipe_id'];
@@ -25,6 +27,29 @@ try {
     }  else if ($edit_type == 'edit_serves') {
         $recipe_serves = $_REQUEST['edit_val'];
         $recipe->setServes($recipe_serves);
+    } else if ($edit_type == 'edit_ingredients') {
+        $recipe->clearIngredients();
+	if (!empty($_REQUEST['ing_name'])) {
+	    foreach ($_REQUEST['ing_name'] as $key => $ingredient_name) {
+		    if (empty($ingredient_name))
+			continue;
+                    $output['errorRow'] = $key;
+		    $ingredient_qty = $_REQUEST['ing_qty'][$key];
+		    $ingredient_unit = $_REQUEST['ing_unit'][$key];
+		    $method = $_REQUEST['ing_method'][$key];
+		    $output['errorCol'] = 0;
+		    $elem = $recipe->addIngredient($ingredient_qty, $ingredient_unit,
+			$method, -1, $ingredient_name, 0 /* don't validate units */);
+
+                    /* validate units, etc */
+                    $output['errorCol'] = 1;
+		    if ((!is_numeric($ingredient_qty)) || ($ingredient_qty<= 0)) {
+			throw new Exception('"qty" needs to be a positive number');
+		    }
+                    $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
+	    }
+	    /* XXX: maybe throw error? */
+	}
     }
 
     $output['rowsaffected'] = $recipe->save(1);

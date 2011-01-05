@@ -778,6 +778,9 @@ class Recipe {
 
 		if ($validate) {
 			/* Validate units and qty */
+			if ((!is_numeric($qty)) || ($qty <= 0)) {
+				throw new Exception('"qty" needs to be a positive number');
+			}
 			$elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
 		}
 

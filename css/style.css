@@ -1,3 +1,32 @@
+h2 .editsection {
+	font-size: 80%;
+}
+
+h2 {
+	border-bottom: 1px solid #AAA;
+	padding-top: 10px;
+}
+.editsection {
+	float: right;
+	margin-left: 5px;
+	font-weight: normal;
+}
+
+.loading-modal {
+	background-color:#fff;
+	display:none;
+	width:350px;
+	padding:15px;
+	text-align:center;
+	border:2px solid #333;
+	z-index: 100000;
+
+	opacity:1;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	-moz-box-shadow: 0 0 50px #ccc;
+	-webkit-box-shadow: 0 0 50px #ccc;
+}
 
 /* scrollable root element */
 #wizard {	
