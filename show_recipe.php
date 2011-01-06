@@ -546,6 +546,21 @@ TODO: add print stuff
 	    isEditing = 0;
 	}
 
+	function myFileBrowser (field_name, url, type, win) {
+	  tinyMCE.activeEditor.windowManager.open({
+	      file : 'fed.php' + '?editor=tinymce' + '&type=' + type + '&recipe_id=' + recipeId,
+	      title : 'My File Browser',
+	      width : 800,  // Your dimensions may differ - toy around with them!
+	      height : 600,
+	      resizable : "yes",
+	      inline : "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+	      close_previous : "no"
+	  }, {
+	      window : win,
+	      input : field_name
+	  });
+	  return false;
+	}
 
 	function activateEditor() {
 		if (isEditing)
@@ -571,6 +586,7 @@ TODO: add print stuff
 		    theme_advanced_toolbar_align : "left",
 		    theme_advanced_statusbar_location : "bottom",
 		    theme_advanced_resizing : true,
+		    file_browser_callback: "myFileBrowser",
 
 		    //theme_advanced_buttons3_add : "myclose",
 

@@ -62,6 +62,7 @@ class Photo {
 		$export['photo'] = $this->get();
 		$export['thumb'] = $this->getThumbnail();
 		$export['caption'] = $this->caption;
+		$export['mime'] = $this->mime;
 		return $export;
 	}
 
