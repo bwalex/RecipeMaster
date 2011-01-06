@@ -11,6 +11,7 @@
 CREATE TABLE IF NOT EXISTS `ingredients` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
+  `info` text,
   `unit` text,
   `qty` float NOT NULL,
   `typical_qty` float,
@@ -65,6 +66,22 @@ CREATE TABLE IF NOT EXISTS `recipe_photos` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `ingredient_photos`
+--
+
+CREATE TABLE IF NOT EXISTS `ingredient_photos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) NOT NULL,
+  `photo_path` text NOT NULL,
+  `photo_caption` text,
+  `photo_mime` text NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (parent_id) references ingredients(id)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `rec_ing`
 --
 
@@ -79,3 +96,36 @@ CREATE TABLE IF NOT EXISTS `rec_ing` (
   FOREIGN KEY (recipe_id) references recipes(id),
   FOREIGN KEY (ingredient_id) references ingredients(id)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `nutrients`
+--
+
+CREATE TABLE IF NOT EXISTS `nutrients` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` text NOT NULL,
+  `info` text,
+  `rdi` float NOT NULL,
+  `unit` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ing_nutrients`
+--
+
+CREATE TABLE IF NOT EXISTS `ing_nutrients` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ingredient_id` int(11) NOT NULL,
+  `nutrient_id` int(11) NOT NULL,
+  `qty` float NOT NULL,
+  `unit` text NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (ingredient_id) references ingredients(id),
+  FOREIGN KEY (nutrient_id) references nutrients(id)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
