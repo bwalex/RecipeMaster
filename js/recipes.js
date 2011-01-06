@@ -71,24 +71,14 @@ function createIngredientRow(qty, unit, name, method) {
     return row;
 }
 
-function editrecipe(id) {
-    recipeId = -1;
-    $.post("ajax_formdata.php", {
-        recipe: id
-    },
-    function(recipe) {
-        // format and output result
-        if (recipe.exception) {
-            alert(recipe.exception);
-            return;
-        }
+function copyrecipe(id) {
+    document.copy_recipe.recipe_id.value = id;
+    $(document.copy_recipe).submit();
+}
 
-        $('#ingredient_add_inputs').empty();
-	$('#photo_add_inputs').empty();
-
-        document.add_recipe.recipe_name.value = recipe.name;
-	document.add_recipe.recipe_serves.value = recipe.serves;
-        document.add_recipe.recipe_instructions.value = recipe.instructions;
+/*
+ * This obviously doesn't belong here, but I don't want to lose it.
+ *
 	CKEDITOR.config.filebrowserImageBrowseUrl = 'fed.php?editor=ckeditor&recipe_id=' + recipe.id;
 	CKEDITOR.config.filebrowserImageWindowWidth = '800';
         CKEDITOR.config.filebrowserImageWindowHeight = '700';
@@ -96,42 +86,7 @@ function editrecipe(id) {
         function() {
             this.checkDirty(); // true
         });
-        for (var i in recipe.ingredients) {
-	    $('#ingredient_add_inputs').append(createIngredientRow(recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].Ingredient.name, recipe.ingredients[i].method));
-        }
-        for (var i in recipe.photos) {
-	    $('#photo_add_inputs').append(createPhotoRow(recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption));
-        }
-        document.add_recipe.recipe_id.value = recipe.id;
-	recipeId = recipe.id;
-        document.add_recipe.form_type.value = 'edit_recipe';
-
-	$('#dialog').dialog('option',
-	{
-	    title: 'Edit recipe',
-	    autoOpen: false,
-	    modal: true,
-	    width: 800,
-	    buttons: [
-		{
-		    id: "dialog-submit",
-		    text: "Submit changes",
-		    click: function() {
-			recipeId = -1;
-			$('input[name^="ing_method"]').trigger('focus');
-			$ret = $(document.add_recipe).submit();
-			if ($ret == true)
-			    $(this).dialog("close");
-		    }
-		}
-	    ]
-	});
-	document.getElementById('form-photoset').style.visibility = 'visible';
-	clearMsgDivs();
-	$('#dialog').dialog('open');
-    },
-    'json');
-}
+*/
 
 function deleterecipe(id) {
     $.confirm({

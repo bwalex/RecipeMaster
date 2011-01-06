@@ -115,15 +115,10 @@ TODO: ajaxify show ingredients
 	}
 
 	$(document).ready(function() {
-	    CKEDITOR.config.filebrowserImageBrowseUrl = 'info.php?editor=ckeditor';
-	    CKEDITOR.config.toolbar = [['Source', '-', 'Preview', '-', 'Templates'], ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'SpellChecker', 'Scayt'], ['Undo', 'Redo', '-', 'Find', 'Replace', '-', 'SelectAll', 'RemoveFormat'], '/', ['Bold', 'Italic', 'Underline', 'Strike', '-', 'Subscript', 'Superscript'], ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'Blockquote', 'CreateDiv'], ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], ['BidiLtr', 'BidiRtl'], ['Link', 'Unlink', 'Anchor'], ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'], '/', ['Styles', 'Format', 'Font', 'FontSize'], ['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks', '-', 'About']];
+	    //CKEDITOR.config.toolbar = [['Source', '-', 'Preview', '-', 'Templates'], ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'SpellChecker', 'Scayt'], ['Undo', 'Redo', '-', 'Find', 'Replace', '-', 'SelectAll', 'RemoveFormat'], '/', ['Bold', 'Italic', 'Underline', 'Strike', '-', 'Subscript', 'Superscript'], ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'Blockquote', 'CreateDiv'], ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], ['BidiLtr', 'BidiRtl'], ['Link', 'Unlink', 'Anchor'], ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'], '/', ['Styles', 'Format', 'Font', 'FontSize'], ['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks', '-', 'About']];
 	});
 
 	$(function() {
-	    // initialize scrollable
-            //var root = $("#wizard").scrollable();
-            //api = root.scrollable();
-
 	    $('form').submit(function() {
 		clearMsgDivs();
 
@@ -141,12 +136,10 @@ TODO: ajaxify show ingredients
 			if (data.error == 0) {
 			    printMsgs(data, 'ok');
 
-			    if ((data.type == 'add_recipe') || (data.type == 'edit_recipe')) {
+			    if (data.type == 'add_recipe') {
 				recipeId = data.id;
 				$('#dialog').dialog('close');
 			    }
-			    if (data.type == 'add_recipe')
-				$('#dialog-photos').dialog('open');
 			} else {
 			    recipeId = -1;
 			    printMsgs(data, 'error');
@@ -180,38 +173,10 @@ TODO: ajaxify show ingredients
 	    });
 
 	    // Dialog
-	    
-	    
-	    
-	    $('#dialog-photos').dialog({
-		autoOpen: false,
-		width: 800,
-		buttons: []
-	    });
 
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
 	    $('#dialog').dialog({
 		autoOpen: false,
-		width: 800,
-		buttons: {
-		    "Add Recipe": function() {
-			document.add_recipe.submit();
-			$(this).dialog("close");
-		    }
-		}
+		width: 625,
 	    });
 
 	    // Dialog Link
@@ -220,27 +185,18 @@ TODO: ajaxify show ingredients
 		$('#ingredient_add_inputs').empty();
 		$('#photo_add_inputs').empty();
 		document.add_recipe.recipe_id.value = '-1';
-		document.add_recipe.form_type.value = 'add_recipe';
 		document.add_recipe.recipe_name.value = '';
-		document.add_recipe.recipe_instructions.value = '';
-		CKEDITOR.config.filebrowserImageBrowseUrl = null;
-		CKEDITOR.instances.add_instructions_editor.setData('',
-		function() {
-		    this.checkDirty(); // true
-		});
 
 		$('#dialog').dialog('option', {
 		    title: 'Add a recipe',
 		    modal: true,
 		    autoOpen: false,
-		    width: 800,
 		    buttons: [
 			{
 			    id: "dialog-submit",
 			    text: "Add Recipe",
 			    click: function() {
 				recipeId = -1;
-				$('[name="ing_method[]"]').trigger('focus');
 				$ret = $(document.add_recipe).submit();
 				if ($ret == true)
 				    $(this).dialog("close");
@@ -248,7 +204,6 @@ TODO: ajaxify show ingredients
 			}
 		    ]
 		});
-		document.getElementById('form-photoset').style.visibility = 'hidden';
 		clearMsgDivs();
 		$('#dialog').dialog('open');
 		return false;
@@ -288,12 +243,12 @@ TODO: ajaxify show ingredients
 	    <input type="hidden" name="where_ok" value="global-messages"/>
 	    <input type="hidden" name="where_error" value="global-messages"/>
 	</form>
-	<form name="delete_photo" action="ajax_form_photos.php" method="post" id="delete_photo">
+	<form name="copy_recipe" action="ajax_form_recipes.php" method="post" id="copy_recipe">
+	    <input type="hidden" name="recipe_name" value=""/>
 	    <input type="hidden" name="recipe_id" value="-1"/>
-	    <input type="hidden" name="photo_id" value="-1"/>
-	    <input type="hidden" name="form_type" value="delete_photo"/>
-	    <input type="hidden" name="where_ok" value="dialog-messages"/>
-	    <input type="hidden" name="where_error" value="dialog-messages"/>
+	    <input type="hidden" name="form_type" value="copy_recipe"/>
+	    <input type="hidden" name="where_ok" value="global-messages"/>
+	    <input type="hidden" name="where_error" value="global-messages"/>
 	</form>
 
 	<div id="dialog" title="Add a recipe">
@@ -305,51 +260,9 @@ TODO: ajaxify show ingredients
 		</div>
 
 		<div class="row">
-		    <input type="text" name="recipe_name" id="add_recipe_name" size="80"/>
+		    <input type="text" name="recipe_name" id="add_recipe_name" style="width: 600px;"/>
 		</div>
 
-		<hr/>
-
-		<div class="row">
-		    <label for="add_recipe_serves">serves:</label>
-		    <input type="text" name="recipe_serves" id="add_recipe_serves" size="2"/>
-		</div>
-
-		<hr/>
-
-		<div class="row">
-		    <label>List of ingredients:</label>
-		</div>
-
-		<div id="ingredient_add_inputs"></div>
-
-		<div class="row">
-		    <a class="boring" href="#" onclick="$('#ingredient_add_inputs').append(createIngredientRow('100', 'g', '', 'method (e.g. diced)'));"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"/></a>
-		</div>
-
-		<hr/>
-
-		<div class="row">
-		    <label for="add_instructions_editor">Instructions:</label>
-		</div>
-
-		<div class="row">
-		    <textarea class="ckeditor" cols="80" id="add_instructions_editor" name="recipe_instructions" rows="10">dummy</textarea>
-		</div>
-
-		<div id="form-photoset">
-		    <hr/>
-
-		    <div class="row">
-			<label>List of photos:</label>
-		    </div>
-
-		    <div id="photo_add_inputs"></div>
-
-		    <div class="row">
-			<a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), recipeId);"><img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"/></a>
-		    </div>
-		</div>
 		<input type="hidden" name="form_type" value="add_recipe"/>
 		<input type="hidden" name="ingredient_count" value="0"/>
 		<input type="hidden" name="recipe_id" value="-1"/>
@@ -358,24 +271,6 @@ TODO: ajaxify show ingredients
 	    </form>
 	</div>
 
-  
-	<div id="dialog-photos" title="Add photos">
-	    <div class="dialog-messages"></div>
-
-	    <div class="row">
-		<label>List of photos:</label>
-	    </div>
-
-	    <div id="photo_new_inputs"></div>
-	    <a class="boring" href="#" onclick="addUpload(document.getElementById('photo_new_inputs'), recipeId);">
-		<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"/>
-	    </a>
-	</div>
-<!--
-<a class="boring" href="#" onclick="addUpload(document.getElementById('photo_add_inputs'), 17);">
-    <img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field"/>
-</a>
--->
 
 	<div id="demo">
 	    <table cellpadding="0" cellspacing="0" border="0" class="display" id="recipe_data">

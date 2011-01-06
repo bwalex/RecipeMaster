@@ -34,17 +34,25 @@ if ($_REQUEST['recipe_id']) {
                 $output['type'] = $form_type;
                 $output['whereOk'] = $_REQUEST['where_ok'];
                 $output['whereError'] = $_REQUEST['where_error'];
-		if (($form_type == "add_recipe") || ($form_type == "edit_recipe")) {
+		if ($form_type == "add_recipe") {
 			$new = 1;
                 } else {
 			$new = 0;
                 }
 
-		$recipe = new Recipe($recipe_id, $recipe_name, $new,
-		    $recipe_description, $recipe_instructions,
-		    $recipe_time_estimate, $recipe_serves);
-		
-		if ($form_type == "add_recipe") {
+		$recipe = new Recipe($recipe_id, $recipe_name, $new);
+
+                if ($form_type == "copy_recipe") {
+                    $recipe->id = -1;
+                    $recipe->setName($recipe->name.' (copy)');
+                    $n = $recipe->save();
+                    $output['id'] = $recipe->id;
+                    $output['rowsaffected'] = $n;
+
+                    if ($n > 0)
+			print_msg('Successfully copied recipe '.$recipe_name);
+		    print_msg("Rows affected: ".($n + $m));
+                } else if ($form_type == "add_recipe") {
 			if (!empty($_REQUEST['ing_name'])) {
 			    foreach ($_REQUEST['ing_name'] as $key => $ingredient_name) {
 				    if (empty($ingredient_name))
@@ -68,39 +76,6 @@ if ($_REQUEST['recipe_id']) {
 			if ($n > 0)
 				print_msg('Successfully added recipe '.$recipe_name);
 			print_msg("Rows affected: ".($n + $m));
-		} else if ($form_type == "edit_recipe") {
-			if (!empty($_REQUEST['ing_name'])) {
-			    foreach ($_REQUEST['ing_name'] as $key => $ingredient_name) {
-				    if (empty($ingredient_name))
-					continue;
-				    $ingredient_id = -1;
-				    $ingredient_qty = $_REQUEST['ing_qty'][$key];
-				    $ingredient_unit = $_REQUEST['ing_unit'][$key];
-				    $method = $_REQUEST['ing_method'][$key];
-				    
-				    $elem = $recipe->addIngredient($ingredient_qty, $ingredient_unit,
-					$method, $ingredient_id, $ingredient_name);
-                                    $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
-			    }
-			    /* XXX: maybe throw error? */
-			}
-			$n = $recipe->save(/* update = */1);
-                        $output['id'] = $recipe->id;
-                        $output['rowsaffected'] = $n;
-
-			if (!empty($_REQUEST['photo_id'])) {
-			    foreach ($_REQUEST['photo_id'] as $key => $photo_id) {
-				if ($photo_id >= 0) {
-				    // Edit caption and keep
-				    $photo = new Photo("recipe", $photo_id);
-				    $photo->updateCaption($_REQUEST['photo_caption'][$key]);
-				}
-			    }
-                        }
-
-			if ($n > 0)
-				print_msg('Successfully edited recipe '.$recipe_name);
-			print_msg("Rows affected: ".$n);
 		} else if ($form_type == "delete_recipe") {
 			$n = $recipe->delete();
 			if ($n > 0)
