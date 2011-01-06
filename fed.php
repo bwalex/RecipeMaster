@@ -3,7 +3,6 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <link type="text/css" href="css/fed.css" rel="stylesheet"/>
 <?php
     $editor = $_REQUEST['editor'];
 
@@ -11,11 +10,64 @@
         echo '
         <script type="text/javascript" src="tinymce/jscripts/tiny_mce/tiny_mce_popup.js"></script>
         <script type="text/javascript">
+
+            var FileBrowserDialogue = {
+                init : function () {
+                    // Here goes your code for setting your custom things onLoad.
+                },
+                mySubmit : function () {
+                    var URL = $("img.active").data("photo");
+                    var win = tinyMCEPopup.getWindowArg("window");
+            
+                    // insert information now
+                    win.document.getElementById(tinyMCEPopup.getWindowArg("input")).value = URL;
+            
+                    // are we an image browser
+                    if (typeof(win.ImageDialog) != "undefined") {
+                        // we are, so update image dimensions...
+                        if (win.ImageDialog.getImageData)
+                            win.ImageDialog.getImageData();
+            
+                        // ... and preview if necessary
+                        if (win.ImageDialog.showPreviewImage)
+                            win.ImageDialog.showPreviewImage(URL);
+                    }
+            
+                    // close popup window
+                    tinyMCEPopup.close();
+                }
+            }
             tinyMCEPopup.onInit.add(FileBrowserDialogue.init, FileBrowserDialogue);
+        </script>
+        ';
+    } else if ($editor == 'ckeditor') {
+        echo '
+        <style type="text/css">
+            body {
+                background: none repeat scroll 0 0 #F0F0EE;
+                font-family: Verdana,Arial,Helvetica,sans-serif;
+                font-size: 11px;
+                margin: 8px 8px 0;
+                padding: 0;
+            }
+        </style>
+        <script type="text/javascript">
+
+            var FileBrowserDialogue = {
+                init : function () {
+                    // Here goes your code for setting your custom things onLoad.
+                },
+                mySubmit : function () {
+                    var URL = $("img.active").data("photo");
+                    window.opener.CKEDITOR.tools.callFunction('.$_REQUEST["CKEditorFuncNum"].', URL);
+                    window.close();
+                }
+            }
         </script>
         ';
     }
 ?>
+    <link type="text/css" href="css/fed.css" rel="stylesheet"/>
     <script type="text/javascript" src="js/jquery-1.4.4.min.js"></script>
     <script type="text/javascript" src="js/jquery.tools.min.js"></script>
 
@@ -23,34 +75,6 @@
         var recipeId = <?php echo $_REQUEST['recipe_id'] ?>;
         
 
-        var FileBrowserDialogue = {
-            init : function () {
-                // Here goes your code for setting your custom things onLoad.
-            },
-            mySubmit : function () {
-                // Here goes your code to insert the retrieved URL value into the original dialogue window.
-                // For example code see below.
-                var URL = $('img.active').data('photo');
-                var win = tinyMCEPopup.getWindowArg("window");
-        
-                // insert information now
-                win.document.getElementById(tinyMCEPopup.getWindowArg("input")).value = URL;
-        
-                // are we an image browser
-                if (typeof(win.ImageDialog) != "undefined") {
-                    // we are, so update image dimensions...
-                    if (win.ImageDialog.getImageData)
-                        win.ImageDialog.getImageData();
-        
-                    // ... and preview if necessary
-                    if (win.ImageDialog.showPreviewImage)
-                        win.ImageDialog.showPreviewImage(URL);
-                }
-        
-                // close popup window
-                tinyMCEPopup.close();
-            }
-        }
 
         function makeScrollable() {
             $(".scrollable").scrollable();

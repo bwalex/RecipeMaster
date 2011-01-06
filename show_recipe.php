@@ -551,7 +551,7 @@ TODO: add print stuff
 	      file : 'fed.php' + '?editor=tinymce' + '&type=' + type + '&recipe_id=' + recipeId,
 	      title : 'My File Browser',
 	      width : 800,  // Your dimensions may differ - toy around with them!
-	      height : 600,
+	      height : 700,
 	      resizable : "yes",
 	      inline : "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
 	      close_previous : "no"

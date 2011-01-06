@@ -89,6 +89,9 @@ function editrecipe(id) {
         document.add_recipe.recipe_name.value = recipe.name;
 	document.add_recipe.recipe_serves.value = recipe.serves;
         document.add_recipe.recipe_instructions.value = recipe.instructions;
+	CKEDITOR.config.filebrowserImageBrowseUrl = 'fed.php?editor=ckeditor&recipe_id=' + recipe.id;
+	CKEDITOR.config.filebrowserImageWindowWidth = '800';
+        CKEDITOR.config.filebrowserImageWindowHeight = '700';
         CKEDITOR.instances.add_instructions_editor.setData(recipe.instructions,
         function() {
             this.checkDirty(); // true
