@@ -29,6 +29,7 @@ function print_javascript($output) {
 	//var myObject = eval('(' + myJSONtext + ')');
 	echo '<script language="javascript" type="text/javascript">';
 	echo 'var obj = '.json_encode($output).';';
+	//echo 'console.log(obj);';
 	echo '	window.top.window.uploadDone(obj);';
 	echo '</script>';
 
@@ -66,6 +67,14 @@ if ($_REQUEST['recipe_id']) {
 		}
 		else if ($form_type == 'add_photo') {
 			$photo_caption = $_REQUEST['photo_caption'];
+			//$output['debug'] = $_FILES;
+
+			if ($_FILES['recipe_photo']['error'] /*!= UPLOAD_ERR_OK*/) {
+				$max_upload_size = min(let_to_num(ini_get('post_max_size')), let_to_num(ini_get('upload_max_filesize')));
+				throw new Exception("Maximum upload file size is ".($max_upload_size/(1024*1024))."MB.");
+				/* NOTREACHED */
+			}
+
 			$photo = new Photo("recipe", -1, $recipe->id, $photo_caption, $_FILES['recipe_photo']['tmp_name']);
 			$n = $photo->store();
 			$output['rowsaffected'] = $n;
