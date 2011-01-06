@@ -61,7 +61,7 @@ class Photo {
 		$export['parent_id'] = $this->parent_id;
 		$export['photo'] = $this->get();
 		$export['thumb'] = $this->getThumbnail();
-		$export['caption'] = $this->caption;
+		$export['caption'] = htmlspecialchars($this->caption);
 		$export['mime'] = $this->mime;
 		return $export;
 	}
@@ -158,7 +158,7 @@ class Photo {
 		if ($this->new == 1)
 			return NULL;
 
-		return $globalConfig['photo']['Path'].$this->id.'.'.$this->extension;
+		return $globalConfig['photo']['Path'].$this->table.'/'.$this->id.'.'.$this->extension;
 	}
 
 	function updateCaption($caption) {
@@ -186,7 +186,7 @@ class Photo {
 		if ($this->new == 1)
 			return NULL;
 
-		return $globalConfig['photo']['ThumbPath'].$this->id.'.jpg';
+		return $globalConfig['photo']['ThumbPath'].$this->table.'/'.$this->id.'.jpg';
 	}
 
 	function validate($photo = NULL) {
@@ -262,7 +262,7 @@ class Photo {
 		}
 
 		$this->id = $db->lastInsertId('id');
-		$path = $globalConfig['photo']['Path'].$this->id.'.'.$this->extension;
+		$path = $globalConfig['photo']['Path'].$this->table.'/'.$this->id.'.'.$this->extension;
 
 		if(copy($this->photo_data, $path)) {
 			/* Generate thumbnail */
@@ -296,7 +296,7 @@ class Photo {
 					throw new Exception('Unknown mime type in Photo->store(), this should have never happened!');
 			}
 			imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
-			imagejpeg($image_p, $globalConfig['photo']['ThumbPath'].$this->id.'.jpg');
+			imagejpeg($image_p, $globalConfig['photo']['ThumbPath'].$this->table.'/'.$this->id.'.jpg');
 			$this->new = 0;
 		} else {
 			throw new Exception('copying image failed');
@@ -306,6 +306,8 @@ class Photo {
 	}
 
 	function delete() {
+		global $globalConfig;
+
 		if ($this->new == 1)
 			return 0;
 
@@ -315,8 +317,8 @@ class Photo {
 		$preparedStatement->execute(array(':id' => $this->id));
 		$n = $preparedStatement->rowCount();
 
-		unlink('photos/'.$this->id.'.'.$this->extension);
-		unlink('thumbs/'.$this->id.'.jpg');
+		unlink($globalConfig['photo']['Path'].$this->table.'/'.$this->id.'.'.$this->extension);
+		unlink($globalConfig['photo']['ThumbPath'].$this->table.'/'.$this->id.'.jpg');
 		$this->id = -1;
 		$this->new = 1;
 		return $n;
