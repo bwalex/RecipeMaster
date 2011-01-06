@@ -134,8 +134,23 @@ function editrecipe(id) {
 }
 
 function deleterecipe(id) {
-    document.delete_recipe.recipe_id.value = id;
-    $(document.delete_recipe).submit();
+    $.confirm({
+	    'title'		: 'Delete Confirmation',
+	    'message'	: 'You are about to delete this item. <br />It cannot be restored at a later time! Continue?',
+	    'buttons'	: {
+		    'Yes' : {
+			    'class'	: 'blue',
+			    'action': function(){
+				document.delete_recipe.recipe_id.value = id;
+				$(document.delete_recipe).submit();
+			    }
+		    },
+		    'No' : {
+			    'class'	: 'gray',
+			    'action': function(){}	// Nothing to do in this case. You can as well omit the action property.
+		    }
+	    }
+    });
 }
 
 function deletePhoto(id) {

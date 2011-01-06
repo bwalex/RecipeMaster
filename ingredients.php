@@ -30,6 +30,10 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
     
     <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js"></script>
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/jquery.confirm.css" />
+    <script type="text/javascript" language="javascript" src="js/jquery.confirm.js"></script>
+
     <script type="text/javascript">
     //<![CDATA[
 	var oTable;
@@ -91,8 +95,23 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 	}
 
 	function deleteingredient(id) {
-	    document.delete_ingredient.ingredient_id.value = id;
-	    $(document.delete_ingredient).submit();
+	    $.confirm({
+		    'title'		: 'Delete Confirmation',
+		    'message'	: 'You are about to delete this item. <br />It cannot be restored at a later time! Continue?',
+		    'buttons'	: {
+			    'Yes' : {
+				    'class'	: 'blue',
+				    'action': function(){
+					document.delete_ingredient.ingredient_id.value = id;
+					$(document.delete_ingredient).submit();
+				    }
+			    },
+			    'No' : {
+				    'class'	: 'gray',
+				    'action': function(){}	// Nothing to do in this case. You can as well omit the action property.
+			    }
+		    }
+	    });
 	}
 
 	function printMsgs(data, type) {
