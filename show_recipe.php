@@ -400,6 +400,7 @@ TODO: add print stuff
 		"adding_row": addingRow,
 		"save_changes": 1,
 		"column": -1,
+		"mode": "saveChanges",
 		"data": oTable.fnGetData()
 	    };
 	    addingRow = 0;
@@ -415,11 +416,13 @@ TODO: add print stuff
 			/* Update the table, row by row */
 			console.log(data.deletedRows);
 			for (var i in data.deletedRows) {
-			    oTable.fnDeleteRow(data.deletedRows[i]);
+			    oTable.fnDeleteRow(data.deletedRows[i]-i, function() {}, true);
 			}
+			console.log(data.aaData);
 			for (var i in data.aaData) {
 			    oTable.fnUpdate(data.aaData[i], i);
 			}
+			populatePage();
 		    } else {
 			$(oTable.fnGetNodes(data.errorRow)).addClass('error-row');
 			errorCol = data.errorCol;
@@ -877,6 +880,7 @@ TODO: add print stuff
 				    "recipe_id": recipeId,
 				    "adding_row": addingRow,
 				    "save_changes": 0,
+				    "mode": "saveChanges",
 				    "row_id": this.parentNode.getAttribute('id'),
 				    "column": oTable.fnGetPosition( this )[2],
 				    "data": oTable.fnGetData()
@@ -895,9 +899,11 @@ TODO: add print stuff
 					    /* Update the table, row by row */
 					    console.log(data.deletedRows);
 					    for (var i in data.deletedRows) {
-						oTable.fnDeleteRow(data.deletedRows[i]);
+						oTable.fnDeleteRow(data.deletedRows[i]-i);
 					    }
+					    console.log(data.aaData)
 					    for (var i in data.aaData) {
+						console.log(i);
 						oTable.fnUpdate(data.aaData[i], i);
 					    }
 
@@ -935,7 +941,7 @@ TODO: add print stuff
 			    {
 				//onblur : ignore  -- Click outside editable area is ignored. Pressing ESC cancels changes. Clicking submit button submits changes.
 				height    : "14px",
-				onblur : 'ignore',
+				//onblur : 'ignore',
 				type      : "autocomplete",
 				tooltip   : 'Click to edit...',
 				autocomplete : {
@@ -1101,16 +1107,16 @@ TODO: add print stuff
 
 	<div class="container_16 clearfix noprint">
 	    <a name="detailednutri" id="detailednutri"></a>
-	    <h2 id="acc_head">
+	    <h2>
 		    <span class="editsection">
-			<a class="boring" href="#" onclick="fnClickAddRow()" title="Add a row">
+			<a class="boring" href="#detailednutri" onclick="fnClickAddRow();" title="Add a row">
 			    <img class="boring" src="icons/add.png" alt="add a row"/>
 			</a>
-			<a class="boring" href="#" onclick="saveChanges()" title="Save Changes">
-			    <img class="boring" src="icons/table_save.png" alt="add a row"/>
+			<a class="boring" href="#" onclick="saveChanges();" title="Save Changes">
+			    <img class="boring" src="icons/table_save.png" alt="save changes"/>
 			</a>
 		    </span>
-		    <span><a style="text-decoration: none; color: #000000;" href="#detailednutri">Detailed Nutrition Facts and Sandbox</a></span>
+		    <span id="acc_head"><a style="text-decoration: none; color: #000000;" href="#detailednutri">Detailed Nutrition Facts and Sandbox</a></span>
 	    </h2>
 	    <div id="acc_content">
 		<!--

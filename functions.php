@@ -142,6 +142,9 @@ class Photo {
 		} else {
 			if ($data == NULL || $parent_id == NULL)
 				throw new Exception('New photo needs data/file and a parent_id! (' . $data . ', ' . $parent_id . ')');
+			if ($parent_id < 0) {
+				throw new Exception('Invalid photo parent id!');
+			}
 			$this->id = -1;
 			$this->parent_id = $parent_id;
 			$this->caption = $caption;
@@ -391,6 +394,7 @@ class Ingredient extends Model {
 	var $cholesterol;
 	var $others;
 	var $mtime;
+	var $photos;
 
 	function Ingredient($id, $name = '', $new = 0, $unit = '', $qty = 0, $typical_unit = '', $typical_qty = 0, $kcal = 0, $carb = 0, $sugar = 0, $fibre = 0, $protein = 0, $fat = 0, $sat_fat = 0, $sodium = 0, $cholesterol = 0, $others = '') {
 		$db = db_connect();
@@ -431,8 +435,10 @@ class Ingredient extends Model {
 			$this->cholesterol = $result['cholesterol'];
 			$this->others = $result['others'];
 			$this->mtime = strtotime($result['mtime']);
+
+			$this->photos = get_photos("ingredient", $this->id);
 		} else {
-			$this->name = $name;
+			$this->setName($name);
 			$this->id = $id;
 			$this->unit = $unit;
 			$this->qty = $qty;
@@ -449,6 +455,13 @@ class Ingredient extends Model {
 			$this->cholesterol = $cholesterol;
 			$this->others = $others;
 		}
+	}
+
+	function setName($name) {
+		if (empty($name))
+			throw new Exception('Empty ingredient names are not valid');
+		else
+			$this->name = $name;
 	}
 
 	function getNutriInfo($qty, $unit, $serves = 1, $dont_except = 0, $fractional_precision = 1) {
@@ -519,9 +532,16 @@ class Ingredient extends Model {
 
 	function delete() {
 		$db = db_connect();
-		$preparedStatement = $db->prepare("DELETE FROM ingredients WHERE id=:ingredient_id");
+
+		$preparedStatement = $db->prepare("DELETE FROM ing_nutrients WHERE ingredient_id=:ingredient_id");
 		$preparedStatement->execute(array(':ingredient_id' => $this->id));
 		$n = $preparedStatement->rowCount();
+
+		$n += delete_photos("ingredient", $this->id);
+
+		$preparedStatement = $db->prepare("DELETE FROM ingredients WHERE id=:ingredient_id");
+		$preparedStatement->execute(array(':ingredient_id' => $this->id));
+		$n += $preparedStatement->rowCount();
 
 		return $n;
 	}
@@ -645,6 +665,7 @@ class Recipe {
 	var $time_estimate;
 	var $mtime;
 	var $serves;
+	var $photos;
 
 	/*
 	 * array of maps such as:

@@ -64,6 +64,21 @@ include('functions.php');
 		    return;
 		}
 
+		$('#ingredient_photos').empty();
+		$('#ingredient_info').empty();
+		$('#ingredient_qtyunit').empty();
+		$('#ingredient_nutrients').empty();
+		$('#ingredient_typical_qtyunit').empty();
+		$('#kcal').empty();
+		$('#carb').empty();
+		$('#sugar').empty();
+		$('#fat').empty();
+		$('#sat_fat').empty();
+		$('#protein').empty();
+		$('#fibre').empty();
+		$('#sodium').empty();
+		$('#cholesterol').empty();
+
 		$('#ingredient_name').text(ingredient.name);
 		$('#ingredient_qtyunit').text('Quantity: ' + ingredient.qty + ingredient.unit);
 		$('#ingredient_typical_qtyunit').text('Typical unit weight: ' + ingredient.typical_qty + ingredient.typical_unit);
@@ -77,6 +92,39 @@ include('functions.php');
 		$('#sodium').text(ingredient.sodium);
 		$('#cholesterol').text(ingredient.cholesterol);
 
+
+		if (ingredient.photos.length > 0) {
+		    //$('#ingredient_photos').append('<h2>Photos</h2>');
+		    if (RMConfig.photoViewer == 'highslide') {
+			var list = $('<ul></ul>').appendTo('#ingredient_photos');
+			for (var i in ingredient.photos) {
+			    var li = $('<li></li>').appendTo(list);
+			    var a = $('<a id="'+ingredient.photos[i].id+'" href="'+ingredient.photos[i].photo+'" title="'+ingredient.photos[i].caption+'" class="highslide">').appendTo(li);
+			    a.append('<img src="'+ingredient.photos[i].thumb+'" alt="photo of dish">');
+			    a.each(function() {
+				this.onclick = function() {
+				    return hs.expand(this, config1);
+				};
+			    });
+			}
+		    } else {
+			for (var i in ingredient.photos) {
+			    var a;
+			    if (RMConfig.photoViewer == 'prettyPhoto')
+				a = $('<a id="'+ingredient.photos[i].id+'" href="'+ingredient.photos[i].photo+'" title="'+ingredient.photos[i].caption+'" rel="prettyPhoto[gallery1]">').appendTo('#ingredient_photos');
+			    else
+				a = $('<a id="'+ingredient.photos[i].id+'" href="'+ingredient.photos[i].photo+'" title="'+ingredient.photos[i].caption+'" rel="gallery1">').appendTo('#ingredient_photos');
+			    
+			    a.append('<img src="'+ingredient.photos[i].thumb+'" alt="photo of dish">');
+			    if (RMConfig.photoViewer == 'fancybox')
+				a.fancybox();
+			    if (RMConfig.photoViewer == 'colorbox')
+				a.colorbox({maxHeight:"100%", maxWidth:"100%"});
+			}
+			if (RMConfig.photoViewer == 'prettyPhoto')
+			    $('#ingredient_photos a').prettyPhoto({theme:'facebook'});
+		    }
+		}
 		$('#loading-screen').data('overlay').close();
 	    },
 	    'json');
@@ -152,7 +200,7 @@ include('functions.php');
 	    <div class="grid_11">
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
-			<a class="boring editsection" href="#" id="recipe_ingredients_header" onclick="switchIngredientsToEdit();" title="Edit">
+			<a class="boring editsection" href="#" id="ingredient_qtys_header" onclick="switchIngredientsToEdit();" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
@@ -172,7 +220,7 @@ include('functions.php');
 	    <div class="grid_11">
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
-			<a class="boring editsection" href="#" id="recipe_ingredients_header" onclick="switchIngredientsToEdit();" title="Edit">
+			<a class="boring editsection" href="#" id="ingredient_nutritional_header" onclick="switchIngredientsToEdit();" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
@@ -231,10 +279,9 @@ include('functions.php');
 		    </div>
 		</div>
 
-		<!--<h2 id="recipe_preparation_header" style="clear: left; padding-top: 15px;">Preparation</h2>-->
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
-			<a class="boring editsection" href="#" id="recipe_preparation_header" title="Edit">
+			<a class="boring editsection" href="#" id="ingredient_additional_nutritional_header" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
@@ -267,7 +314,7 @@ include('functions.php');
 		
 		<h2>
 		    <span class="editsection">
-			<a class="boring editsection" href="#" id="recipe_preparation_header" title="Edit">
+			<a class="boring editsection" href="#" id="ingredient_info_header" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
@@ -289,7 +336,7 @@ include('functions.php');
 	<div class="container_16 clearfix">
 	    <h2>
 	    	<span class="editsection">
-		    <a class="boring editsection" href="#" id="recipe_photo_header" onclick="switchPhotosToEdit();" title="Edit">
+		    <a class="boring editsection" href="#" id="ingredient_photo_header" onclick="switchPhotosToEdit();" title="Edit">
 		        <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 		    </a>
 		</span>

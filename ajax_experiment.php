@@ -41,10 +41,12 @@ try {
             $output .= '],';
             return $output;
     }
-    
+
+    if (($_REQUEST['mode']) && ($_REQUEST['mode'] == 'saveChanges') /*XXX: completely retarded name */)
+        $recipe->clearIngredients();
+
     if ($_REQUEST['data']) {
         $data = $_REQUEST['data'];
-        $recipe->clearIngredients();
         foreach($data as $idx => $row) {
             $error_col = 0;
             $error_row = $idx;
@@ -53,7 +55,8 @@ try {
                 continue;
             }
             list($qty, $unit) = split(' ', $row[1]);
-            $elem = $recipe->addIngredient($qty, $unit, $row[2], -1, $row[0], 0 /* don't validate units */);
+            //0null b (diced) <-- null
+            $elem = $recipe->addIngredient($qty, $unit, ($row[2] != NULL)?($row[2]):'', -1, $row[0], 0 /* don't validate units */);
             $error_col = 1;
             /* validate units, etc */
             $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
