@@ -50,51 +50,14 @@ TODO: add print stuff
     <script type="text/javascript" src="js/jquery.tools.min.js"></script>
 
 <?php
-    if($globalConfig['photo']['Viewer'] == "highslide") {
-	echo '
-	    <!-- Highslide -->
-	    <script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
-	    </script>
-	    <script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8">
-	    </script>
-	    <link rel="stylesheet" type="text/css" href="highslide/highslide.css"/>
-	    <!--[if lt IE 7]>
-		<link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
-	    <![endif]-->
-	    ';
-    } else if($globalConfig['photo']['Viewer'] == "fancybox") {
-	echo '
-	    <!-- Fancybox -->
-	    <script type="text/javascript" src="fancybox/jquery.fancybox-1.3.4.js"></script>
-	    <link rel="stylesheet" href="fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
-	    ';
-    } if($globalConfig['photo']['Viewer'] == "colorbox") {
-	echo '
-	    <!-- Colorbox -->
-	    <script type="text/javascript" src="colorbox/colorbox/jquery.colorbox-min.js"></script>
-	    <link rel="stylesheet" href="colorbox/example'.$globalConfig['photo']['Colorbox']['Style'].'/colorbox.css" type="text/css" media="screen" />
-	';
-    } else if($globalConfig['photo']['Viewer'] == "prettyPhoto") {
-	echo '
-	    <!-- prettyPhoto -->
-	    <script type="text/javascript" src="prettyphoto/js/jquery.prettyPhoto.js"></script>
-	    <link rel="stylesheet" href="prettyphoto/css/prettyPhoto.css" type="text/css" media="screen" />
-	';
-    }
+    printExtraHeaders();
 ?>
 
     <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js">
 </script>
     <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
     </script>
-    <!--
-    <script type="text/javascript" src="ckeditor/ckeditor.js">
-</script>
-    <script type="text/javascript" src="ckeditor/adapters/jquery.js"></script>
-    <script type="text/javascript" src="ckeditor/plugins/save/plugin.js"></script>
-    -->
-    <script type="text/javascript" src="tinymce/jscripts/tiny_mce/jquery.tinymce.js"></script>
-    <script type="text/javascript" src="tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
+
     <script type="text/javascript" src="js/recipes.js">
     </script>
     <script type="text/javascript">
@@ -108,6 +71,7 @@ TODO: add print stuff
 	var origHTML = '';
 	var RMConfig = {
 	    photoViewer : "<?php echo $globalConfig['photo']['Viewer'] ?>",
+	    richEditor : "<?php echo $globalConfig['text']['richEditor'] ?>",
 	}
 
 
@@ -572,79 +536,85 @@ TODO: add print stuff
 		$('#recipe_preparation').empty();
 		var textarea = $('<textarea id="tinymce" style="width: 100%; height: 400px;">'+ html + '</textarea>').appendTo('#recipe_preparation');
 		
-		$(textarea).tinymce({
-		    //script_url : 'tinymce/tiny_mce.js',
-		    plugins : "safari,spellchecker,pagebreak,style,layer,table,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
-		    //imagemanager, filemanager
-
-		    theme : "advanced",
-		    theme_advanced_buttons1 : "mysave,myclose,|,preview,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
-		    theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,forecolor,backcolor",
-		    theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
-		    theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,spellchecker,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,blockquote,pagebreak,|,insertfile,insertimage",
-		    theme_advanced_toolbar_location : "top",
-		    theme_advanced_toolbar_align : "left",
-		    theme_advanced_statusbar_location : "bottom",
-		    theme_advanced_resizing : true,
-		    file_browser_callback: "myFileBrowser",
-
-		    //theme_advanced_buttons3_add : "myclose",
-
-		    setup : function(ed) {
-                        ed.addButton('mysave', {
-                                title : 'Apply/Save and Close',
-                                //image : 'themes/default/img/icons/save.gif',
-				image : 'icons/page_save.png',
-                                onclick : function() {
-					console.debug($(this).html());
-					html = $(this).html();
-                                        this.remove();
-					savePreparation(html);
-                                }
-                        });
-                        ed.addButton('myclose', {
-                                title : 'Close without saving',
-                                //image : 'themes/default/img/icons/save.gif',
-				image : 'icons/cancel.png',
-                                onclick : function() {
-					this.remove();
-					savePreparation(null);
-                                }
-                        });
-		    }
+		if (RMConfig.richEditor == 'tinymce') {
+		    $(textarea).tinymce({
+			//script_url : 'tinymce/tiny_mce.js',
+			plugins : "safari,spellchecker,pagebreak,style,layer,table,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
+			//imagemanager, filemanager
     
-
-		});
+			theme : "advanced",
+			theme_advanced_buttons1 : "mysave,myclose,|,preview,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
+			theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,forecolor,backcolor",
+			theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+			theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,spellchecker,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,blockquote,pagebreak,|,insertfile,insertimage",
+			theme_advanced_toolbar_location : "top",
+			theme_advanced_toolbar_align : "left",
+			theme_advanced_statusbar_location : "bottom",
+			theme_advanced_resizing : true,
+			file_browser_callback: "myFileBrowser",
+    
+			//theme_advanced_buttons3_add : "myclose",
+    
+			setup : function(ed) {
+			    ed.addButton('mysave', {
+				    title : 'Apply/Save and Close',
+				    //image : 'themes/default/img/icons/save.gif',
+				    image : 'icons/page_save.png',
+				    onclick : function() {
+					    console.debug($(this).html());
+					    html = $(this).html();
+					    this.remove();
+					    savePreparation(html);
+				    }
+			    });
+			    ed.addButton('myclose', {
+				    title : 'Close without saving',
+				    //image : 'themes/default/img/icons/save.gif',
+				    image : 'icons/cancel.png',
+				    onclick : function() {
+					    this.remove();
+					    savePreparation(null);
+				    }
+			    });
+			}
+		    });
+		} else if (RMConfig.richEditor == 'ckeditor') {
+		    $(textarea).ckeditor(function() {},
+			{
+			    filebrowserImageBrowseUrl : 'fed.php?editor=ckeditor&recipe_id=' + recipeId,
+			    filebrowserImageWindowWidth : '800',
+			    filebrowserImageWindowHeight : '700'
+			}
+		    );
+		}
 		
 		var a = $('<a class="boring editsection" id="recipe_preparation_header" href="#" title="Finish editing and save changes"></a>').replaceAll('#recipe_preparation_header');
 		a.click(function() {
-		    html = $('#tinymce').tinymce().getContent();
+		    var html = '';
+		    if (RMConfig.richEditor == 'tinymce') {
+			html = $('#tinymce').tinymce().getContent();
+			$('#tinymce').tinymce().remove();
+		    } else if (RMConfig.richEditor == 'ckeditor') {
+			editor = $('#tinymce').ckeditorGet();
+			html = editor.getData();
+			editor.destroy();
+		    }
 		    console.log(html);
-		    $('#tinymce').tinymce().remove();
 		    savePreparation(html);
 		});
 		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing and save changes">');
 
 		var a = $('<a class="boring editsection" id="recipe_preparation_header2" href="#" title="Finish editing without saving"></a>').insertBefore('#recipe_preparation_header');
 		a.click(function() {
-		    $('#tinymce').tinymce().remove();
+		    if (RMConfig.richEditor == 'tinymce')
+			$('#tinymce').tinymce().remove();
+		    else if (RMConfig.richEditor == 'ckeditor')
+			$('#tinymce').ckeditorGet().destroy();
+
 		    savePreparation(null);
 		});
 		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
 
-		/*
-		$(textarea).ckeditor(function() {},
-		    {
-			// needs: http://dev.ckeditor.com/ticket/4507
-			"saveFunction" : function(data, editor) {
-					    //console.log(editor);
-					    editor.destroy();
-					    savePreparation(data);
-					    
-					}
-		    }
-		);
-		*/
 	}
 
 	$(function() {

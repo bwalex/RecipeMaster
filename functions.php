@@ -1071,5 +1071,55 @@ function let_to_num($v){ //This function transforms the php.ini notation for num
     return $ret;
 }
 
+function printExtraHeaders()
+{
+	global $globalConfig;
+
+	if($globalConfig['photo']['Viewer'] == "highslide") {
+		echo '
+		<!-- Highslide -->
+		<script type="text/javascript" src="highslide/highslide-with-gallery.min.js">
+		</script>
+		<script type="text/javascript" src="highslide/highslide.config.js" charset="utf-8">
+		</script>
+		<link rel="stylesheet" type="text/css" href="highslide/highslide.css"/>
+		<!--[if lt IE 7]>
+		    <link rel="stylesheet" type="text/css" href="highslide/highslide-ie6.css" />
+		<![endif]-->
+		';
+	} else if($globalConfig['photo']['Viewer'] == "fancybox") {
+		echo '
+		<!-- Fancybox -->
+		<script type="text/javascript" src="fancybox/jquery.fancybox-1.3.4.js"></script>
+		<link rel="stylesheet" href="fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
+		';
+	} if($globalConfig['photo']['Viewer'] == "colorbox") {
+		echo '
+		<!-- Colorbox -->
+		<script type="text/javascript" src="colorbox/colorbox/jquery.colorbox-min.js"></script>
+		<link rel="stylesheet" href="colorbox/example'.$globalConfig['photo']['Colorbox']['Style'].'/colorbox.css" type="text/css" media="screen" />
+		';
+	} else if($globalConfig['photo']['Viewer'] == "prettyPhoto") {
+		echo '
+		<!-- prettyPhoto -->
+		<script type="text/javascript" src="prettyphoto/js/jquery.prettyPhoto.js"></script>
+		<link rel="stylesheet" href="prettyphoto/css/prettyPhoto.css" type="text/css" media="screen" />
+		';
+	}
+
+	if ($globalConfig['text']['richEditor'] == "tinymce") {
+		echo '
+		<!-- tinyMCE -->
+		<script type="text/javascript" src="tinymce/jscripts/tiny_mce/jquery.tinymce.js"></script>
+		<script type="text/javascript" src="tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
+		';
+	} else if ($globalConfig['text']['richEditor'] == "ckeditor") {
+		echo '
+		<!-- CKEditor -->
+		<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+		<script type="text/javascript" src="ckeditor/adapters/jquery.js"></script>
+		';
+	}
+}
 
 ?>

@@ -76,18 +76,6 @@ function copyrecipe(id) {
     $(document.copy_recipe).submit();
 }
 
-/*
- * This obviously doesn't belong here, but I don't want to lose it.
- *
-	CKEDITOR.config.filebrowserImageBrowseUrl = 'fed.php?editor=ckeditor&recipe_id=' + recipe.id;
-	CKEDITOR.config.filebrowserImageWindowWidth = '800';
-        CKEDITOR.config.filebrowserImageWindowHeight = '700';
-        CKEDITOR.instances.add_instructions_editor.setData(recipe.instructions,
-        function() {
-            this.checkDirty(); // true
-        });
-*/
-
 function deleterecipe(id) {
     $.confirm({
 	    'title'		: 'Delete Confirmation',
