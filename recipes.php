@@ -122,8 +122,6 @@ TODO: ajaxify show ingredients
 	    $('form').submit(function() {
 		clearMsgDivs();
 
-		alert($(this).serialize());
-
 		$("#dialog-submit").button("disable");
 		$.ajax({
 		    type: "POST",
@@ -136,9 +134,10 @@ TODO: ajaxify show ingredients
 			if (data.error == 0) {
 			    printMsgs(data, 'ok');
 
-			    if (data.type == 'add_recipe') {
+			    if ((data.type == 'add_recipe') || (data.type == 'copy_recipe')) {
 				recipeId = data.id;
 				$('#dialog').dialog('close');
+				location.href = "show_recipe.php?recipe_id="+recipeId;
 			    }
 			} else {
 			    recipeId = -1;

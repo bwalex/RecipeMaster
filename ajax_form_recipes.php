@@ -53,29 +53,13 @@ if ($_REQUEST['recipe_id']) {
 			print_msg('Successfully copied recipe '.$recipe_name);
 		    print_msg("Rows affected: ".($n + $m));
                 } else if ($form_type == "add_recipe") {
-			if (!empty($_REQUEST['ing_name'])) {
-			    foreach ($_REQUEST['ing_name'] as $key => $ingredient_name) {
-				    if (empty($ingredient_name))
-					continue;
-				    $ingredient_id = -1;
-				    $ingredient_qty = $_REQUEST['ing_qty'][$key];
-				    $ingredient_unit = $_REQUEST['ing_unit'][$key];
-				    $method = $_REQUEST['ing_method'][$key];
-				    
-				    $elem = $recipe->addIngredient($ingredient_qty, $ingredient_unit,
-					$method, $ingredient_id, $ingredient_name);
-                                    $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
-			    }
-			    /* XXX: maybe throw error */
-			}
-
-			$n = $recipe->save();
-                        $output['id'] = $recipe->id;
-                        $output['rowsaffected'] = $n;
-
-			if ($n > 0)
-				print_msg('Successfully added recipe '.$recipe_name);
-			print_msg("Rows affected: ".($n + $m));
+                    $n = $recipe->save();
+                    $output['id'] = $recipe->id;
+                    $output['rowsaffected'] = $n;
+                    
+                    if ($n > 0)
+                        print_msg('Successfully added recipe '.$recipe_name);
+                    print_msg("Rows affected: ".($n + $m));
 		} else if ($form_type == "delete_recipe") {
 			$n = $recipe->delete();
 			if ($n > 0)
