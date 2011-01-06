@@ -1,3 +1,25 @@
+input {
+	background-color: white;
+	border-color: #666;
+	border-width: 1px;
+	border-style: solid;
+}
+
+.sortable-placeholder {
+	background-color: #F7B64B;
+	height: 2.5em;
+	line-height: 2.2em;
+}
+
+.sortable-outline {
+	border-color: #ccc;
+	border-style: dashed;
+	border-width: 1px;
+	margin-top: 5px;
+	padding-left: 10px;
+}
+
+
 h2 .editsection {
 	font-size: 80%;
 }

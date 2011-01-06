@@ -158,6 +158,11 @@ TODO: add print stuff
 			div.append(createIngredientRow(recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].Ingredient.name, recipe.ingredients[i].method));
 		    }
 		}
+		$( "#ingredient_add_inputs" ).sortable({
+			placeholder: "sortable-placeholder"
+		});
+		$( "#ingredient_add_inputs" ).disableSelection();
+
 		var div = $('<div class="row"></div>').appendTo('#recipe_ingredients');
 		var a = $('<a class="boring" href="#"></a>').appendTo(div);
 		a.click(function() {

@@ -15,7 +15,7 @@ function createselect(name, options) {
 }
 
 function createIngredientRow(qty, unit, name, method) {
-    var row = $('<div class="row"></div>');
+    var row = $('<div class="row sortable-outline"></div>');
 
     row.append('<input type="text" size="5" name="ing_qty[]" value="'+ qty +'">');
 
