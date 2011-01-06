@@ -93,12 +93,14 @@
                 },
                 function(recipe) {
                     if (recipe.exception) {
-                        alert(recipe.exception);
+                        $('#content').empty();
+                        $('#content').append('<h2>' + recipe.exception + '</h2>');
                         return;
                     }
                     var count = recipe.photos.length;
                     if (count == 0) {
-                        
+                        $('#content').empty();
+                        $('#content').append('<h2>Recipe &quot;' + recipe.name + '&quot; has no photos yet. Please upload some and try again.</h2>');
                         return;
                     }
                     var segments = Math.ceil(count/5);
@@ -126,7 +128,7 @@
 </head>
 
 <body>
-
+<div id="content">
 <div id="image_browser" class="clearfix">
     <!-- wrapper element for the large image --> 
     <div id="image_wrap"> 
@@ -155,6 +157,7 @@
 </div>
 <div style="text-align: center; margin-top: 20px;">
 <a href="#" onClick="FileBrowserDialogue.mySubmit();"><span id="select-button">Select image</span></a>
+</div>
 </div>
 </body>
 </html>
