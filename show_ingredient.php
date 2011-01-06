@@ -51,6 +51,38 @@ include('functions.php');
 	    richEditor : "<?php echo $globalConfig['text']['richEditor'] ?>",
 	}
 
+
+	function populatePage() {
+	    $('#loading-screen').data('overlay').load();
+	    $.post("ajax_formdata.php", {
+		ingredient: ingredientId
+	    },
+	    function(ingredient) {
+		// format and output result
+		if (ingredient.exception) {
+		    alert(ingredient.exception);
+		    return;
+		}
+
+		$('#ingredient_name').text(ingredient.name);
+		$('#ingredient_qtyunit').text('Quantity: ' + ingredient.qty + ingredient.unit);
+		$('#ingredient_typical_qtyunit').text('Typical unit weight: ' + ingredient.typical_qty + ingredient.typical_unit);
+		$('#kcal').text(ingredient.kcal);
+		$('#carb').text(ingredient.carb);
+		$('#sugar').text(ingredient.sugar);
+		$('#fat').text(ingredient.fat);
+		$('#sat_fat').text(ingredient.sat_fat);
+		$('#protein').text(ingredient.protein);
+		$('#fibre').text(ingredient.fibre);
+		$('#sodium').text(ingredient.sodium);
+		$('#cholesterol').text(ingredient.cholesterol);
+
+		$('#loading-screen').data('overlay').close();
+	    },
+	    'json');
+	}
+
+
 	$(function() {
 	    $('#loading-screen').overlay({
 		    top: 260,
@@ -65,7 +97,7 @@ include('functions.php');
 		    speed: 100,
 		    load: true
 	    });
-	    $('#loading-screen').data('overlay').close();
+	    populatePage();
 	});
     //]]>
     </script>
@@ -105,7 +137,7 @@ include('functions.php');
 
 	<div class="container_16">
 	    <div class="grid_15">
-		<h1 id="recipe_name" style="margin-bottom: 8px">DUMMY_INGREDIENT_NAME</h1>
+		<h1 id="ingredient_name" style="margin-bottom: 8px">DUMMY_INGREDIENT_NAME</h1>
 	    </div>
 	    <div class="grid_1" style="padding-top: 20px">
 		<span class="noprint">
@@ -152,32 +184,31 @@ include('functions.php');
 			<table>
 			    <tr>
 				<td>Calories:</td>
-				<td><span id="kcal">555</span>kcal</td>
+				<td><span id="kcal">DUMMY</span> kcal</td>
 			    </tr>
 			    <tr>
 				<td>Carbohydrates:</td>
-				<td><span id="carb">37</span>g</td>
+				<td><span id="carb">DUMMY</span>g</td>
 			    </tr>
 			    <tr>
 				<td>Fat:</td>
-				<td><span id="fat">37</span>g</td>
-				
+				<td><span id="fat">DUMMY</span>g</td>
 			    </tr>
 			    <tr>
 				<td>Protein:</td>
-				<td><span id="protein">9.1</span>g</td>
+				<td><span id="protein">DUMMY</span>g</td>
 			    </tr>
 			    <tr>
 				<td>Fibre:</td>
-				<td><span id="fibre">9.1</span>g</td>
+				<td><span id="fibre">DUMMY</span>g</td>
 			    </tr>
 			    <tr>
 				<td>Sodium:</td>
-				<td><span id="sodium">9.1</span>g</td>
+				<td><span id="sodium">DUMMY</span>mg</td>
 			    </tr>
 			    <tr>
 				<td>Cholesterol:</td>
-				<td><span id="cholesterol">9.1</span>g</td>
+				<td><span id="cholesterol">DUMMY</span>mg</td>
 			    </tr>
 
 			</table>
@@ -190,11 +221,11 @@ include('functions.php');
 			    </tr>
 			    <tr>
 				<td>of which sugars:</td>
-				<td><span id="sugar">37</span>g</td>
+				<td><span id="sugar">DUMMY</span>g</td>
 			    </tr>
 			    <tr>
 				<td>of which saturated:</td>
-				<td><span id="sat_fat">37</span>g</td>
+				<td><span id="sat_fat">DUMMY</span>g</td>
 			    </tr>
 			</table>
 		    </div>
