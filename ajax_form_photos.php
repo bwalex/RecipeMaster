@@ -41,19 +41,19 @@ try {
 	$output['type'] = $form_type;
         $output['whereOk'] = $_REQUEST['where_ok'];
         $output['whereError'] = $_REQUEST['where_error'];
-	$parent_id = -1;
-	$photo_type = '';
-	if ($_REQUEST['recipe_id']) {
-		$recipe_id = $_REQUEST['recipe_id'];
-		$recipe = new Recipe($recipe_id);
-		$parent_id = $recipe->id;
-		$photo_type = 'recipe';
-	} else if ($_REQUEST['ingredient_id']) {
-		$ingredient_id = $_REQUEST['ingredient_id'];
-		$ingredient = new Ingredient($ingredient_id);
-		$parent_id = $ingredient->id;
-		$photo_type = 'ingredient';
+	$parent_id = $_REQUEST['parent_id'];
+	$photo_type = $_REQUEST['parent_type'];
+
+	if ($photo_type == 'recipe') {
+		$recipe = new Recipe($parent_id);
+	} else if ($photo_type == 'ingredient') {
+		$ingredient = new Ingredient($parent_id);
+	} else {
+		throw new Exception('invalid parentType!');
 	}
+
+	$output['parentType'] = $photo_type;
+	$output['parentId'] = $parent_id;
 
 	if ($form_type == 'delete_photo') {
 		$photo = new Photo($photo_type, $photo_id, $parent_id);

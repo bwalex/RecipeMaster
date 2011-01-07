@@ -42,6 +42,7 @@ try {
             return $output;
     }
 
+    /* The other mode is the normal table data fetch, which should of course contain all ingredients */
     if (($_REQUEST['mode']) && ($_REQUEST['mode'] == 'saveChanges') /*XXX: completely retarded name */)
         $recipe->clearIngredients();
 
@@ -93,8 +94,11 @@ try {
     $n = 0;
 
     if ($_REQUEST['save_changes'] == 1) {
+        $output .= '"refresh": 1, ';
         $n = $recipe->save(1);
         $output .= '"msg": "Successfully edited recipe '.$recipe->name.'",';
+    } else {
+        $output .= '"refresh": 0, ';
     }
 
     $output .= '"rowsaffected": '.$n;
@@ -107,6 +111,7 @@ try {
     $output .= '"sEcho": '.intval($_REQUEST['sEcho']).', ';
     $output .= '"iTotalRecords": 0, ';
     $output .= '"error": 1, ';
+    $output .= '"refresh": 0, ';
     $output .= '"errorRow": '.$error_row.', ';
     $output .= '"errorCol": '.$error_col.', ';
     $output .= '"errmsg": "'.str_replace('"', '\"', $e->getMessage()).'", ';

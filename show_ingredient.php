@@ -37,8 +37,7 @@ include('functions.php');
     <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
     </script>
 
-    <script type="text/javascript" src="js/recipes.js">
-    </script>
+    <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript">
     //<![CDATA[
 	var addingRow = 0;
@@ -92,39 +91,8 @@ include('functions.php');
 		$('#sodium').text(ingredient.sodium);
 		$('#cholesterol').text(ingredient.cholesterol);
 
+		$('#ingredient_photos').append(createPhotoGallery(ingredient.photos, '1'));
 
-		if (ingredient.photos.length > 0) {
-		    //$('#ingredient_photos').append('<h2>Photos</h2>');
-		    if (RMConfig.photoViewer == 'highslide') {
-			var list = $('<ul></ul>').appendTo('#ingredient_photos');
-			for (var i in ingredient.photos) {
-			    var li = $('<li></li>').appendTo(list);
-			    var a = $('<a id="'+ingredient.photos[i].id+'" href="'+ingredient.photos[i].photo+'" title="'+ingredient.photos[i].caption+'" class="highslide">').appendTo(li);
-			    a.append('<img src="'+ingredient.photos[i].thumb+'" alt="photo of dish">');
-			    a.each(function() {
-				this.onclick = function() {
-				    return hs.expand(this, config1);
-				};
-			    });
-			}
-		    } else {
-			for (var i in ingredient.photos) {
-			    var a;
-			    if (RMConfig.photoViewer == 'prettyPhoto')
-				a = $('<a id="'+ingredient.photos[i].id+'" href="'+ingredient.photos[i].photo+'" title="'+ingredient.photos[i].caption+'" rel="prettyPhoto[gallery1]">').appendTo('#ingredient_photos');
-			    else
-				a = $('<a id="'+ingredient.photos[i].id+'" href="'+ingredient.photos[i].photo+'" title="'+ingredient.photos[i].caption+'" rel="gallery1">').appendTo('#ingredient_photos');
-			    
-			    a.append('<img src="'+ingredient.photos[i].thumb+'" alt="photo of dish">');
-			    if (RMConfig.photoViewer == 'fancybox')
-				a.fancybox();
-			    if (RMConfig.photoViewer == 'colorbox')
-				a.colorbox({maxHeight:"100%", maxWidth:"100%"});
-			}
-			if (RMConfig.photoViewer == 'prettyPhoto')
-			    $('#ingredient_photos a').prettyPhoto({theme:'facebook'});
-		    }
-		}
 		$('#loading-screen').data('overlay').close();
 	    },
 	    'json');

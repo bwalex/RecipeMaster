@@ -58,6 +58,7 @@ TODO: add print stuff
     <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
     </script>
 
+    <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript" src="js/recipes.js">
     </script>
     <script type="text/javascript">
@@ -86,9 +87,10 @@ TODO: add print stuff
 		$(this).removeClass('error-ingredients-tooltip');
 	    });
 
-	    var a = $('<a class="boring editsection" id="recipe_ingredients_header" href="#" title="Edit"></a>').replaceAll('#recipe_ingredients_header');
+	    var a = $('<a class="boring editsection" id="recipe_ingredients_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#recipe_ingredients_header');
 	    a.click(function() {
 	        switchIngredientsToEdit();
+		return false;
 	    });
 	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
 	    $('#recipe_ingredients_header2').remove();
@@ -128,14 +130,15 @@ TODO: add print stuff
 		$( "#ingredient_add_inputs" ).disableSelection();
 
 		var div = $('<div class="row"></div>').appendTo('#recipe_ingredients');
-		var a = $('<a class="boring" href="#"></a>').appendTo(div);
+		var a = $('<a class="boring" href="javascript:void(0);"></a>').appendTo(div);
 		a.click(function() {
 		    $('#ingredient_add_inputs').append(createIngredientRow('100', 'g', '', 'method (e.g. diced)'));
+		    return false;
 		});
 		a.append('<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">');
 
 
-		var a = $('<a class="boring editsection" id="recipe_ingredients_header" href="#" title="Finish editing"></a>').replaceAll('#recipe_ingredients_header');
+		var a = $('<a class="boring editsection" id="recipe_ingredients_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#recipe_ingredients_header');
 		a.click(function() {
 		    // Save
 		    $('#ingredient_add_inputs').children().filter('.error-field').removeClass('error-field');
@@ -192,14 +195,15 @@ TODO: add print stuff
 			    
 			}
 		    });
-		    
+		    return false;  
 		});
 		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
 
-		var a = $('<a class="boring editsection" id="recipe_ingredients_header2" href="#" title="Finish editing without saving"></a>').insertBefore('#recipe_ingredients_header');
+		var a = $('<a class="boring editsection" id="recipe_ingredients_header2" href="javascript:void(0);" title="Finish editing without saving"></a>').insertBefore('#recipe_ingredients_header');
 		a.click(function() {
 		    // Cancel
 		    switchIngredientsToNormal();
+		    return false;
 		});
 		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
 
@@ -239,19 +243,21 @@ TODO: add print stuff
 	function switchPhotosToNormal() {
 	    if (isPhotoEditing == 0)
 		return;
-	    var a = $('<a class="boring editsection" id="recipe_photo_header" href="#" title="Edit"></a>').replaceAll('#recipe_photo_header');
+	    var a = $('<a class="boring editsection" id="recipe_photo_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#recipe_photo_header');
 	    a.click(function() {
 	        switchPhotosToEdit();
+		return false;
 	    });
 	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
 	    isPhotoEditing = 0;
 	    populatePage();
+	    return false;
 	}
 
 	function switchPhotosToEdit()
 	{
 	    if (isPhotoEditing)
-		return;
+		return false;
 	    isPhotoEditing = 1;
 	    $.post("ajax_formdata.php", {
 		recipe: recipeId
@@ -268,25 +274,29 @@ TODO: add print stuff
 		if (recipe.photos.length > 0) {
 		    //$('#recipe_photos').append('<h2>Photos</h2>');
 		    for (var i in recipe.photos) {
-			div.append(createPhotoRow(recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption));
+			div.append(createPhotoRow('recipe', recipeId, recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption));
 		    }
 		}
 		var div = $('<div class="row"></div>').appendTo('#recipe_photos');
-		var a = $('<a class="boring" href="#"></a>').appendTo(div);
+		var a = $('<a class="boring" href="javascript:void(0);"></a>').appendTo(div);
 		a.click(function() {
-		    addUpload(document.getElementById('photo_add_inputs'), recipeId);
+		    addUpload(document.getElementById('photo_add_inputs'), 'recipe', recipeId);
+		    return false;
 		});
 		a.append('<img class="boring" src="icons/add.png" width="16" height="16" alt="add photo field">');
 
 
-		var a = $('<a class="boring editsection" id="recipe_photo_header" href="#" title="Finish editing"></a>').replaceAll('#recipe_photo_header');
+		var a = $('<a class="boring editsection" id="recipe_photo_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#recipe_photo_header');
 		a.click(function() {
 		    switchPhotosToNormal();
+		    return false;
 		});
 		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
 
 	    },
-	    'json');  
+	    'json');
+
+	    return false;
 	}
 
 	function populatePage() {
@@ -340,50 +350,17 @@ TODO: add print stuff
 		    }
 		}
 
-		for (var i in recipe.ingredients) {
-		    
-		    //$('#ingredient_add_inputs').append(createIngredientRow(recipe.ingredients[i].qty, recipe.ingredients[i].unit, recipe.ingredients[i].Ingredient.name, recipe.ingredients[i].method));
-		}
+		$('#recipe_photos').append(createPhotoGallery(recipe.photos, '1'));
 
-		if (recipe.photos.length > 0) {
-		    //$('#recipe_photos').append('<h2>Photos</h2>');
-		    if (RMConfig.photoViewer == 'highslide') {
-			var list = $('<ul></ul>').appendTo('#recipe_photos');
-			for (var i in recipe.photos) {
-			    //recipe.photos[i].id, recipe.photos[i].photo, recipe.photos[i].thumb, recipe.photos[i].caption));
-			    var li = $('<li></li>').appendTo(list);
-			    var a = $('<a id="'+recipe.photos[i].id+'" href="'+recipe.photos[i].photo+'" title="'+recipe.photos[i].caption+'" class="highslide">').appendTo(li);
-			    a.append('<img src="'+recipe.photos[i].thumb+'" alt="photo of dish">');
-			    a.each(function() {
-				this.onclick = function() {
-				    return hs.expand(this, config1);
-				};
-			    });
-			}
-		    } else {
-			for (var i in recipe.photos) {
-			    var a;
-			    if (RMConfig.photoViewer == 'prettyPhoto')
-				a = $('<a id="'+recipe.photos[i].id+'" href="'+recipe.photos[i].photo+'" title="'+recipe.photos[i].caption+'" rel="prettyPhoto[gallery1]">').appendTo('#recipe_photos');
-			    else
-				a = $('<a id="'+recipe.photos[i].id+'" href="'+recipe.photos[i].photo+'" title="'+recipe.photos[i].caption+'" rel="gallery1">').appendTo('#recipe_photos');
-			    
-			    a.append('<img src="'+recipe.photos[i].thumb+'" alt="photo of dish">');
-			    if (RMConfig.photoViewer == 'fancybox')
-				a.fancybox();
-			    if (RMConfig.photoViewer == 'colorbox')
-				a.colorbox({maxHeight:"100%", maxWidth:"100%"});
-			}
-			if (RMConfig.photoViewer == 'prettyPhoto')
-			    $('#recipe_photos a').prettyPhoto({theme:'facebook'});
-		    }
-		}
 		$('#loading-screen').data('overlay').close();
 	    },
 	    'json');
 	}
 
-	function saveChanges() {
+	function saveChanges(save) {
+	    /* Clear previous nutri info */
+	    $('#nutri_info').empty();
+
 	    /* Clear errors */
 	    $(oTable.fnGetNodes()).filter('.error-row').each(function() {
 		$('td', this).slice(0, 2).each(function() {
@@ -397,9 +374,8 @@ TODO: add print stuff
 
 	    var sendData = {
 		"recipe_id": recipeId,
-		"adding_row": addingRow,
-		"save_changes": 1,
-		"column": -1,
+		"adding_row": addingRow, // <-- ????
+		"save_changes": save,
 		"mode": "saveChanges",
 		"data": oTable.fnGetData()
 	    };
@@ -416,13 +392,16 @@ TODO: add print stuff
 			/* Update the table, row by row */
 			console.log(data.deletedRows);
 			for (var i in data.deletedRows) {
-			    oTable.fnDeleteRow(data.deletedRows[i]-i, function() {}, true);
+			    oTable.fnDeleteRow(data.deletedRows[i]-i);
 			}
 			console.log(data.aaData);
 			for (var i in data.aaData) {
 			    oTable.fnUpdate(data.aaData[i], i);
 			}
-			populatePage();
+			if (data.refresh)
+			    populatePage();
+			    /* populate nutri_info div */
+			    $('#nutri_info').append(createPhoto('nutrilabel.php?'+ $.param(data.nutriInfo[0]), null, 'Revised Nutritional Information'));
 		    } else {
 			$(oTable.fnGetNodes(data.errorRow)).addClass('error-row');
 			errorCol = data.errorCol;
@@ -447,6 +426,7 @@ TODO: add print stuff
 
 		}
 	    });
+	    return false;
 	}
 
 
@@ -471,6 +451,7 @@ TODO: add print stuff
 	function fnClickAddRow() {
 	    addingRow = 0; /* needed since draw callback will refresh data */
 	    oTable.fnAddData( ['', '', '', '', '','','','','','','',''] );
+	    return false;
 	}
 
 
@@ -503,9 +484,10 @@ TODO: add print stuff
 
 	    $('#recipe_preparation').append(data);
 
-	    var a = $('<a class="boring editsection" id="recipe_preparation_header" href="#" title="Edit"></a>').replaceAll('#recipe_preparation_header');
+	    var a = $('<a class="boring editsection" id="recipe_preparation_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#recipe_preparation_header');
 	    a.click(function() {
 	        activateEditor();
+		return false;
 	    });
 	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
 
@@ -591,7 +573,7 @@ TODO: add print stuff
 		    );
 		}
 		
-		var a = $('<a class="boring editsection" id="recipe_preparation_header" href="#" title="Finish editing and save changes"></a>').replaceAll('#recipe_preparation_header');
+		var a = $('<a class="boring editsection" id="recipe_preparation_header" href="javascript:void(0);" title="Finish editing and save changes"></a>').replaceAll('#recipe_preparation_header');
 		a.click(function() {
 		    var html = '';
 		    if (RMConfig.richEditor == 'tinymce') {
@@ -604,10 +586,11 @@ TODO: add print stuff
 		    }
 		    console.log(html);
 		    savePreparation(html);
+		    return false;
 		});
 		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing and save changes">');
 
-		var a = $('<a class="boring editsection" id="recipe_preparation_header2" href="#" title="Finish editing without saving"></a>').insertBefore('#recipe_preparation_header');
+		var a = $('<a class="boring editsection" id="recipe_preparation_header2" href="javascript:void(0);" title="Finish editing without saving"></a>').insertBefore('#recipe_preparation_header');
 		a.click(function() {
 		    if (RMConfig.richEditor == 'tinymce')
 			$('#tinymce').tinymce().remove();
@@ -615,9 +598,10 @@ TODO: add print stuff
 			$('#tinymce').ckeditorGet().destroy();
 
 		    savePreparation(null);
+		    return false;
 		});
 		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
-
+	    return false;
 	}
 
 	$(function() {
@@ -796,6 +780,7 @@ TODO: add print stuff
 	    //toggle the componenet with class msg_body
 	    $("#acc_head").add(".detailed_nutri_link").click(function() {
 		$("#acc_content").slideToggle(0);
+		return false;
 	    });
 
 	    $.editable.addInputType('autocomplete', {
@@ -857,96 +842,35 @@ TODO: add print stuff
 		    /* Apply the jEditable handlers to the table */
 		    
 		    $(oTable.fnGetNodes()).each(function() {
-			$('td', this).slice(0,3).editable(
+			/* Autocomplete type for name */
+			$('td', this).eq(0).editable(
 			    function(value, settings) {
-				/* Clear previous nutri info */
-				$('#nutri_info').empty();
-
-				/* Clear errors */
-				$(oTable.fnGetNodes()).filter('.error-row').each(function() {
-				    $('td', this).slice(0, 2).each(function() {
-					if ($(this).data('tooltip')) {
-					    $(this).data('tooltip').hide();
-					    $(this).data('tooltip', null);
-					}
-				    });
-				});
-				$(oTable.fnGetNodes()).filter('.error-row').removeClass('error-row');
-				
-
 				/* Update edited value in table */
 				oTable.fnUpdate(value, oTable.fnGetPosition( this )[0], oTable.fnGetPosition( this )[2]);
-				var sendData = {
-				    "recipe_id": recipeId,
-				    "adding_row": addingRow,
-				    "save_changes": 0,
-				    "mode": "saveChanges",
-				    "row_id": this.parentNode.getAttribute('id'),
-				    "column": oTable.fnGetPosition( this )[2],
-				    "data": oTable.fnGetData()
-				};
-				addingRow = 0;
-				//console.log(sendData);
-				$.ajax( {
-				    "dataType": 'json',
-				    "type": "GET",
-				    "url": "ajax_experiment.php",
-				    "data": sendData,
-				    "success": function(data) {
-					//console.log(data);
-
-					if (data.error == 0) {
-					    /* Update the table, row by row */
-					    console.log(data.deletedRows);
-					    for (var i in data.deletedRows) {
-						oTable.fnDeleteRow(data.deletedRows[i]-i);
-					    }
-					    console.log(data.aaData)
-					    for (var i in data.aaData) {
-						console.log(i);
-						oTable.fnUpdate(data.aaData[i], i);
-					    }
-
-					    /* populate nutri_info div */
-					    var a = $('<a href="nutrilabel.php?'+ $.param(data.nutriInfo[0]) +'" class="highslide">Revised Nutritional Information Label</a>').appendTo('#nutri_info');
-					    a.click(function() {
-						return hs.expand(this);
-					    });
-					} else {
-					    $(oTable.fnGetNodes(data.errorRow)).addClass('error-row');
-					    errorCol = data.errorCol;
-					    $('td', oTable.fnGetNodes(data.errorRow)).slice(errorCol, errorCol+1).attr('title', data.errmsg);
-					    $('td', oTable.fnGetNodes(data.errorRow)).slice(errorCol, errorCol+1).tooltip({
-						    position: "top center",
-						    events: {
-							def: ',',
-							input: ',',
-							widget: ',',
-							tooltip: ','
-							
-						    },
-						    effect: "fade",
-						    tipClass: "tooltip-arrow-black",
-						    opacity: 1
-					    });
-					    $('td', oTable.fnGetNodes(data.errorRow)).slice(errorCol, errorCol+1).data('tooltip').show();
-					    //console.log(data.errorRow);
-					    //console.log(oTable.fnGetNodes(data.errorRow));
-					}
-					
-				    }
-				} );
+				/* Validate and get new data */
+				saveChanges(0 /* Don't save */);
 				return(value);
 			    },
 			    {
-				//onblur : ignore  -- Click outside editable area is ignored. Pressing ESC cancels changes. Clicking submit button submits changes.
-				height    : "14px",
-				//onblur : 'ignore',
 				type      : "autocomplete",
 				tooltip   : 'Click to edit...',
 				autocomplete : {
 				    minLength : 1
 				}
+			    }
+			);
+			/* Normal type for the rest */
+			$('td', this).slice(1,3).editable(
+			    function(value, settings) {
+				/* Update edited value in table */
+				oTable.fnUpdate(value, oTable.fnGetPosition( this )[0], oTable.fnGetPosition( this )[2]);
+				/* Validate and get new data */
+				saveChanges(0 /* Don't save */);
+				return(value);
+			    },
+			    {
+				type      : "text",
+				tooltip   : 'Click to edit...'
 			    }
 			);
 		    })
@@ -1015,7 +939,7 @@ TODO: add print stuff
 	    <div class="grid_11">
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
-			<a class="boring editsection" href="#" id="recipe_ingredients_header" onclick="switchIngredientsToEdit();" title="Edit">
+			<a class="boring editsection" href="javascript:void(0);" id="recipe_ingredients_header" onclick="switchIngredientsToEdit();" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
@@ -1035,7 +959,7 @@ TODO: add print stuff
 		<!--<h2 id="recipe_preparation_header" style="clear: left; padding-top: 15px;">Preparation</h2>-->
 		<h2>
 		    <span class="editsection">
-			<a class="boring editsection" href="#" id="recipe_preparation_header" title="Edit">
+			<a class="boring editsection" href="javascript:void(0);" id="recipe_preparation_header" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
@@ -1058,7 +982,7 @@ TODO: add print stuff
 	<div class="container_16 clearfix">
 	    <h2>
 	    	<span class="editsection">
-		    <a class="boring editsection" href="#" id="recipe_photo_header" onclick="switchPhotosToEdit();" title="Edit">
+		    <a class="boring editsection" href="javascript:void(0);" id="recipe_photo_header" onclick="switchPhotosToEdit();" title="Edit">
 		        <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 		    </a>
 		</span>
@@ -1112,7 +1036,7 @@ TODO: add print stuff
 			<a class="boring" href="#detailednutri" onclick="fnClickAddRow();" title="Add a row">
 			    <img class="boring" src="icons/add.png" alt="add a row"/>
 			</a>
-			<a class="boring" href="#" onclick="saveChanges();" title="Save Changes">
+			<a class="boring" href="javascript:void(0);" onclick="saveChanges(1);" title="Save Changes">
 			    <img class="boring" src="icons/table_save.png" alt="save changes"/>
 			</a>
 		    </span>
