@@ -539,7 +539,7 @@ TODO: add print stuff
 			file_browser_callback: "myFileBrowser",
     
 			//theme_advanced_buttons3_add : "myclose",
-    
+
 			setup : function(ed) {
 			    ed.addButton('mysave', {
 				    title : 'Apply/Save and Close',
@@ -617,7 +617,7 @@ TODO: add print stuff
 		    success: function(data) {
 			if (data.error == 0) {
 			} else {
-			    recipeId = -1;
+			    // recipeId = -1;
 			    // printMsgs(data, 'error');
 			}
 		    },

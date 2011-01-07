@@ -395,8 +395,10 @@ class Ingredient extends Model {
 	var $others;
 	var $mtime;
 	var $photos;
+	var $info;
+	var $nutrients;
 
-	function Ingredient($id, $name = '', $new = 0, $unit = '', $qty = 0, $typical_unit = '', $typical_qty = 0, $kcal = 0, $carb = 0, $sugar = 0, $fibre = 0, $protein = 0, $fat = 0, $sat_fat = 0, $sodium = 0, $cholesterol = 0, $others = '') {
+	function Ingredient($id, $name = '', $new = 0, $unit = '', $qty = 0, $typical_unit = '', $typical_qty = 0, $kcal = 0, $carb = 0, $sugar = 0, $fibre = 0, $protein = 0, $fat = 0, $sat_fat = 0, $sodium = 0, $cholesterol = 0, $others = '', $info = '') {
 		$db = db_connect();
 		$result = 0;
 		$this->mtime = 0;
@@ -420,6 +422,7 @@ class Ingredient extends Model {
 			
 			$this->name = $result['name'];
 			$this->id = $result['id'];
+			$this->info = $result['info'];
 			$this->unit = $result['unit'];
 			$this->qty = $result['qty'];
 			$this->typical_unit = $result['typical_unit'];
@@ -440,10 +443,8 @@ class Ingredient extends Model {
 		} else {
 			$this->setName($name);
 			$this->id = $id;
-			$this->unit = $unit;
-			$this->qty = $qty;
-			$this->typical_unit = $typical_unit;
-			$this->typical_qty = $typical_qty;
+			$this->info = $info;
+			$this->setQtyUnit($qty, $unit, $typical_qty, $typical_unit);
 			$this->kcal = $kcal;
 			$this->carb = $carb;
 			$this->sugar = $sugar;
@@ -464,6 +465,42 @@ class Ingredient extends Model {
 			$this->name = $name;
 	}
 
+	function setQtyUnit($qty, $unit, $typical_qty, $typical_unit) {
+		if (!is_numeric($qty))
+			throw new Exception('Quantity must be a number!');
+		if ($qty <= 0)
+			throw new Exception('Quantity must be positive!');
+		if (!is_numeric($typical_qty))
+			throw new Exception('Typical weight must be a number!');
+		if ($typical_qty < 0)
+			throw new Exception('Typical weight cannot be negative!');
+
+		if (($unit != '') && ($unit != 'mg') && ($unit != 'g') && ($unit != 'kg') && ($unit != 'ml') && ($unit != 'l'))
+			throw new Exception('Unit must be one of the provided choices!');
+		if (($typical_unit != 'mg') && ($typical_unit != 'g') && ($typical_unit != 'kg'))
+			throw new Exception('Typical Unit Weight must be one of the provided choices (mg, g, kg)!');
+		if (($unit == '') && ($typical_qty == 0)) {
+			throw new Exception('If no unit is specified, a typical weight must be specified!');
+		}
+		$this->qty = $qty;
+		$this->unit = $unit;
+		$this->typical_qty = $typical_qty;
+		$this->typical_unit = $typical_unit;
+	}
+
+	function setNutri($key, $val) {
+		if (!isset($key))
+			throw new Exception('Key must be set!');
+		if (!isset($val))
+			throw new Exception('Value for '.$key.' must be set!');
+		if (!is_numeric($val))
+			throw new Exception('Value for '.$key.' must be a number!');
+		if ($val < 0)
+			throw new Exception('Value for '.$key.' cannot be negative!');
+
+		$this->$key = $val;
+	}
+
 	function getNutriInfo($qty, $unit, $serves = 1, $dont_except = 0, $fractional_precision = 1) {
 		$info = array();
 		$info['kcal'] = 0;
@@ -476,8 +513,9 @@ class Ingredient extends Model {
 		$info['sodium'] = 0;
 		$info['cholesterol'] = 0;
 
-		
-		if (($unit == '') && ($this->typical_qty != 0)) {
+		if (($unit == '') && ($this->typical_qty == 0))
+			throw new Exception('The unit cannot be zero as there is no typical weight specified');
+		if (($unit == '')) {
 			$multiplier = $qty * $this->typical_qty/$this->qty;
 			$unit = $this->typical_unit;
 		} else {
@@ -551,7 +589,7 @@ class Ingredient extends Model {
 		$preparedStatement = $db->prepare('SELECT * FROM ingredients WHERE name LIKE :name');
 		$preparedStatement->execute(array(':name' => $this->name));
 		$result = $preparedStatement->fetch();
-		if ($result && $update == 0) {
+		if ($result && (($update == 0) || (($update == 1) && ($result['id'] != $this->id)))) {
 			throw new Exception('Tried to add new ingredient, but ingredient \''.$this->name.'\' already exists');
 			return -1;
 		}
@@ -564,9 +602,10 @@ class Ingredient extends Model {
 				throw new Exception('Tried to update ingredient, but ingredient doesn\'t exist');
 				return -1;
 			}
-			$preparedStatement = $db->prepare("UPDATE ingredients SET name=:ingredient_name, unit=:ingredient_unit, qty=:ingredient_qty, typical_unit=:ingredient_typical_unit, typical_qty=:ingredient_typical_qty, kcal=:ingredient_kcal, carb=:ingredient_carb, sugar=:ingredient_sugar, fibre=:ingredient_fibre, protein=:ingredient_protein, fat=:ingredient_fat, sat_fat=:ingredient_sat_fat, sodium=:ingredient_sodium, cholesterol=:ingredient_cholesterol,  others=:ingredient_others WHERE id=:ingredient_id");
+			$preparedStatement = $db->prepare("UPDATE ingredients SET name=:ingredient_name, info=:ingredient_info, unit=:ingredient_unit, qty=:ingredient_qty, typical_unit=:ingredient_typical_unit, typical_qty=:ingredient_typical_qty, kcal=:ingredient_kcal, carb=:ingredient_carb, sugar=:ingredient_sugar, fibre=:ingredient_fibre, protein=:ingredient_protein, fat=:ingredient_fat, sat_fat=:ingredient_sat_fat, sodium=:ingredient_sodium, cholesterol=:ingredient_cholesterol,  others=:ingredient_others WHERE id=:ingredient_id");
 			$preparedStatement->execute(array(
 				':ingredient_name' => $this->name,
+				':ingredient_info' => $this->info,
 				':ingredient_unit' => $this->unit,
 				':ingredient_qty' => $this->qty,
 				':ingredient_typical_unit' => $this->typical_unit,
@@ -586,10 +625,11 @@ class Ingredient extends Model {
 			$n = $preparedStatement->rowCount();
 			return $n;
 		} else {
-			$preparedStatement = $db->prepare("INSERT INTO ingredients (name, unit, qty, typical_unit, typical_qty, kcal, carb, sugar, fibre, protein, fat, sat_fat, sodium, cholesterol, others) ".
-				"VALUES (:ingredient_name, :ingredient_unit, :ingredient_qty, :ingredient_typical_unit, :ingredient_typical_qty, :ingredient_kcal, :ingredient_carb, :ingredient_sugar, :ingredient_fibre, :ingredient_protein, :ingredient_fat, :ingredient_sat_fat, :ingredient_sodium,  :ingredient_cholesterol,  :ingredient_others);");
+			$preparedStatement = $db->prepare("INSERT INTO ingredients (name, info, unit, qty, typical_unit, typical_qty, kcal, carb, sugar, fibre, protein, fat, sat_fat, sodium, cholesterol, others) ".
+				"VALUES (:ingredient_name, :ingredient_info, :ingredient_unit, :ingredient_qty, :ingredient_typical_unit, :ingredient_typical_qty, :ingredient_kcal, :ingredient_carb, :ingredient_sugar, :ingredient_fibre, :ingredient_protein, :ingredient_fat, :ingredient_sat_fat, :ingredient_sodium,  :ingredient_cholesterol,  :ingredient_others);");
 			$preparedStatement->execute(array(
 				':ingredient_name' => $this->name,
+				':ingredient_info' => $this->info,
 				':ingredient_unit' => $this->unit,
 				':ingredient_qty' => $this->qty,
 				':ingredient_typical_unit' => $this->typical_unit,
@@ -627,15 +667,14 @@ function get_all_ingredients($restrict_query = '', $tokens = NULL) {
 		$result = $db->query('SELECT * FROM ingredients');
 	} else {
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$preparedStatement = $db->prepare('SELECT * FROM ingredients '.$restrict_query);
+		$preparedStatement = $db->prepare('SELECT id FROM ingredients '.$restrict_query);
 		//echo $preparedStatement->queryString;
 		$preparedStatement->execute($tokens);
 		$result = $preparedStatement->fetchAll();
 	}
 	$i = 0;
 	foreach ($result as $row) {
-		$ingredients[$i++] = new Ingredient($row['id'], $row['name'], 1, $row['unit'], $row['qty'], $row['typical_unit'], $row['typical_qty'], $row['kcal'], $row['carb'], $row['sugar'], $row['fibre'], $row['protein'], $row['fat'], $row['sat_fat'], $row['sodium'], $row['cholesterol'], $row['others']);
-		//$ingredients[$i++] = new Ingredient($row['id']);
+		$ingredients[$i++] = new Ingredient($row['id']);
 	}
 
 	return $ingredients;

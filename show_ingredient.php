@@ -43,12 +43,358 @@ include('functions.php');
 	var addingRow = 0;
 	var ingredientId = <?php echo $_REQUEST['ingredient_id'] ?>;
 	var isEditing = 0;
+	var isQtyEditing = 0;
 	var isPhotoEditing = 0;
+	var isNutritionalEditing = 0;
 	var origHTML = '';
 	var RMConfig = {
 	    photoViewer : "<?php echo $globalConfig['photo']['Viewer'] ?>",
 	    richEditor : "<?php echo $globalConfig['text']['richEditor'] ?>",
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	function switchQtyToNormal() {
+	    if (isQtyEditing == 0)
+		return;
+
+	    $('#ingredient_qtys').find('.error-field').removeClass('error-field');
+	    $('.error-qtys-tooltip').each(function() {
+		$(this).data('tooltip').hide();
+		$(this).data('tooltip', null);
+		$(this).removeClass('error-qtys-tooltip');
+	    });
+
+	    $('#ingredient_qtys').empty();
+
+	    var a = $('<a class="boring editsection" id="ingredient_qtys_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#ingredient_qtys_header');
+	    a.click(function() {
+	        switchQtyToEdit();
+		return false;
+	    });
+	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
+	    $('#ingredient_qtys_header2').remove();
+	    isQtyEditing = 0;
+	    populatePage();
+	}
+
+	function switchQtyToEdit() {
+	    if (isQtyEditing)
+		return;
+	    isQtyEditing = 1;
+
+	    $.post("ajax_formdata.php", {
+		ingredient: ingredientId
+	    },
+	    function(ingredient) {
+		// format and output result
+		if (ingredient.exception) {
+		    alert(ingredient.exception);
+		    return;
+		}
+
+		$('#ingredient_qtys').empty();
+		
+		var form = $('<form id="ingredient_qty_form" action="ajax_editable.php" method="post"></form>').appendTo('#ingredient_qtys');
+		form.append('<input type="hidden" name="ingredient_id" value="'+ingredientId+'"/>');
+		form.append('<input type="hidden" name="edit_type" value="edit_qtys"/>');
+		
+		var div = $('<div id="ingredient_qtyunit" class="leftfixed"></div>').appendTo(form);
+		div.append('<label for="field_qty">Quantity: </label>');
+		div.append('<input type="text" size="5" name="field_qty" id="field_qty" value="'+ingredient.qty+'">');
+		div.append('<select name="field_unit" id="field_unit"><option></option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option></select>');
+		$('#field_unit').val(ingredient.unit);
+		
+		var div = $('<div id="ingredient_typical_qtyunit" class="rightfixed"></div>').appendTo(form);
+		div.append('<label for="field_typical_qty">Typical unit weight: </label>');
+		div.append('<input type="text" size="5" name="field_typical_qty" id="field_typical_qty" value="'+ingredient.typical_qty+'">');
+		div.append('<select name="field_typical_unit" id="field_typical_unit"><option>g</option><option>mg</option><option>kg</option></select>');
+		$('#field_typical_unit').val(ingredient.typical_unit);
+
+		var a = $('<a class="boring editsection" id="ingredient_qtys_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#ingredient_qtys_header');
+		a.click(function() {
+		    // Save
+		    $('#ingredient_qtys').find('.error-field').removeClass('error-field');
+		    $('.error-qtys-tooltip').each(function() {
+			$(this).data('tooltip').hide();
+			$(this).data('tooltip', null);
+			$(this).removeClass('error-qtys-tooltip');
+		    });
+
+		    $.ajax({
+			"dataType": 'json',
+			"type": "GET",
+			"url": "ajax_editable.php",
+			"data": $('#ingredient_qty_form').serialize(),
+			"success": function(data) {
+			    //console.log(data);
+    
+			    if (data.error == 0) {
+				switchQtyToNormal();
+			    } else {
+				if ((data.errorRow == '') || (data.errorRow == -1)) {
+				    alert(data.errmsg);
+				    return;
+				}
+				
+				$('#field_'+data.errorRow).parent().addClass('error-field');
+
+				input = $('#field_'+data.errorRow).filter('input');
+
+				input.attr('title', data.errmsg);
+				input.addClass('error-qtys-tooltip');
+				input.tooltip({
+					position: "top center",
+					//offset: [10, 150],
+					events: {
+					    def: ',',
+					    input: ',',
+					    widget: ',',
+					    tooltip: ','
+					    
+					},
+					effect: "fade",
+					tipClass: "tooltip-arrow-black",
+					opacity: 1
+				});
+				input.data('tooltip').show();
+			    }
+			    
+			}
+		    });
+		    return false;  
+		});
+		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
+
+		var a = $('<a class="boring editsection" id="ingredient_qtys_header2" href="javascript:void(0);" title="Finish editing without saving"></a>').insertBefore('#ingredient_qtys_header');
+		a.click(function() {
+		    // Cancel
+		    switchQtyToNormal();
+		    return false;
+		});
+		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
+		
+
+	    });
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	function switchNutritionalToNormal() {
+	    if (isNutritionalEditing == 0)
+		return;
+
+	    $('#ingredient_nutritional_information').find('.error-field').removeClass('error-field');
+	    $('.error-nutri-tooltip').each(function() {
+		$(this).data('tooltip').hide();
+		$(this).data('tooltip', null);
+		$(this).removeClass('error-nutri-tooltip');
+	    });
+
+	    $('#ingredient_nutri_form').find('input').remove();
+
+	    var a = $('<a class="boring editsection" id="ingredient_nutritional_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#ingredient_nutritional_header');
+	    a.click(function() {
+	        switchNutritionalToEdit();
+		return false;
+	    });
+	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
+	    $('#ingredient_nutritional_header2').remove();
+	    isNutritionalEditing = 0;
+	    populatePage();
+	}
+
+	function switchNutritionalToEdit() {
+	    if (isNutritionalEditing)
+		return;
+	    isNutritionalEditing = 1;
+	    var fields = [ "kcal", "carb", "fat", "protein", "fibre", "sodium", "cholesterol", "sugar", "sat_fat" ];
+
+	    $.post("ajax_formdata.php", {
+		ingredient: ingredientId
+	    },
+	    function(ingredient) {
+		// format and output result
+		if (ingredient.exception) {
+		    alert(ingredient.exception);
+		    return;
+		}
+
+		console.log($('#ingredient_nutritional_information'));
+
+		$('#ingredient_nutri_form').find('input').remove();
+		$('#ingredient_nutri_form').prepend('<input type="hidden" name="ingredient_id" value="'+ingredientId+'"/>');
+		$('#ingredient_nutri_form').prepend('<input type="hidden" name="edit_type" value="edit_nutritional"/>');
+
+		for (var i in fields) {
+		    $('#'+fields[i]).empty();
+		    $('#'+fields[i]).append('<input name="field_'+fields[i]+'" id="field_'+fields[i]+'" type="text" size="5" value="'+ingredient[fields[i]]+'"/>');
+		}
+
+		var a = $('<a class="boring editsection" id="ingredient_nutritional_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#ingredient_nutritional_header');
+		a.click(function() {
+		    // Save
+		    $('#ingredient_nutritional_information').find('.error-field').removeClass('error-field');
+		    $('.error-nutri-tooltip').each(function() {
+			$(this).data('tooltip').hide();
+			$(this).data('tooltip', null);
+			$(this).removeClass('error-nutri-tooltip');
+		    });
+		    console.log($('#ingredient_nutri_form'));
+		    console.log($('#ingredient_nutri_form').serialize());
+		    $.ajax({
+			"dataType": 'json',
+			"type": "GET",
+			"url": "ajax_editable.php",
+			"data": $('#ingredient_nutri_form').serialize(),
+			"success": function(data) {
+			    //console.log(data);
+    
+			    if (data.error == 0) {
+				switchNutritionalToNormal();
+			    } else {
+				if ((data.errorRow == '') || (data.errorRow == -1)) {
+				    alert(data.errmsg);
+				    return;
+				}
+				
+				$('#'+data.errorRow).addClass('error-field');
+				
+
+				input = $('#field_'+data.errorRow).filter('input');
+
+				input.attr('title', data.errmsg);
+				input.addClass('error-nutri-tooltip');
+				input.tooltip({
+					position: "top center",
+					//offset: [10, 150],
+					events: {
+					    def: ',',
+					    input: ',',
+					    widget: ',',
+					    tooltip: ','
+					    
+					},
+					effect: "fade",
+					tipClass: "tooltip-arrow-black",
+					opacity: 1
+				});
+				input.data('tooltip').show();
+				//console.log(data.errorRow);
+				//console.log(oTable.fnGetNodes(data.errorRow));
+			    }
+			    
+			}
+		    });
+		    return false;  
+		});
+		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
+
+		var a = $('<a class="boring editsection" id="ingredient_nutritional_header2" href="javascript:void(0);" title="Finish editing without saving"></a>').insertBefore('#ingredient_nutritional_header');
+		a.click(function() {
+		    // Cancel
+		    switchNutritionalToNormal();
+		    return false;
+		});
+		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
+		
+
+	    });
+	}
+
+
+	function switchPhotosToNormal() {
+	    if (isPhotoEditing == 0)
+		return;
+	    var a = $('<a class="boring editsection" id="ingredient_photo_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#ingredient_photo_header');
+	    a.click(function() {
+	        switchPhotosToEdit();
+		return false;
+	    });
+	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
+	    isPhotoEditing = 0;
+	    populatePage();
+	    return false;
+	}
+
+	function switchPhotosToEdit()
+	{
+	    if (isPhotoEditing)
+		return false;
+	    isPhotoEditing = 1;
+	    $.post("ajax_formdata.php", {
+		ingredient: ingredientId
+	    },
+	    function(ingredient) {
+		// format and output result
+		if (ingredient.exception) {
+		    alert(ingredient.exception);
+		    return;
+		}
+
+		$('#ingredient_photos').empty();
+		var div = $('<div id="photo_add_inputs"></div>').appendTo('#ingredient_photos');
+		if (ingredient.photos.length > 0) {
+		    //$('#ingredient_photos').append('<h2>Photos</h2>');
+		    for (var i in ingredient.photos) {
+			div.append(createPhotoRow('ingredient', ingredientId, ingredient.photos[i].id, ingredient.photos[i].photo, ingredient.photos[i].thumb, ingredient.photos[i].caption));
+		    }
+		}
+		var div = $('<div class="row"></div>').appendTo('#ingredient_photos');
+		var a = $('<a class="boring" href="javascript:void(0);"></a>').appendTo(div);
+		a.click(function() {
+		    addUpload(document.getElementById('photo_add_inputs'), 'ingredient', ingredientId);
+		    return false;
+		});
+		a.append('<img class="boring" src="icons/add.png" width="16" height="16" alt="add photo field">');
+
+
+		var a = $('<a class="boring editsection" id="ingredient_photo_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#ingredient_photo_header');
+		a.click(function() {
+		    switchPhotosToNormal();
+		    return false;
+		});
+		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
+
+	    },
+	    'json');
+
+	    return false;
+	}
+
+
+
+
+
 
 
 	function populatePage() {
@@ -63,11 +409,11 @@ include('functions.php');
 		    return;
 		}
 
+		$('#ingredient_nutri_form').find('input').remove();
 		$('#ingredient_photos').empty();
 		$('#ingredient_info').empty();
-		$('#ingredient_qtyunit').empty();
+		$('#ingredient_qtys').empty();
 		$('#ingredient_nutrients').empty();
-		$('#ingredient_typical_qtyunit').empty();
 		$('#kcal').empty();
 		$('#carb').empty();
 		$('#sugar').empty();
@@ -79,8 +425,10 @@ include('functions.php');
 		$('#cholesterol').empty();
 
 		$('#ingredient_name').text(ingredient.name);
-		$('#ingredient_qtyunit').text('Quantity: ' + ingredient.qty + ingredient.unit);
-		$('#ingredient_typical_qtyunit').text('Typical unit weight: ' + ingredient.typical_qty + ingredient.typical_unit);
+
+		$('<div id="ingredient_qtyunit" class="leftfixed"></div>').appendTo('#ingredient_qtys').text('Quantity: ' + ingredient.qty + ingredient.unit);
+		$('<div id="ingredient_typical_qtyunit" class="rightfixed"></div>').appendTo('#ingredient_qtys').text('Typical unit weight: ' + ingredient.typical_qty + ingredient.typical_unit);
+
 		$('#kcal').text(ingredient.kcal);
 		$('#carb').text(ingredient.carb);
 		$('#sugar').text(ingredient.sugar);
@@ -91,6 +439,8 @@ include('functions.php');
 		$('#sodium').text(ingredient.sodium);
 		$('#cholesterol').text(ingredient.cholesterol);
 
+		$('#ingredient_info').append(ingredient.info);
+
 		$('#ingredient_photos').append(createPhotoGallery(ingredient.photos, '1'));
 
 		$('#loading-screen').data('overlay').close();
@@ -99,7 +449,229 @@ include('functions.php');
 	}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	function saveInfo(data) {
+	    if (data != null) {
+		var sendData = {
+		    "ingredient_id": ingredientId,
+		    "edit_type": "edit_info",
+		    "edit_val" : data
+		};
+	    
+		$.ajax({
+		    "dataType": 'json',
+		    "type": "GET",
+		    "url": "ajax_editable.php",
+		    "data": sendData,
+		    "success": function(data) {
+			if (data.error == 0) {
+			} else {
+			    alert(data.errmsg);
+			}
+		    }
+		});
+	    }
+
+	    $('#ingredient_info').empty();
+
+	    if (data == null)
+		data = origHTML;
+
+	    $('#ingredient_info').append(data);
+
+	    var a = $('<a class="boring editsection" id="ingredient_info_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#ingredient_info_header');
+	    a.click(function() {
+	        activateEditor();
+		return false;
+	    });
+	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
+
+	    $('#ingredient_info_header2').remove();
+	    isEditing = 0;
+	}
+
+	function myFileBrowser (field_name, url, type, win) {
+	  tinyMCE.activeEditor.windowManager.open({
+	      file : 'fed.php' + '?editor=tinymce' + '&type=' + type + '&ingredient_id=' + ingredientId,
+	      title : 'My File Browser',
+	      width : 800,  // Your dimensions may differ - toy around with them!
+	      height : 700,
+	      resizable : "yes",
+	      inline : "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+	      close_previous : "no"
+	  }, {
+	      window : win,
+	      input : field_name
+	  });
+	  return false;
+	}
+
+	function activateEditor() {
+		if (isEditing)
+		    return false;
+
+		isEditing = 1;
+		var html = $('#ingredient_info').html();
+		origHTML = html;
+		$('#ingredient_info').empty();
+		var textarea = $('<textarea id="tinymce" style="width: 100%; height: 400px;">'+ html + '</textarea>').appendTo('#ingredient_info');
+		
+		if (RMConfig.richEditor == 'tinymce') {
+		    $(textarea).tinymce({
+			//script_url : 'tinymce/tiny_mce.js',
+			plugins : "safari,spellchecker,pagebreak,style,layer,table,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
+			//imagemanager, filemanager
+    
+			theme : "advanced",
+			theme_advanced_buttons1 : "mysave,myclose,|,preview,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
+			theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,forecolor,backcolor",
+			theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+			theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,spellchecker,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,blockquote,pagebreak,|,insertfile,insertimage",
+			theme_advanced_toolbar_location : "top",
+			theme_advanced_toolbar_align : "left",
+			theme_advanced_statusbar_location : "bottom",
+			theme_advanced_resizing : true,
+			file_browser_callback: "myFileBrowser",
+    
+			//theme_advanced_buttons3_add : "myclose",
+
+			setup : function(ed) {
+			    ed.addButton('mysave', {
+				    title : 'Apply/Save and Close',
+				    //image : 'themes/default/img/icons/save.gif',
+				    image : 'icons/page_save.png',
+				    onclick : function() {
+					    console.debug($(this).html());
+					    html = $(this).html();
+					    this.remove();
+					    saveInfo(html);
+				    }
+			    });
+			    ed.addButton('myclose', {
+				    title : 'Close without saving',
+				    //image : 'themes/default/img/icons/save.gif',
+				    image : 'icons/cancel.png',
+				    onclick : function() {
+					    this.remove();
+					    saveInfo(null);
+				    }
+			    });
+			}
+		    });
+		} else if (RMConfig.richEditor == 'ckeditor') {
+		    $(textarea).ckeditor(function() {},
+			{
+			    filebrowserImageBrowseUrl : 'fed.php?editor=ckeditor&ingredient_id=' + ingredientId,
+			    filebrowserImageWindowWidth : '800',
+			    filebrowserImageWindowHeight : '700'
+			}
+		    );
+		}
+		
+		var a = $('<a class="boring editsection" id="ingredient_info_header" href="javascript:void(0);" title="Finish editing and save changes"></a>').replaceAll('#ingredient_info_header');
+		a.click(function() {
+		    var html = '';
+		    if (RMConfig.richEditor == 'tinymce') {
+			html = $('#tinymce').tinymce().getContent();
+			$('#tinymce').tinymce().remove();
+		    } else if (RMConfig.richEditor == 'ckeditor') {
+			editor = $('#tinymce').ckeditorGet();
+			html = editor.getData();
+			editor.destroy();
+		    }
+		    console.log(html);
+		    saveInfo(html);
+		    return false;
+		});
+		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing and save changes">');
+
+		var a = $('<a class="boring editsection" id="ingredient_info_header2" href="javascript:void(0);" title="Finish editing without saving"></a>').insertBefore('#ingredient_info_header');
+		a.click(function() {
+		    if (RMConfig.richEditor == 'tinymce')
+			$('#tinymce').tinymce().remove();
+		    else if (RMConfig.richEditor == 'ckeditor')
+			$('#tinymce').ckeditorGet().destroy();
+
+		    saveInfo(null);
+		    return false;
+		});
+		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
+	    return false;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	$(function() {
+	    $('form').submit(function() {
+		$.ajax({
+		    type: "POST",
+		    timeout: 30000,
+		    /* in ms */
+		    url: this.action/* "ajax_form_ingredients.php" */,
+		    dataType: "json",
+		    data: $(this).serialize(),
+		    success: function(data) {
+			if (data.error == 0) {
+			} else {
+			    // ingredientId = -1;
+			    // printMsgs(data, 'error');
+			}
+		    },
+		    error: function(req, textstatus) {
+			alert('Request failed: ' + textstatus);
+		    }
+		});
+		return false;
+	    });
+
 	    $('#loading-screen').overlay({
 		    top: 260,
 		    target: '#loading-screen',
@@ -113,7 +685,88 @@ include('functions.php');
 		    speed: 100,
 		    load: true
 	    });
+
 	    populatePage();
+
+	    $('#ingredient_info_header').click(activateEditor);
+
+
+
+
+
+
+
+	    // make other stuff editable
+	    $('#ingredient_name').editable(
+		function(value, settings) {
+    		    /* Clear errors */
+
+		    if ($('#ingredient_name').data('tooltip')) {
+			$('#ingredient_name').data('tooltip').hide();
+			$('#ingredient_name').data('tooltip', null);
+		    }
+
+		    $('.error-field').removeClass('error-field');
+		    
+		    var sendData = {
+			"ingredient_id": ingredientId,
+			"edit_type": "edit_name",
+			"edit_val" : value
+		    };
+
+		    $.ajax( {
+			"dataType": 'json',
+			"type": "GET",
+			"url": "ajax_editable.php",
+			"data": sendData,
+			"success": function(data) {
+			    //console.log(data);
+    
+			    if (data.error == 0) {
+
+			    } else {
+				$('#ingredient_name').addClass('error-field');
+
+				$('#ingredient_name').attr('title', data.errmsg);
+				$('#ingredient_name').tooltip({
+					position: "top left",
+					offset: [10, 150],
+					events: {
+					    def: ',',
+					    input: ',',
+					    widget: ',',
+					    tooltip: ','
+					    
+					},
+					effect: "fade",
+					tipClass: "tooltip-arrow-black",
+					opacity: 1
+				});
+				$('#ingredient_name').data('tooltip').show();
+				//console.log(data.errorRow);
+				//console.log(oTable.fnGetNodes(data.errorRow));
+			    }
+			    
+			}
+		    } );
+		    return(value);
+		},
+		{
+		    //onblur : 'ignore',
+		    tooltip   : 'Click to edit...'
+		}
+	    );
+
+
+
+
+
+
+
+
+
+
+
 	});
     //]]>
     </script>
@@ -168,13 +821,13 @@ include('functions.php');
 	    <div class="grid_11">
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
-			<a class="boring editsection" href="#" id="ingredient_qtys_header" onclick="switchIngredientsToEdit();" title="Edit">
+			<a class="boring editsection" href="#" id="ingredient_qtys_header" onclick="switchQtyToEdit();" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
 		    <span>Quantities</span>
 		</h2>
-		<div class="row clearfix">
+		<div id="ingredient_qtys" class="row clearfix">
 		    <div id="ingredient_qtyunit" class="leftfixed">
 			Quantity: 100g
 		    </div>
@@ -188,63 +841,65 @@ include('functions.php');
 	    <div class="grid_11">
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
-			<a class="boring editsection" href="#" id="ingredient_nutritional_header" onclick="switchIngredientsToEdit();" title="Edit">
+			<a class="boring editsection" href="#" id="ingredient_nutritional_header" onclick="switchNutritionalToEdit();" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
 		    <span>Nutritional Information</span>
 		</h2>
 
-		<div class="row clearfix">
-		    <div class="leftfixed">
-			<table>
-			    <tr>
-				<td>Calories:</td>
-				<td><span id="kcal">DUMMY</span> kcal</td>
-			    </tr>
-			    <tr>
-				<td>Carbohydrates:</td>
-				<td><span id="carb">DUMMY</span>g</td>
-			    </tr>
-			    <tr>
-				<td>Fat:</td>
-				<td><span id="fat">DUMMY</span>g</td>
-			    </tr>
-			    <tr>
-				<td>Protein:</td>
-				<td><span id="protein">DUMMY</span>g</td>
-			    </tr>
-			    <tr>
-				<td>Fibre:</td>
-				<td><span id="fibre">DUMMY</span>g</td>
-			    </tr>
-			    <tr>
-				<td>Sodium:</td>
-				<td><span id="sodium">DUMMY</span>mg</td>
-			    </tr>
-			    <tr>
-				<td>Cholesterol:</td>
-				<td><span id="cholesterol">DUMMY</span>mg</td>
-			    </tr>
-
-			</table>
-		    </div>
-		    <div class="rightfixed">
-			<table>
-			    <tr>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-			    </tr>
-			    <tr>
-				<td>of which sugars:</td>
-				<td><span id="sugar">DUMMY</span>g</td>
-			    </tr>
-			    <tr>
-				<td>of which saturated:</td>
-				<td><span id="sat_fat">DUMMY</span>g</td>
-			    </tr>
-			</table>
-		    </div>
+		<div id="ingredient_nutritional_information" class="row clearfix">
+		    <form id="ingredient_nutri_form" name="ingredient_nutri_form" method="post" action="ajax_editable.php">
+			<div class="leftfixed">
+			    <table>
+				<tr>
+				    <td>Calories:</td>
+				    <td><span id="kcal">DUMMY</span> kcal</td>
+				</tr>
+				<tr>
+				    <td>Carbohydrates:</td>
+				    <td><span id="carb">DUMMY</span>g</td>
+				</tr>
+				<tr>
+				    <td>Fat:</td>
+				    <td><span id="fat">DUMMY</span>g</td>
+				</tr>
+				<tr>
+				    <td>Protein:</td>
+				    <td><span id="protein">DUMMY</span>g</td>
+				</tr>
+				<tr>
+				    <td>Fibre:</td>
+				    <td><span id="fibre">DUMMY</span>g</td>
+				</tr>
+				<tr>
+				    <td>Sodium:</td>
+				    <td><span id="sodium">DUMMY</span>mg</td>
+				</tr>
+				<tr>
+				    <td>Cholesterol:</td>
+				    <td><span id="cholesterol">DUMMY</span>mg</td>
+				</tr>
+    
+			    </table>
+			</div>
+			<div class="rightfixed">
+			    <table>
+				<tr>
+				    <td>&nbsp;</td>
+				    <td>&nbsp;</td>
+				</tr>
+				<tr>
+				    <td>of which sugars:</td>
+				    <td><span id="sugar">DUMMY</span>g</td>
+				</tr>
+				<tr>
+				    <td>of which saturated:</td>
+				    <td><span id="sat_fat">DUMMY</span>g</td>
+				</tr>
+			    </table>
+			</div>
+		    </form>
 		</div>
 
 		<h2 style="margin-bottom: 0px;">

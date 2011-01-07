@@ -72,10 +72,6 @@
     <script type="text/javascript" src="js/jquery.tools.min.js"></script>
 
     <script type="text/javascript">
-        var recipeId = <?php echo $_REQUEST['recipe_id'] ?>;
-        
-
-
         function makeScrollable() {
             $(".scrollable").scrollable();
      
@@ -113,18 +109,23 @@
     
         $(function() {
             $.post("ajax_formdata.php", {
-                    recipe: recipeId
+<?php
+        if ($_REQUEST['recipe_id'])
+            echo 'recipe : '.$_REQUEST['recipe_id'];
+        else if ($_REQUEST['ingredient_id'])
+            echo 'ingredient : '.$_REQUEST['ingredient_id'];
+?>
                 },
-                function(recipe) {
-                    if (recipe.exception) {
+                function(data) {
+                    if (data.exception) {
                         $('#content').empty();
-                        $('#content').append('<h2>' + recipe.exception + '</h2>');
+                        $('#content').append('<h2>' + data.exception + '</h2>');
                         return;
                     }
-                    var count = recipe.photos.length;
+                    var count = data.photos.length;
                     if (count == 0) {
                         $('#content').empty();
-                        $('#content').append('<h2>Recipe &quot;' + recipe.name + '&quot; has no photos yet. Please upload some and try again.</h2>');
+                        $('#content').append('<h2>Object &quot;' + data.name + '&quot; has no photos yet. Please upload some and try again.</h2>');
                         return;
                     }
                     var segments = Math.ceil(count/5);
@@ -137,9 +138,9 @@
                     for (var s = 0; s < segments; s = s+1) {
                         var div = $('<div></div>').appendTo('.items');
                         for (var j = 0; (i < count) && (j < 5); i = i+1, j = j+1) {
-                            var img = $('<img src="resize.php?width=100&height=75&photo='+recipe.photos[i].thumb+'" alt="photo of dish"/>').appendTo(div);
-                            img.data('photo', recipe.photos[i].photo);
-                            img.data('photoCaption', recipe.photos[i].caption);
+                            var img = $('<img src="resize.php?width=100&height=75&photo='+data.photos[i].thumb+'" alt="photo of dish"/>').appendTo(div);
+                            img.data('photo', data.photos[i].photo);
+                            img.data('photoCaption', data.photos[i].caption);
                         }
                     }
                     makeScrollable();
@@ -148,7 +149,7 @@
         });
     </script>
 
-    <title>Recipe Image Browser</title>
+    <title>Image Browser</title>
 </head>
 
 <body>

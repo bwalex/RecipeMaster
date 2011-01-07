@@ -1,3 +1,5 @@
+var seq = 0;
+
 function createPhoto(photo, thumb, caption) {
     var a = $('<a href="'+ photo +'" title="'+ caption +'" class="highslide">');
     if (thumb != null) {

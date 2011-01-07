@@ -1,5 +1,3 @@
-var seq = 0;
-
 function createselect(name, options) {
     var select = document.createElement("select");
     select.name = name;

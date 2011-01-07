@@ -88,6 +88,10 @@ tr.error-row {
 	background-color: red;
 }
 
+.error-field input {
+	background: #ffAAAA;
+}
+
 tr.error-row td.sorting_1 {
 	background-color: red;
 }
