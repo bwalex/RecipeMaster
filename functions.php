@@ -376,6 +376,169 @@ function get_photos($type, $parent_id) {
 	return $photos;
 }
 
+
+
+
+class Nutrient extends Model {
+	var $id;
+	var $name;
+	var $info;
+	var $rdi;
+	var $unit;
+
+	function Nutrient($id, $name = '', $info = '', $rdi = '', $unit = '') {
+		$db = db_connect();
+		$result = 0;
+		$this->mtime = 0;
+
+		if (!$new) {
+			if ($name != '') {
+				/* Get by name */
+				$preparedStatement = $db->prepare('SELECT * FROM nutrients WHERE name LIKE :name');
+				$preparedStatement->execute(array(':name' => $name));
+				$result = $preparedStatement->fetch();  
+			} else {
+				/* Get by ID */
+				$preparedStatement = $db->prepare("SELECT * FROM nutrients WHERE id=:id");
+				$preparedStatement->execute(array(':id' => $id));
+				$result = $preparedStatement->fetch();
+			}
+
+			if (!$result) {
+				throw new Exception('Nutrient doesn\'t exist!');
+			}
+			
+			$this->name = $result['name'];
+			$this->id = $result['id'];
+			$this->info = $result['info'];
+			$this->unit = $result['unit'];
+			$this->rdi = $result['rdi'];
+		} else {
+			$this->setName($name);
+			$this->id = $id;
+			$this->info = $info;
+			$this->unit = $unit;
+			$this->rdi = $rdi;
+		}
+	}
+
+	function setName($name) {
+		if (empty($name))
+			throw new Exception('Empty nutrient names are not valid');
+		else
+			$this->name = $name;
+	}
+
+	function save($update = 0) {
+		$db = db_connect();
+		$preparedStatement = $db->prepare('SELECT * FROM nutrients WHERE name LIKE :name');
+		$preparedStatement->execute(array(':name' => $this->name));
+		$result = $preparedStatement->fetch();
+		if ($result && (($update == 0) || (($update == 1) && ($result['id'] != $this->id)))) {
+			throw new Exception('Tried to add new nutrient, but \''.$this->name.'\' already exists');
+			return -1;
+		}
+
+		if ($update) {
+			$preparedStatement = $db->prepare("SELECT * FROM nutrients WHERE id=:id");
+			$preparedStatement->execute(array(':id' => $this->id));
+
+			if (!$preparedStatement->fetch()) {
+				throw new Exception('Tried to update nutrient, but nutrient doesn\'t exist');
+				return -1;
+			}
+			$preparedStatement = $db->prepare("UPDATE nutrients SET name=:name, info=:info, unit=:unit, rdi=:rdi WHERE id=:id");
+			$preparedStatement->execute(array(
+				':name' => $this->name,
+				':info' => $this->info,
+				':iunit' => $this->unit,
+				':rdi' => $this->rdi,
+				':id' => $this->id
+				));
+			$n = $preparedStatement->rowCount();
+			return $n;
+		} else {
+			$preparedStatement = $db->prepare("INSERT INTO nutrients (name, info, unit, rdi) ".
+				"VALUES (:name, :info, :unit, :rdi);");
+			$preparedStatement->execute(array(
+				':name' => $this->name,
+				':info' => $this->info,
+				':iunit' => $this->unit,
+				':rdi' => $this->rdi
+				));
+			$n = $preparedStatement->rowCount();
+			$preparedStatement = $db->prepare('SELECT id FROM nutrients WHERE name LIKE :name');
+			$preparedStatement->execute(array(':name' => $this->name));
+			if ($row = $preparedStatement->fetch()) {
+				$this->id = $row['id'];
+			} else {
+				throw new Exception('Error adding new nutrient');
+			}
+			return $n;
+		}
+	}
+
+	function delete() {
+		$db = db_connect();
+
+		$preparedStatement = $db->prepare("DELETE FROM nutrients WHERE id=:id");
+		$preparedStatement->execute(array(':id' => $this->id));
+		$n = $preparedStatement->rowCount();
+
+		return $n;
+	}
+}
+
+
+
+
+
+
+function get_all_nutrients($restrict_query = '', $tokens = NULL) {
+	$nutrients = array();
+	
+	$db = db_connect();
+	if ($restrict_query == '') {
+		$result = $db->query('SELECT * FROM nutrients');
+	} else {
+		$preparedStatement = $db->prepare('SELECT id FROM nutrients '.$restrict_query);
+		//echo $preparedStatement->queryString;
+		$preparedStatement->execute($tokens);
+		$result = $preparedStatement->fetchAll();
+	}
+	$i = 0;
+	foreach ($result as $row) {
+		$nutrients[$i++] = new Nutrient($row['id']);
+	}
+
+	return $nutrients;
+}
+
+
+function get_nutrients_count($restrict_query = '', $tokens = NULL) {
+	$nutrients = array();
+	
+	$db = db_connect();
+	if ($restrict_query == '') {
+		$result = $db->query('SELECT COUNT(id) FROM nutrients');
+		return $result->fetchColumn();
+	} else {
+		$preparedStatement = $db->prepare('SELECT COUNT(id) FROM nutrients '.$restrict_query);
+		$preparedStatement->execute($tokens);
+		return $preparedStatement->fetchColumn();
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
 class Ingredient extends Model {
 	var $name;
 	var $id;
@@ -439,6 +602,30 @@ class Ingredient extends Model {
 			$this->others = $result['others'];
 			$this->mtime = strtotime($result['mtime']);
 
+
+
+			$nuts = array();
+			$i = 0;
+
+			$preparedStatement = $db->prepare("SELECT * FROM ing_nutrients WHERE ingredient_id=:ingredient_id");
+			$preparedStatement->execute(array(':ingredient_id' => $this->id));
+			$result = $preparedStatement->fetchAll();
+			foreach ($result as $row) {
+				$elem = array();
+
+				$elem['qty'] = $row['qty'];
+				$elem['unit'] = $row['unit'];
+				$elem['Nutrient'] = new Nutrient($row['nutrient_id']);
+				if (!$elem['Nutrient']) {
+					throw new Exception('Problem with nutrient id='.$row['nutrient_id']);
+				}
+
+				$nuts[$i++] = $elem;
+			}
+			$this->nutrients = $nuts;
+
+
+
 			$this->photos = get_photos("ingredient", $this->id);
 		} else {
 			$this->setName($name);
@@ -455,7 +642,33 @@ class Ingredient extends Model {
 			$this->sodium = $sodium;
 			$this->cholesterol = $cholesterol;
 			$this->others = $others;
+			$this->nutrients = array();
 		}
+	}
+
+	function addNutrient($qty, $unit, $id, $name = '', $validate = 1) {
+		$elem = array();
+		$elem['qty'] = $qty;
+		$elem['unit'] = $unit;
+		$elem['Nutrient'] = new Nutrient($id, $name);
+
+		if ($validate) {
+			/* Validate units and qty */
+			if ((!is_numeric($qty)) || ($qty <= 0)) {
+				throw new Exception('"qty" needs to be a positive number');
+			}
+			if ($unit != $elem['Nutrient']->unit) {
+				throw new Exception('"unit" needs to match the unit of the nutrient');
+			}
+			//$elem['Nutrient']->...validate..
+		}
+
+		array_push($this->nutrients, $elem);
+		return $elem;
+	}
+
+	function clearNutrients() {
+		$this->nutrients = array();
 	}
 
 	function setName($name) {
@@ -623,7 +836,26 @@ class Ingredient extends Model {
 				':ingredient_id' => $this->id
 				));
 			$n = $preparedStatement->rowCount();
+
+
+			$preparedStatement = $db->prepare("DELETE FROM ing_nutrients WHERE ingredient_id=:ingredient_id");
+			$preparedStatement->execute(array(':ingredient_id' => $this->id));
+			$n += $preparedStatement->rowCount();
+
+			foreach ($this->nutrients as $nut) {
+				$preparedStatement = $db->prepare("INSERT INTO ing_nutrients (nutrient_id, ingredient_id, qty, unit) ".
+					"VALUES (:nutrient_id, :ingredient_id, :qty, :unit);");
+				$preparedStatement->execute(array(
+					':rnutrient_id' => $nut['Nutrient']->id,
+					':ingredient_id' => $this->id,
+					':qty' => $nut['qty'],
+					':unit' => $nut['unit']
+					));
+				$n += $preparedStatement->rowCount();
+			}
 			return $n;
+
+
 		} else {
 			$preparedStatement = $db->prepare("INSERT INTO ingredients (name, info, unit, qty, typical_unit, typical_qty, kcal, carb, sugar, fibre, protein, fat, sat_fat, sodium, cholesterol, others) ".
 				"VALUES (:ingredient_name, :ingredient_info, :ingredient_unit, :ingredient_qty, :ingredient_typical_unit, :ingredient_typical_qty, :ingredient_kcal, :ingredient_carb, :ingredient_sugar, :ingredient_fibre, :ingredient_protein, :ingredient_fat, :ingredient_sat_fat, :ingredient_sodium,  :ingredient_cholesterol,  :ingredient_others);");
@@ -653,6 +885,18 @@ class Ingredient extends Model {
 				$this->mtime = strtotime($row['mtime']);
 			} else {
 				throw new Exception('Error adding new ingredient');
+			}
+
+			foreach ($this->nutrients as $nut) {
+				$preparedStatement = $db->prepare("INSERT INTO ing_nutrients (nutrient_id, ingredient_id, qty, unit) ".
+					"VALUES (:nutrient_id, :ingredient_id, :qty, :unit);");
+				$preparedStatement->execute(array(
+					':rnutrient_id' => $nut['Nutrient']->id,
+					':ingredient_id' => $this->id,
+					':qty' => $nut['qty'],
+					':unit' => $nut['unit']
+					));
+				$n += $preparedStatement->rowCount();
 			}
 			return $n;
 		}
