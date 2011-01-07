@@ -62,7 +62,7 @@ $output .= '"aaData": [ ';
 if (!empty($ingredients)) {
     foreach ($ingredients as $ingredient) {
         $output .= '[';
-        $output .= '"'.str_replace('"', '\"',$ingredient->name.
+        $output .= '"'.str_replace('"', '\"','<a class="recipe" href="show_ingredient.php?ingredient_id='.$ingredient->id.'">'.$ingredient->name.'</a>'.
                                    '<a href="#" class="boring" onclick="editingredient(\''.$ingredient->id.'\');" ><img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/></a>'.
                                    '<a href="#" class="boring" onclick="deleteingredient(\''.$ingredient->id.'\');" ><img class="boring" src="icons/cross.png" width="16" height="16" alt="(delete)"/></a>'
                                     ).'",';
