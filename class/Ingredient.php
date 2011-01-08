@@ -26,7 +26,7 @@ class Ingredient {
 
 
 	public function toArray() {
-		$nutri_info = $this->getNutriInfo($this->qty, $this->uni, 1, 0, 1, 0); 
+		$nutri_info = $this->getNutriInfo($this->qty, $this->unit, 1, 0, 1, 0); 
 		$arr = get_object_vars($this);
 		$arr['nutri_info'] = $nutri_info;
 	    
@@ -63,7 +63,7 @@ class Ingredient {
 	}
 
 
-	function Ingredient($id, $name = '', $new = 0, $unit = '', $qty = 0, $typical_unit = '', $typical_qty = 0, $kcal = 0, $carb = 0, $sugar = 0, $fibre = 0, $protein = 0, $fat = 0, $sat_fat = 0, $sodium = 0, $cholesterol = 0, $others = '', $info = '') {
+	function Ingredient($id, $name = '', $new = 0, $unit = '', $qty = 0, $typical_unit = 'g', $typical_qty = 0, $kcal = 0, $carb = 0, $sugar = 0, $fibre = 0, $protein = 0, $fat = 0, $sat_fat = 0, $sodium = 0, $cholesterol = 0, $others = '', $info = '') {
 		$db = db_connect();
 		$result = 0;
 		$this->mtime = 0;
@@ -223,6 +223,7 @@ class Ingredient {
 	}
 
 	function getNutriInfo($qty, $unit, $serves = 1, $dont_except = 0, $fractional_precision = 1, $panic = 1) {
+                $ok = 0;
 		$info = array();
 		$info['kcal'] = 0;
 		$info['carb'] = 0;
@@ -242,10 +243,11 @@ class Ingredient {
 		}
 		if (($unit == '')) {
 			$multiplier = $qty * $this->typical_qty/$this->qty;
-			$unit = $this->typical_unit;
+                        $ok = 1;
+			//$unit = $this->typical_unit;
 		} else {
 			if ($this->qty == 0)
-				return NULL;
+				return $info;
 			$multiplier = $qty/$this->qty;
 		}
 		$multiplier /= $serves;
@@ -253,7 +255,10 @@ class Ingredient {
 			$unit = 'ml';
 			$multiplier *= 1000;
 		}
-		if ($unit == $this->unit) {
+
+                if ($ok) {
+                        /* Do nothing */
+                } else if ($unit == $this->unit) {
 			$multiplier *= 1;
 		} else if (($unit == 'g') && ($this->unit == 'ml')) {
 			$multiplier *= 1;
@@ -278,7 +283,11 @@ class Ingredient {
 			else
 				throw new Exception("unknown unit mismatch, '".$unit."' vs '".$this->unit."'");
 		}
-		
+
+                /* This means that the function was called from the ingredient itself. for myself the multiplier is always 1 */
+                if ($panic == 0)
+                    $multiplier = 1;
+
 		$info['kcal'] += round($this->kcal * $multiplier, $fractional_precision);
 		$info['carb'] += round($this->carb * $multiplier, $fractional_precision);
 		$info['sugar'] += round($this->sugar * $multiplier, $fractional_precision);

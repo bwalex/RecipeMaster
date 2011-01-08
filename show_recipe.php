@@ -852,6 +852,7 @@ TODO: add print stuff
 				return(value);
 			    },
 			    {
+				onblur : "submit",
 				type      : "autocomplete",
 				tooltip   : 'Click to edit...',
 				autocomplete : {

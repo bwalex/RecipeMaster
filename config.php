@@ -16,6 +16,6 @@ $globalConfig['photo']['Viewer'] = "highslide"; //Valid options: highslide, fanc
 $globalConfig['photo']['Colorbox']['Style'] = 1;       // Valid options: 1-5 (except 2, which is ugly!!)
 
 /* Text Editor Settings */
-$globalConfig['text']['richEditor'] = "ckeditor"; //Valid options: tinymce, ckeditor
+$globalConfig['text']['richEditor'] = "tinymce"; //Valid options: tinymce, ckeditor
 
 ?>
