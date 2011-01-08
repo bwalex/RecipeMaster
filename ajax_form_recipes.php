@@ -26,11 +26,6 @@ if ($_REQUEST['recipe_id']) {
 		$form_type = $_REQUEST['form_type'];
 		$recipe_name = $_REQUEST['recipe_name'];
 		$recipe_id = $_REQUEST['recipe_id'];
-		$recipe_instructions = $_REQUEST['recipe_instructions'];
-		$recipe_description = '';
-		$recipe_time_estimate = 60;
-                $recipe_serves = $_REQUEST['recipe_serves'];
-		$ingredient_count = $_REQUEST['ingredient_count'];
                 $output['type'] = $form_type;
                 $output['whereOk'] = $_REQUEST['where_ok'];
                 $output['whereError'] = $_REQUEST['where_error'];

@@ -194,6 +194,12 @@ div.row span.labelfull {
   width: 20%;
   text-align: right;
   }
+
+div.row span.labelfullleft {
+  float: left;
+  width: 20%;
+  text-align: left;
+  }
   
 div.row span.formfull {
   float: right;

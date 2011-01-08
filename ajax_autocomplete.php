@@ -19,19 +19,32 @@ if(isset($_REQUEST["type"]) && isset($_REQUEST["term"])) {
 			$objs = get_all_ingredients($query, $tokens);
 		else if ($type == "recipes")
 			$objs = get_all_recipes($query, $tokens);
+		else if ($type == "nutrients")
+			$objs = get_all_nutrients($query, $tokens);
 		else {
 			$objs = array();
 		}
 
-		$output .= '{';
-		$output .= '"objects" : [ ';
-		foreach($objs as $obj) {
-			$output .= '"'.str_replace('"', '\"', $obj->name).'",';
+		if ($type == "nutrients") {
+			$arr = array();
+			foreach ($objs as $nut) {
+				$m['label'] = $nut->name;
+				$m['value'] = $m['label'].' ('.$nut->unit.')';
+				array_push($arr, $m);
+			}
+			$out['objects'] = $arr;
+			$output = json_encode($out);
+		} else {
+			$output .= '{';
+			$output .= '"objects" : [ ';
+			foreach($objs as $obj) {
+				$output .= '"'.str_replace('"', '\"', $obj->name).'",';
+			}
+			/* Remove last comma */
+			$output = substr_replace($output, "", -1);
+			$output .= ' ]';
+			$output .= '}';
 		}
-		/* Remove last comma */
-		$output = substr_replace($output, "", -1);
-		$output .= ' ]';
-		$output .= '}';
 	} catch (Exception $e) {
 		$output = '{ "exception" : "'.$e->getMessage().'" }';
 	}

@@ -46,6 +46,7 @@ include('functions.php');
 	var isQtyEditing = 0;
 	var isPhotoEditing = 0;
 	var isNutritionalEditing = 0;
+	var isNutrientEditing = 0;
 	var origHTML = '';
 	var RMConfig = {
 	    photoViewer : "<?php echo $globalConfig['photo']['Viewer'] ?>",
@@ -189,6 +190,244 @@ include('functions.php');
 
 	    });
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+function createNutrientRow(qty, unit, name) {
+    var row = $('<div class="row sortable-outline clearfix"></div>');
+
+    spanleft = $('<span class="labelfullleft"></span>').appendTo(row);
+    spanleft.append('<input type="text" size="5" name="nut_qty[]" value="'+ qty +'">');
+    if (unit == '')
+	unit = '(unit)';
+    var span = $('<span class="nut-unit">'+unit+'</span>').appendTo(spanleft);
+
+    spanright = $('<span class="formfull"></span>').appendTo(row);
+    var nameInput = $('<input style="margin-left: 15px;" type="text" size="30" name="nut_name[]" value="'+ name +'">').appendTo(spanright);
+
+    var a = $('<a href="#" class="boring"></a>').appendTo(spanright);
+    a.click(function() {
+	$(this).parent().parent().remove();
+    });
+    a.append('<img alt="remove field" width="16" height="16" src="icons/cross.png" class="boring">');
+
+    var a = $('<a href="#" class="boring"></a>').appendTo(spanright);
+    a.click(function() {
+	$(this).parent().parent().after(createNutrientRow(' ', '', ''));
+    });
+    a.append('<img alt="add field" width="16" height="16" src="icons/add.png" class="boring">');
+    nameInput.data('unitField', span);
+    nameInput.autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "ajax_autocomplete.php",
+                dataType: "json",
+                data: {
+                    type: "nutrients",
+                    maxRows: 12,
+                    term: request.term
+                },
+                success: function(data) {
+                    if (data.exception) {
+                        response([]);
+                        alert(data.exception);
+                        return;
+                    }
+		    console.log(data.objects);
+                    response(data.objects);
+                }
+            });
+        },
+	select: function(event, ui) {
+	    var val = ui.item.value;
+	    console.log(val);
+	    var idx = val.lastIndexOf('(');
+	    var unit = val.substr(idx+1, val.length-2-idx);
+	    console.log(unit);
+	    ui.item.value = val.substr(0, idx -1);
+	    console.log(ui.item.value);
+	    $(this).data('unitField').text(unit);
+	},
+        minLength: 1
+    });
+
+    return row;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+	function switchNutrientsToNormal() {
+	    if (isNutrientEditing == 0)
+		return;
+
+	    $('#nutrient_add_inputs').find('.error-field').removeClass('error-field');
+	    $('.error-nutrients-tooltip').each(function() {
+		$(this).data('tooltip').hide();
+		$(this).data('tooltip', null);
+		$(this).removeClass('error-nutrients-tooltip');
+	    });
+
+	    $('#ingredient_nutrients_form').empty();
+
+	    var a = $('<a class="boring editsection" id="ingredient_additional_nutritional_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#ingredient_additional_nutritional_header');
+	    a.click(function() {
+	        switchNutrientsToEdit();
+		return false;
+	    });
+	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
+	    $('#ingredient_additional_nutritional_header2').remove();
+	    isNutrientEditing = 0;
+	    populatePage();
+	}
+
+	function switchNutrientsToEdit() {
+	    if (isNutrientEditing)
+		return;
+	    isNutrientEditing = 1;
+
+	    $.post("ajax_formdata.php", {
+		ingredient: ingredientId
+	    },
+	    function(ingredient) {
+		// format and output result
+		if (ingredient.exception) {
+		    alert(ingredient.exception);
+		    return;
+		}
+
+		console.log($('#ingredient_additional_nutritional_header'));
+		console.log($('#ingredient_nutrients_form'));
+		$('#ingredient_nutrients_form').empty();
+		$('#ingredient_nutrients_form').prepend('<input type="hidden" name="ingredient_id" value="'+ingredientId+'"/>');
+		$('#ingredient_nutrients_form').prepend('<input type="hidden" name="edit_type" value="edit_nutrients"/>');
+		//$('#ingredient_nutrients_form').append(createNutrientRow(' ', '', ''));
+		console.log($('#ingredient_nutrients_form'));
+		var div = $('<div id="nutrient_add_inputs"></div>').appendTo('#ingredient_nutrients_form');
+		if (ingredient.nutrients.length > 0) {
+		    for (var i in ingredient.nutrients) {
+			div.append(createNutrientRow(ingredient.nutrients[i].qty, ingredient.nutrients[i].unit, ingredient.nutrients[i].Nutrient.name));
+		    }
+		}
+		$( "#nutrient_add_inputs" ).sortable({
+			placeholder: "sortable-placeholder"
+		});
+		$( "#nutrient_add_inputs" ).disableSelection();
+		var div = $('<div class="row"></div>').appendTo('#ingredient_nutrients_form');
+		var a = $('<a class="boring" href="javascript:void(0);"></a>').appendTo(div);
+		a.click(function() {
+		    $('#nutrient_add_inputs').append(createNutrientRow(' ', '', ''));
+		    return false;
+		});
+		a.append('<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">');
+
+
+		var a = $('<a class="boring editsection" id="ingredient_additional_nutritional_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#ingredient_additional_nutritional_header');
+		a.click(function() {
+		    // Save
+		    $('#nutrient_add_inputs').find('.error-field').removeClass('error-field');
+		    $('.error-nutrients-tooltip').each(function() {
+			$(this).data('tooltip').hide();
+			$(this).data('tooltip', null);
+			$(this).removeClass('error-nutrients-tooltip');
+		    });
+		    console.log($('#ingredient_nutrients_form'));
+		    console.log($('#ingredient_nutrients_form').serialize());
+		    $.ajax({
+			"dataType": 'json',
+			"type": "GET",
+			"url": "ajax_editable.php",
+			"data": $('#ingredient_nutrients_form').serialize(),
+			"success": function(data) {
+			    //console.log(data);
+    
+			    if (data.error == 0) {
+				switchNutrientsToNormal();
+			    } else {
+				if (data.errorRow < 0) {
+				    alert(data.errmsg);
+				    return;
+				}
+
+				$('#nutrient_add_inputs').children().eq(data.errorRow).addClass('error-field');
+				input = $('#nutrient_add_inputs').children().eq(data.errorRow).find('input[name^=nut_name]');
+				console.log(input);
+
+				input.attr('title', data.errmsg);
+				input.addClass('error-nutrients-tooltip');
+				input.tooltip({
+					position: "top center",
+					//offset: [10, 150],
+					events: {
+					    def: ',',
+					    input: ',',
+					    widget: ',',
+					    tooltip: ','
+					    
+					},
+					effect: "fade",
+					tipClass: "tooltip-arrow-black",
+					opacity: 1
+				});
+				input.data('tooltip').show();
+				//console.log(data.errorRow);
+				//console.log(oTable.fnGetNodes(data.errorRow));
+			    }
+			    
+			}
+		    });
+		    return false;  
+		});
+		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
+
+		var a = $('<a class="boring editsection" id="ingredient_additional_nutritional_header2" href="javascript:void(0);" title="Finish editing without saving"></a>').insertBefore('#ingredient_additional_nutritional_header');
+		a.click(function() {
+		    // Cancel
+		    switchNutrientsToNormal();
+		    return false;
+		});
+		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
+		
+
+	    });
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -413,7 +652,8 @@ include('functions.php');
 		$('#ingredient_photos').empty();
 		$('#ingredient_info').empty();
 		$('#ingredient_qtys').empty();
-		$('#ingredient_nutrients').empty();
+		$('#ingredient_nutrients_form').empty();
+		$('#ingredient_nutrilabel').empty();
 		$('#kcal').empty();
 		$('#carb').empty();
 		$('#sugar').empty();
@@ -439,9 +679,33 @@ include('functions.php');
 		$('#sodium').text(ingredient.sodium);
 		$('#cholesterol').text(ingredient.cholesterol);
 
+		var count = ingredient.nutrients.length;
+		var leftCount = Math.ceil(count/2);
+		var rightCount = count - leftCount;
+
+		var div = $('<div class="leftfixed"></div>').appendTo('#ingredient_nutrients_form');
+		if (leftCount > 0) {
+		    var table = $('<table>').appendTo(div);
+		    for (var i = 0; i < leftCount; i = i+1) {
+			table.append('<tr><td>'+ingredient.nutrients[i].Nutrient.name+': </td><td>'+ingredient.nutrients[i].qty + ingredient.nutrients[i].unit+'</td></tr>');
+		    }
+		}
+
+
+		var div = $('<div class="rightfixed"></div>').appendTo('#ingredient_nutrients_form');
+		if (rightCount > 0) {
+		    var table = $('<table>').appendTo(div);
+		    for (var i = leftCount; i < count; i = i+1) {
+			table.append('<tr><td>'+ingredient.nutrients[i].Nutrient.name+': </td><td>'+ingredient.nutrients[i].qty + ingredient.nutrients[i].unit+'</td></tr>');
+		    }
+		}
+
+
 		$('#ingredient_info').append(ingredient.info);
 
 		$('#ingredient_photos').append(createPhotoGallery(ingredient.photos, '1'));
+		$('#ingredient_nutrilabel').append('<img src="nutrilabel.php?'+ $.param(ingredient.nutri_info_keyval) +'" alt="Nutritional Information Label">');
+
 
 		$('#loading-screen').data('overlay').close();
 	    },
@@ -836,9 +1100,7 @@ include('functions.php');
 			Typical unit weight: 550g
 		    </div>
 		</div>
-	    </div>
 
-	    <div class="grid_11">
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
 			<a class="boring editsection" href="#" id="ingredient_nutritional_header" onclick="switchNutritionalToEdit();" title="Edit">
@@ -904,7 +1166,7 @@ include('functions.php');
 
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
-			<a class="boring editsection" href="#" id="ingredient_additional_nutritional_header" title="Edit">
+			<a class="boring editsection" href="#" id="ingredient_additional_nutritional_header"  onclick="switchNutrientsToEdit();" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
@@ -912,27 +1174,29 @@ include('functions.php');
 		</h2>
 
 		<div id="ingredient_nutrients" class="row clearfix">
-		    <div class="leftfixed">
-			<table>
-			    <tr>
-				<td>Vitamin A:</td>
-				<td>10mg</td>
-			    </tr>
-			    <tr>
-				<td>Vitamin B12:</td>
-				<td>0.01mg</td>
-			    </tr>
-
-			</table>
-		    </div>
-		    <div class="rightfixed">
-			<table>
-			    <tr>
-				<td>Vitamin E:</td>
-				<td>0.1mg</td>
-			    </tr>
-			</table>
-		    </div>
+		    <form id="ingredient_nutrients_form" name="ingredient_nutrients_form" method="post" action="ajax_editable.php">
+			<div class="leftfixed">
+			    <table>
+				<tr>
+				    <td>Vitamin A:</td>
+				    <td>10mg</td>
+				</tr>
+				<tr>
+				    <td>Vitamin B12:</td>
+				    <td>0.01mg</td>
+				</tr>
+    
+			    </table>
+			</div>
+			<div class="rightfixed">
+			    <table>
+				<tr>
+				    <td>Vitamin E:</td>
+				    <td>0.1mg</td>
+				</tr>
+			    </table>
+			</div>
+		    </form>
 		</div>
 		
 		<h2>
@@ -948,13 +1212,13 @@ include('functions.php');
 		    DUMMY_INGREDIENT_INFO
 		</div>
 	    </div>
-
 	    <div class="grid_5">
 		<div id="ingredient_nutrilabel">
 		    DUMMY_INGREDIENT_NUTRI_LABEL
 		</div>
 	    </div>
 	</div>
+
 
 	<div class="container_16 clearfix">
 	    <h2>

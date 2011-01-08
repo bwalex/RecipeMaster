@@ -49,6 +49,7 @@ try {
                         }
                         $elem['Ingredient']->getNutriInfo($elem['qty'], $elem['unit']);
                 }
+                $output['errorRow'] = -1;
                 /* XXX: maybe throw error? */
             }
         }
@@ -82,6 +83,19 @@ try {
             $typical_unit = $_REQUEST['field_typical_unit'];
             $ingredient->setQtyUnit($qty, $unit, $typical_qty, $typical_unit);
             $output['errorRow'] = '';
+        } else if ($edit_type == 'edit_nutrients') {
+            $ingredient->clearNutrients();
+            if (!empty($_REQUEST['nut_name'])) {
+                foreach ($_REQUEST['nut_name'] as $key => $nutrient_name) {
+                        if (empty($nutrient_name))
+                            continue;
+                        $output['errorRow'] = $key;
+                        $nutrient_qty = $_REQUEST['nut_qty'][$key];
+                        $elem = $ingredient->addNutrient($nutrient_qty, '', -1, $nutrient_name);
+                }
+                $output['errorRow'] = -1;
+                /* XXX: maybe throw error? */
+            }
         }
 
         $output['rowsaffected'] = $ingredient->save(1);
