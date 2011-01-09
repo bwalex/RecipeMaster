@@ -311,6 +311,8 @@ class Ingredient {
                     return $info;
                 }
 
+                //if ($this->name == 'Cebolla')
+                    //echo "Cheat: < $qty, $unit vs ".$this->qty.$this->unit.'>';
                 if ($this->unit == '') {
                     if ($this->typical_qty == 0) {
                         throw new Exception('The ingredient\'s unit cannot be zero as there is no typical weight specified');
@@ -318,7 +320,8 @@ class Ingredient {
                     $multiplier = $qty/$this->qty;
                     $adjustment = 0;
                     
-                } else if ($unit == '' && $this->unit != '') {
+                }
+                if ($unit == '' && $this->unit != '') {
                     $qty = $qty * $this->typical_qty;
                     $unit = $this->typical_unit;
                     //echo $this->name ." : $qty : $unit";
@@ -333,6 +336,7 @@ class Ingredient {
                 } else if ($unit != '' && $this->unit == '') {
                     $qty_bar = $this->qty * $this->typical_qty;
                     $unit_bar = $this->typical_unit;
+                    //echo $this->name." <bar: $qty_bar, $unit_bar vs: $qty, $unit >";
                     $adjustment = 1;
                     $multiplier = $this->getMultiplier($unit, $unit_bar, $qty, $qty_bar, $dont_except);
                     
