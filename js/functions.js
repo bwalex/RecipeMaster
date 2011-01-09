@@ -42,60 +42,6 @@ function enableLightbox(jqi) {
     }
 }
 
-function createPhotoGallery(photos, galleryId) {
-    var div = $('<div class="photo-gallery clearfix"></div>');
-    if (photos.length > 0) {
-        //if (RMConfig.photoViewer == 'highslide') {
-            var list = $('<ul></ul>').appendTo(div);
-
-            if (RMConfig.photoViewer == 'prettyPhoto')
-                rel = 'prettyPhoto[gallery_'+galleryId+']';
-            else
-                rel = 'gallery_' + galleryId;
-
-            for (var i in photos) {
-                //photos[i].id, photos[i].photo, photos[i].thumb, photos[i].caption));
-                var li = $('<li></li>').appendTo(list);
-                var a = $('<a id="'+photos[i].id+'" href="'+photos[i].photo+'" title="'+photos[i].caption+'" rel="'+rel+'" class="highslide">').appendTo(li);
-		a.append('<img src="'+photos[i].thumb+'" alt="photo of dish">');
-                if (RMConfig.photoViewer == 'fancybox') {
-                    a.fancybox();
-                } else if (RMConfig.photoViewer == 'colorbox') {
-                    a.colorbox({maxHeight:"100%", maxWidth:"100%"});
-                } else if (RMConfig.photoViewer == 'highslide') {
-		    a.each(function() {
-			this.onclick = function() {
-			    return hs.expand(this, config1);
-			};
-		    });
-		}
-            }
-	/*
-        } else {
-            for (var i in photos) {
-                var a;
-                var rel;
-                if (RMConfig.photoViewer == 'prettyPhoto')
-                    rel = 'prettyPhoto[gallery_'+galleryId+']';
-                else
-                    rel = 'gallery_' + galleryId;
-
-                a = $('<a id="'+photos[i].id+'" href="'+photos[i].photo+'" title="'+photos[i].caption+'" rel="'+rel+'">').appendTo(div);
-                a.append('<img src="'+photos[i].thumb+'" alt="photo of dish">');
-
-                if (RMConfig.photoViewer == 'fancybox')
-                    a.fancybox();
-                if (RMConfig.photoViewer == 'colorbox')
-                    a.colorbox({maxHeight:"100%", maxWidth:"100%"});
-            }
-            if (RMConfig.photoViewer == 'prettyPhoto')
-                div.children().prettyPhoto({theme:'facebook'});
-        }*/
-    }
-
-    return div;
-}
-
 function createPhotoRow(parentType, parentId, photoId, photo, thumb, caption) {
     var row = $('<div class="row"></div>');
 

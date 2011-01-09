@@ -26,7 +26,7 @@ class Ingredient {
 
 
 	public function toArray() {
-		$nutri_info = $this->getNutriInfo($this->qty, $this->unit, 1, 0, 1, 0); 
+		$nutri_info = $this->getOwnNutriInfo();
 		$arr = get_object_vars($this);
 		$arr['nutri_info'] = $nutri_info;
 	    
@@ -222,7 +222,76 @@ class Ingredient {
 		$this->$key = $val;
 	}
 
-	function getNutriInfo($qty, $unit, $serves = 1, $dont_except = 0, $fractional_precision = 1, $panic = 1) {
+        function getMultiplier($unit, $own_unit, $qty, $own_qty, $dont_except = 0) {
+                if ($own_qty == 0)
+                    throw new Exception('oops eeps, own_qty=0');
+                $multiplier = $qty/$own_qty;
+		if ($unit == 'l') {
+			$unit = 'ml';
+			$multiplier *= 1000;
+		}
+
+                if ($ok) {
+                        /* Do nothing */
+                } else if ($unit == $own_unit) {
+			$multiplier *= 1;
+		} else if (($unit == 'g') && ($own_unit == 'ml')) {
+			$multiplier *= 1;
+		} else if (($unit == 'ml') && ($own_unit == 'g')) {
+			$multiplier *= 1;
+		} else if (($unit == 'g') && ($own_unit == 'mg')) {
+			$multiplier *= 1000;
+		} else if (($unit == 'mg') && ($own_unit == 'g')) {
+			$multiplier /= 1000;
+		} else if (($unit == 'kg') && ($own_unit == 'g')) {
+			$multiplier *= 1000;
+		} else if (($unit == 'g') && ($own_unit == 'kg')) {
+			$multiplier /= 1000;
+		} else if (($unit == 'l') && ($own_unit == 'ml')) {
+			$multiplier *= 1000;
+		} else if (($unit == 'ml') && ($own_unit == 'l')) {
+			$multiplier /= 1000;
+		} else {
+			//return NULL;
+			if ($dont_except)
+				return 0;
+			else
+				throw new Exception("unknown unit mismatch, '".$unit."' vs '".$this->unit."'");
+		}
+                
+                return $multiplier;
+        }
+
+        function getOwnNutriInfo() {
+		$info = array();
+		$info['kcal'] = 0;
+		$info['carb'] = 0;
+		$info['sugar'] = 0;
+		$info['fat'] = 0;
+		$info['sat_fat'] = 0;
+		$info['protein'] = 0;
+		$info['fibre'] = 0;
+		$info['sodium'] = 0;
+		$info['cholesterol'] = 0;
+                
+                $multiplier = 1;
+		$info['kcal'] += round($this->kcal * $multiplier, $fractional_precision);
+		$info['carb'] += round($this->carb * $multiplier, $fractional_precision);
+		$info['sugar'] += round($this->sugar * $multiplier, $fractional_precision);
+		$info['fat'] += round($this->fat * $multiplier, $fractional_precision);
+		$info['sat_fat'] += round($this->sat_fat * $multiplier, $fractional_precision);
+		$info['protein'] += round($this->protein * $multiplier, $fractional_precision);
+		$info['fibre'] += round($this->fibre * $multiplier, $fractional_precision);
+		$info['sodium'] += round($this->sodium * $multiplier, $fractional_precision);
+		$info['cholesterol'] += round($this->cholesterol * $multiplier, $fractional_precision);
+
+		foreach($this->nutrients as $nutrient) {
+			$info[$nutrient['Nutrient']->name] = round($nutrient['qty'] * $multiplier, $fractional_precision);
+		}
+                return $info;
+        }
+
+        function getNutriInfo($qty, $unit, $serves = 1, $dont_except = 0, $fractional_precision = 1, $panic = 1) {
                 $ok = 0;
 		$info = array();
 		$info['kcal'] = 0;
@@ -234,59 +303,42 @@ class Ingredient {
 		$info['fibre'] = 0;
 		$info['sodium'] = 0;
 		$info['cholesterol'] = 0;
+                $multiplier = 1;
+                $adjustment = 1;
 
-		if (($unit == '') && ($this->typical_qty == 0)) {
-			if ($panic)
-				throw new Exception('The unit cannot be zero as there is no typical weight specified');
-			else
-				return $info;
-		}
-		if (($unit == '')) {
-			$multiplier = $qty * $this->typical_qty/$this->qty;
-                        $ok = 1;
-			//$unit = $this->typical_unit;
-		} else {
-			if ($this->qty == 0)
-				return $info;
-			$multiplier = $qty/$this->qty;
-		}
-		$multiplier /= $serves;
-		if ($unit == 'l') {
-			$unit = 'ml';
-			$multiplier *= 1000;
-		}
+                if ($this->qty == 0) {
+                    //throw new Exception('This ingredient has a 0 quantity and cannot be used');
+                    return $info;
+                }
 
-                if ($ok) {
-                        /* Do nothing */
-                } else if ($unit == $this->unit) {
-			$multiplier *= 1;
-		} else if (($unit == 'g') && ($this->unit == 'ml')) {
-			$multiplier *= 1;
-		} else if (($unit == 'ml') && ($this->unit == 'g')) {
-			$multiplier *= 1;
-		} else if (($unit == 'g') && ($this->unit == 'mg')) {
-			$multiplier *= 1000;
-		} else if (($unit == 'mg') && ($this->unit == 'g')) {
-			$multiplier /= 1000;
-		} else if (($unit == 'kg') && ($this->unit == 'g')) {
-			$multiplier *= 1000;
-		} else if (($unit == 'g') && ($this->unit == 'kg')) {
-			$multiplier /= 1000;
-		} else if (($unit == 'l') && ($this->unit == 'ml')) {
-			$multiplier *= 1000;
-		} else if (($unit == 'ml') && ($this->unit == 'l')) {
-			$multiplier /= 1000;
-		} else {
-			//return NULL;
-			if ($dont_except)
-				return $info;
-			else
-				throw new Exception("unknown unit mismatch, '".$unit."' vs '".$this->unit."'");
-		}
+                if ($this->unit == '') {
+                    if ($this->typical_qty == 0) {
+                        throw new Exception('The ingredient\'s unit cannot be zero as there is no typical weight specified');
+                    }
+                    $multiplier = $qty/$this->qty;
+                    $adjustment = 0;
+                    
+                } else if ($unit == '' && $this->unit != '') {
+                    $qty = $qty * $this->typical_qty;
+                    $unit = $this->typical_unit;
+                    //echo $this->name ." : $qty : $unit";
+                    $adjustment = 1;
+                    $multiplier = $this->getMultiplier($unit, $this->unit, $qty, $this->qty, $dont_except);
+                    //echo "Multi < $multiplier >";
+                    
+                } else if ($unit != '' && $this->unit != '') {
+                    $adjustment = 1;
+                    $multiplier = $this->getMultiplier($unit, $this->unit, $qty, $this->qty, $dont_except);
+                    
+                } else if ($unit != '' && $this->unit == '') {
+                    $qty_bar = $this->qty * $this->typical_qty;
+                    $unit_bar = $this->typical_unit;
+                    $adjustment = 1;
+                    $multiplier = $this->getMultiplier($unit, $unit_bar, $qty, $qty_bar, $dont_except);
+                    
+                }
 
-                /* This means that the function was called from the ingredient itself. for myself the multiplier is always 1 */
-                if ($panic == 0)
-                    $multiplier = 1;
+                $multiplier /= $serves;
 
 		$info['kcal'] += round($this->kcal * $multiplier, $fractional_precision);
 		$info['carb'] += round($this->carb * $multiplier, $fractional_precision);
@@ -303,7 +355,8 @@ class Ingredient {
 		}
 
 		return $info;
-	}
+        }
+
 
 	function delete() {
 		$db = db_connect();
