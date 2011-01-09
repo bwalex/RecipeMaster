@@ -36,6 +36,7 @@ include('functions.php');
 </script>
     <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
     </script>
+    <script type="text/javascript" language="javascript" src="jquery-tmpl/jquery.tmpl.min.js"></script>
 
     <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript">
@@ -666,9 +667,7 @@ function createNutrientRow(qty, unit, name) {
 
 		$('#ingredient_name').text(ingredient.name);
 
-		$('<div id="ingredient_qtyunit" class="leftfixed"></div>').appendTo('#ingredient_qtys').text('Quantity: ' + ingredient.qty + ingredient.unit);
-		$('<div id="ingredient_typical_qtyunit" class="rightfixed"></div>').appendTo('#ingredient_qtys').text('Typical unit weight: ' + ingredient.typical_qty + ingredient.typical_unit);
-
+		$('#ingredientQtysTemplate').tmpl(ingredient).appendTo('#ingredient_qtys');
 		$('#kcal').text(ingredient.kcal);
 		$('#carb').text(ingredient.carb);
 		$('#sugar').text(ingredient.sugar);
@@ -679,31 +678,14 @@ function createNutrientRow(qty, unit, name) {
 		$('#sodium').text(ingredient.sodium);
 		$('#cholesterol').text(ingredient.cholesterol);
 
-		var count = ingredient.nutrients.length;
-		var leftCount = Math.ceil(count/2);
-		var rightCount = count - leftCount;
-
-		var div = $('<div class="leftfixed"></div>').appendTo('#ingredient_nutrients_form');
-		if (leftCount > 0) {
-		    var table = $('<table>').appendTo(div);
-		    for (var i = 0; i < leftCount; i = i+1) {
-			table.append('<tr><td>'+ingredient.nutrients[i].Nutrient.name+': </td><td>'+ingredient.nutrients[i].qty + ingredient.nutrients[i].unit+'</td></tr>');
-		    }
-		}
-
-
-		var div = $('<div class="rightfixed"></div>').appendTo('#ingredient_nutrients_form');
-		if (rightCount > 0) {
-		    var table = $('<table>').appendTo(div);
-		    for (var i = leftCount; i < count; i = i+1) {
-			table.append('<tr><td>'+ingredient.nutrients[i].Nutrient.name+': </td><td>'+ingredient.nutrients[i].qty + ingredient.nutrients[i].unit+'</td></tr>');
-		    }
-		}
-
+		$('#nutrientTemplate').tmpl(ingredient).appendTo('#ingredient_nutrients_form');
 
 		$('#ingredient_info').append(ingredient.info);
 
-		$('#ingredient_photos').append(createPhotoGallery(ingredient.photos, '1'));
+		galleryId = 1;
+		$('#photoGalleryTemplate').tmpl(ingredient, {galleryId: ((RMConfig.photoViewer == 'prettyPhoto')?'prettyPhoto[gallery_'+galleryId+']':'gallery_'+galleryId)}).appendTo('#ingredient_photos');
+		enableLightbox($('#ingredient_photos a'));
+
 		$('#ingredient_nutrilabel').append('<img src="nutrilabel.php?'+ $.param(ingredient.nutri_info_keyval) +'" alt="Nutritional Information Label">');
 
 
@@ -1100,6 +1082,15 @@ function createNutrientRow(qty, unit, name) {
 			Typical unit weight: 550g
 		    </div>
 		</div>
+		<script id="ingredientQtysTemplate" type="text/x-jquery-tmpl">
+		    <div id="ingredient_qtyunit" class="leftfixed">
+			Quantity: ${qty}${unit}
+		    </div>
+
+		    <div id="ingredient_typical_qtyunit" class="rightfixed">
+			Typical unit weight: ${typical_qty}${typical_unit}
+		    </div>
+		</script>
 
 		<h2 style="margin-bottom: 0px;">
 		    <span class="editsection">
@@ -1175,29 +1166,28 @@ function createNutrientRow(qty, unit, name) {
 
 		<div id="ingredient_nutrients" class="row clearfix">
 		    <form id="ingredient_nutrients_form" name="ingredient_nutrients_form" method="post" action="ajax_editable.php">
-			<div class="leftfixed">
-			    <table>
-				<tr>
-				    <td>Vitamin A:</td>
-				    <td>10mg</td>
-				</tr>
-				<tr>
-				    <td>Vitamin B12:</td>
-				    <td>0.01mg</td>
-				</tr>
-    
-			    </table>
-			</div>
-			<div class="rightfixed">
-			    <table>
-				<tr>
-				    <td>Vitamin E:</td>
-				    <td>0.1mg</td>
-				</tr>
-			    </table>
-			</div>
 		    </form>
 		</div>
+		    <script id="nutrientTemplate" type="text/x-jquery-tmpl">
+			<div class="leftfixed">
+			    {{if nutrients.length > 0}}
+				<table>
+				    {{each nutrients.slice(0, Math.ceil(nutrients.length/2))}}
+					<tr><td>${$value.Nutrient.name}: </td><td>${$value.qty}${$value.unit}</td></tr>
+				    {{/each}}
+				</table>
+			    {{/if}}
+			</div>
+			<div class="rightfixed">
+			    {{if nutrients.length > 1}}
+				<table>
+				    {{each nutrients.slice(-Math.floor(nutrients.length/2))}}
+					<tr><td>${$value.Nutrient.name}: </td><td>${$value.qty}${$value.unit}</td></tr>
+				    {{/each}}
+				</table>
+			    {{/if}}
+			</div>			
+		    </script>
 		
 		<h2>
 		    <span class="editsection">
@@ -1230,8 +1220,20 @@ function createNutrientRow(qty, unit, name) {
 		<span>Photos</span>
 	    </h2>
 	    <div id="ingredient_photos" class="highslide-gallery" style="clear: both;">
-		DUMMY_INGREDIENT_PHOTOS
 	    </div>
+	    <script id="photoGalleryTemplate" type="text/x-jquery-tmpl">
+		<div class="photo-gallery clearfix">
+		    <ul>
+			{{each photos}}
+			    <li>
+				<a class="highslide" rel="gallery_${$item.galleryId}" title="${$value.caption}" href="${$value.photo}" id="${$value.id}">
+				    <img alt="${$value.caption}" src="${$value.thumb}"/>
+				</a>
+			    </li>
+			{{/each}}
+		    </ul>
+		</div>
+	    </script>
 	</div>
 
 

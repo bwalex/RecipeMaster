@@ -20,6 +20,38 @@ input {
 }
 
 
+.photo-gallery ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.photo-gallery ul li {
+	display: table;
+	border: 1px solid #D0D0D0;
+	line-height: 0;
+	float: left;
+	overflow: hidden;
+	position: relative;
+}
+
+.photo-gallery ul a {
+	top: 50%;
+	display: table-cell;
+	outline: none;
+	position: static;
+	vertical-align: middle;
+	text-decoration: none;
+	color: #D0D0D0;
+}
+
+.photo-gallery ul img {
+	outline: none;
+	border: none;
+}
+
+
+
 h2 .editsection {
 	font-size: 80%;
 }

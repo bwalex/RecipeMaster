@@ -48,7 +48,6 @@ TODO: add print stuff
     <script type="text/javascript" src="js/jquery-ui-1.8.7.custom.min.js">
 </script>
     <script type="text/javascript" src="js/jquery.tools.min.js"></script>
-
 <?php
     printExtraHeaders();
 ?>
@@ -57,6 +56,7 @@ TODO: add print stuff
 </script>
     <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
     </script>
+    <script type="text/javascript" language="javascript" src="jquery-tmpl/jquery.tmpl.min.js"></script>
 
     <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript" src="js/recipes.js">
@@ -324,33 +324,10 @@ TODO: add print stuff
 
 		$('#recipe_nutrilabel').append('<img src="nutrilabel.php?'+ $.param(recipe.nutri_info_keyval) +'" alt="Nutritional Information Label">');
 
-		var count = recipe.ingredients.length;
-		var leftCount = Math.ceil(count/2);
-		var rightCount = count - leftCount;
-		
-		var div = $('<div class="leftfixed"></div>').appendTo('#recipe_ingredients');
-		if (leftCount > 0) {
-		    var list = $('<ul style="margin-top: 0px;"></ul>').appendTo(div);
-		    for (var i = 0; i < leftCount; i = i+1) {
-			if (recipe.ingredients[i].method != '')
-			    list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name + ' (' + recipe.ingredients[i].method +')</li>');
-			else
-			    list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name + '</li>');
-		    }
-		}
-
-		var div = $('<div class="rightfixed"></div>').appendTo('#recipe_ingredients');
-		if (rightCount > 0) {
-		    var list = $('<ul style="margin-top: 0px;"></ul>').appendTo(div);
-		    for (var i = leftCount; i < count; i = i+1) {
-			if (recipe.ingredients[i].method != '')
-			    list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name + ' (' + recipe.ingredients[i].method +')</li>');
-			else
-			    list.append('<li>' + recipe.ingredients[i].qty + recipe.ingredients[i].unit + ' ' + recipe.ingredients[i].Ingredient.name + '</li>');
-		    }
-		}
-
-		$('#recipe_photos').append(createPhotoGallery(recipe.photos, '1'));
+		$('#ingredientTemplate').tmpl(recipe).appendTo("#recipe_ingredients");
+		galleryId = 5;
+		$('#photoGalleryTemplate').tmpl(recipe, {galleryId: ((RMConfig.photoViewer == 'prettyPhoto')?'prettyPhoto[gallery_'+galleryId+']':'gallery_'+galleryId)}).appendTo('#recipe_photos');
+		enableLightbox($('#recipe_photos a'));
 
 		$('#loading-screen').data('overlay').close();
 	    },
@@ -948,14 +925,28 @@ TODO: add print stuff
 		</h2>
 
 		<div id="recipe_ingredients" class="row clearfix">
-		    <div class="leftfixed">
-			&bull;&nbsp;DUMMY_INGREDIENT 100g foo (foobar)
-		    </div>
-
-		    <div class="rightfixed">
-			&bull;&nbsp;DUMMY_INGREDIENT 100g foo (foobar)
-		    </div>
 		</div>
+		<!-- ${$value.qty}${$value.unit} ${$value.Ingredient.name} {{if value.method != ''}}(${$value.method}){{/if}} -->
+		    <script id="ingredientTemplate" type="text/x-jquery-tmpl">
+			<div class="leftfixed">
+			    {{if ingredients.length > 0}}
+				<ul style="margin-top: 0px;">
+				    {{each ingredients.slice(0, Math.ceil(ingredients.length/2))}}
+					<li>${$value.qty}${$value.unit} ${$value.Ingredient.name} {{if $value.method != ''}}(${$value.method}){{/if}}</li>
+				    {{/each}}
+				</ul>
+			    {{/if}}
+			</div>
+			<div class="rightfixed">
+			    {{if ingredients.length > 1}}
+				<ul style="margin-top: 0px;">
+				    {{each ingredients.slice(-Math.floor(ingredients.length/2))}}
+					<li>${$value.qty}${$value.unit} ${$value.Ingredient.name} {{if $value.method != ''}}(${$value.method}){{/if}}</li>
+				    {{/each}}
+				</ul>
+			    {{/if}}
+			</div>			
+		    </script>
 
 		<!--<h2 id="recipe_preparation_header" style="clear: left; padding-top: 15px;">Preparation</h2>-->
 		<h2>
@@ -992,6 +983,19 @@ TODO: add print stuff
 	    <div id="recipe_photos" class="highslide-gallery" style="clear: both;">
 		DUMMY_RECIPE_PHOTOS
 	    </div>
+	    <script id="photoGalleryTemplate" type="text/x-jquery-tmpl">
+		<div class="photo-gallery clearfix">
+		    <ul>
+			{{each photos}}
+			    <li>
+				<a class="highslide" rel="gallery_${$item.galleryId}" title="${$value.caption}" href="${$value.photo}" id="${$value.id}">
+				    <img alt="${$value.caption}" src="${$value.thumb}"/>
+				</a>
+			    </li>
+			{{/each}}
+		    </ul>
+		</div>
+	    </script>
 	</div>
 
 

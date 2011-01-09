@@ -25,22 +25,52 @@ function createPhoto(photo, thumb, caption) {
     return a;
 }
 
+function enableLightbox(jqi) {
+    console.log(jqi);
+    if (RMConfig.photoViewer == 'fancybox') {
+	jqi.fancybox();
+    } else if (RMConfig.photoViewer == 'colorbox') {
+	jqi.colorbox({maxHeight:"100%", maxWidth:"100%"});
+    } else if (RMConfig.photoViewer == 'highslide') {
+	jqi.each(function() {
+	    this.onclick = function() {
+		return hs.expand(this, config1);
+	    };
+	});
+    } else if (RMConfig.photoViewer == 'prettyPhoto') {
+	jqi.prettyPhoto({theme:'facebook'});
+    }
+}
+
 function createPhotoGallery(photos, galleryId) {
-    var div = $('<div></div>');
+    var div = $('<div class="photo-gallery clearfix"></div>');
     if (photos.length > 0) {
-        if (RMConfig.photoViewer == 'highslide') {
+        //if (RMConfig.photoViewer == 'highslide') {
             var list = $('<ul></ul>').appendTo(div);
+
+            if (RMConfig.photoViewer == 'prettyPhoto')
+                rel = 'prettyPhoto[gallery_'+galleryId+']';
+            else
+                rel = 'gallery_' + galleryId;
+
             for (var i in photos) {
                 //photos[i].id, photos[i].photo, photos[i].thumb, photos[i].caption));
                 var li = $('<li></li>').appendTo(list);
-                var a = $('<a id="'+photos[i].id+'" href="'+photos[i].photo+'" title="'+photos[i].caption+'" class="highslide">').appendTo(li);
-                a.append('<img src="'+photos[i].thumb+'" alt="photo of dish">');
-                a.each(function() {
-                    this.onclick = function() {
-                        return hs.expand(this, config1);
-                    };
-                });
+                var a = $('<a id="'+photos[i].id+'" href="'+photos[i].photo+'" title="'+photos[i].caption+'" rel="'+rel+'" class="highslide">').appendTo(li);
+		a.append('<img src="'+photos[i].thumb+'" alt="photo of dish">');
+                if (RMConfig.photoViewer == 'fancybox') {
+                    a.fancybox();
+                } else if (RMConfig.photoViewer == 'colorbox') {
+                    a.colorbox({maxHeight:"100%", maxWidth:"100%"});
+                } else if (RMConfig.photoViewer == 'highslide') {
+		    a.each(function() {
+			this.onclick = function() {
+			    return hs.expand(this, config1);
+			};
+		    });
+		}
             }
+	/*
         } else {
             for (var i in photos) {
                 var a;
@@ -60,7 +90,7 @@ function createPhotoGallery(photos, galleryId) {
             }
             if (RMConfig.photoViewer == 'prettyPhoto')
                 div.children().prettyPhoto({theme:'facebook'});
-        }
+        }*/
     }
 
     return div;
