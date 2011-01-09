@@ -38,6 +38,13 @@ include('functions.php');
     </script>
     <script type="text/javascript" language="javascript" src="jquery-tmpl/jquery.tmpl.min.js"></script>
 
+    
+
+    <script type="text/javascript" language="javascript" src="qTip/jquery.qtip-1.0.0-rc3.min.js"></script>
+    <link type="text/css" href="qTip/jquery.qtip.css" rel="stylesheet"/>
+
+
+
     <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript">
     //<![CDATA[
@@ -74,8 +81,7 @@ include('functions.php');
 
 	    $('#ingredient_qtys').find('.error-field').removeClass('error-field');
 	    $('.error-qtys-tooltip').each(function() {
-		$(this).data('tooltip').hide();
-		$(this).data('tooltip', null);
+		$(this).qtip("destroy");
 		$(this).removeClass('error-qtys-tooltip');
 	    });
 
@@ -157,7 +163,33 @@ include('functions.php');
 
 				input.attr('title', data.errmsg);
 				input.addClass('error-qtys-tooltip');
-				input.tooltip({
+				input.qtip({
+					//content: 'Stems are great for indicating the context of the tooltip.',
+					show: {
+					    when: false, // Don't specify a show event
+					    ready: true // Show the tooltip when ready
+					 },
+					 hide: false, // Don't specify a hide event
+					position: {
+					    corner: {
+						tooltip: 'bottomMiddle',
+						target: 'topLeft'
+					    }
+					},
+					style: {
+					    'font-weight': 'bold',
+					    'font-size': '14px',
+					    background: '#ffAAAA',
+					    color: 'black',
+					    border: {
+					       width: 7,
+					       radius: 5,
+					       color: '#ffAAAA'
+					    },
+					    tip: 'bottomMiddle' // Notice the corner value is identical to the previously mentioned positioning corners
+					}
+				});
+				/*input.tooltip({
 					position: "top center",
 					//offset: [10, 150],
 					events: {
@@ -171,7 +203,9 @@ include('functions.php');
 					tipClass: "tooltip-arrow-black",
 					opacity: 1
 				});
-				input.data('tooltip').show();
+				
+				input.data('tooltip').show();*/
+				
 			    }
 			    
 			}
@@ -976,11 +1010,8 @@ include('functions.php');
 	    $('#ingredient_name').editable(
 		function(value, settings) {
     		    /* Clear errors */
-
-		    if ($('#ingredient_name').data('tooltip')) {
-			$('#ingredient_name').data('tooltip').hide();
-			$('#ingredient_name').data('tooltip', null);
-		    }
+		    if ($('#ingredient_name').data("qtip"))
+			$('#ingredient_name').qtip("destroy");
 
 		    $('.error-field').removeClass('error-field');
 		    
@@ -1004,21 +1035,32 @@ include('functions.php');
 				$('#ingredient_name').addClass('error-field');
 
 				$('#ingredient_name').attr('title', data.errmsg);
-				$('#ingredient_name').tooltip({
-					position: "top left",
-					offset: [10, 150],
-					events: {
-					    def: ',',
-					    input: ',',
-					    widget: ',',
-					    tooltip: ','
-					    
+				$('#ingredient_name').qtip({
+					//content: 'Stems are great for indicating the context of the tooltip.',
+					show: {
+					    when: false, // Don't specify a show event
+					    ready: true // Show the tooltip when ready
+					 },
+					 hide: false, // Don't specify a hide event
+					position: {
+					    corner: {
+						tooltip: 'bottomMiddle',
+						target: 'topMiddle'
+					    }
 					},
-					effect: "fade",
-					tipClass: "tooltip-arrow-black",
-					opacity: 1
+					style: {
+					    'font-weight': 'bold',
+					    'font-size': '14px',
+					    background: '#ffAAAA',
+					    color: 'black',
+					    border: {
+					       width: 7,
+					       radius: 5,
+					       color: '#ffAAAA'
+					    },
+					    tip: 'bottomMiddle' // Notice the corner value is identical to the previously mentioned positioning corners
+					}
 				});
-				$('#ingredient_name').data('tooltip').show();
 				//console.log(data.errorRow);
 				//console.log(oTable.fnGetNodes(data.errorRow));
 			    }

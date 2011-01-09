@@ -113,11 +113,11 @@ h2 {
 
 
 tr.error-row {
-	background-color: red;
+	background-color: #ffAAAA;
 }
 
 .error-field {
-	background-color: red;
+	background-color: #ffAAAA;
 }
 
 .error-field input {
@@ -125,7 +125,7 @@ tr.error-row {
 }
 
 tr.error-row td.sorting_1 {
-	background-color: red;
+	background-color: #ffAAAA;
 }
 
 
