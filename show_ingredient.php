@@ -61,7 +61,7 @@ include('functions.php');
 
 
 
-
+	
 
 
 
@@ -198,85 +198,6 @@ include('functions.php');
 
 
 
-
-
-
-
-
-
-function createNutrientRow(qty, unit, name) {
-    var row = $('<div class="row sortable-outline clearfix"></div>');
-
-    spanleft = $('<span class="labelfullleft"></span>').appendTo(row);
-    spanleft.append('<input type="text" size="5" name="nut_qty[]" value="'+ qty +'">');
-    if (unit == '')
-	unit = '(unit)';
-    var span = $('<span class="nut-unit">'+unit+'</span>').appendTo(spanleft);
-
-    spanright = $('<span class="formfull"></span>').appendTo(row);
-    var nameInput = $('<input style="margin-left: 15px;" type="text" size="30" name="nut_name[]" value="'+ name +'">').appendTo(spanright);
-
-    var a = $('<a href="#" class="boring"></a>').appendTo(spanright);
-    a.click(function() {
-	$(this).parent().parent().remove();
-    });
-    a.append('<img alt="remove field" width="16" height="16" src="icons/cross.png" class="boring">');
-
-    var a = $('<a href="#" class="boring"></a>').appendTo(spanright);
-    a.click(function() {
-	$(this).parent().parent().after(createNutrientRow(' ', '', ''));
-    });
-    a.append('<img alt="add field" width="16" height="16" src="icons/add.png" class="boring">');
-    nameInput.data('unitField', span);
-    nameInput.autocomplete({
-        source: function(request, response) {
-            $.ajax({
-                url: "ajax_autocomplete.php",
-                dataType: "json",
-                data: {
-                    type: "nutrients",
-                    maxRows: 12,
-                    term: request.term
-                },
-                success: function(data) {
-                    if (data.exception) {
-                        response([]);
-                        alert(data.exception);
-                        return;
-                    }
-		    console.log(data.objects);
-                    response(data.objects);
-                }
-            });
-        },
-	select: function(event, ui) {
-	    var val = ui.item.value;
-	    console.log(val);
-	    var idx = val.lastIndexOf('(');
-	    var unit = val.substr(idx+1, val.length-2-idx);
-	    console.log(unit);
-	    ui.item.value = val.substr(0, idx -1);
-	    console.log(ui.item.value);
-	    $(this).data('unitField').text(unit);
-	},
-        minLength: 1
-    });
-
-    return row;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 	function switchNutrientsToNormal() {
 	    if (isNutrientEditing == 0)
 		return;
@@ -288,15 +209,11 @@ function createNutrientRow(qty, unit, name) {
 		$(this).removeClass('error-nutrients-tooltip');
 	    });
 
-	    $('#ingredient_nutrients_form').empty();
+	    $('#ingredient_nutrients').empty();
 
-	    var a = $('<a class="boring editsection" id="ingredient_additional_nutritional_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#ingredient_additional_nutritional_header');
-	    a.click(function() {
-	        switchNutrientsToEdit();
-		return false;
-	    });
-	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
-	    $('#ingredient_additional_nutritional_header2').remove();
+	    $('#editsection-additional-nutritional').empty();
+	    $('#iconTemplate').tmpl({id: 'editsection-additional-nutritional-edit', classes: 'editsection', title: 'Edit', src: 'icons/table_edit.png'}).appendTo('#editsection-additional-nutritional');
+	    
 	    isNutrientEditing = 0;
 	    populatePage();
 	}
@@ -316,98 +233,22 @@ function createNutrientRow(qty, unit, name) {
 		    return;
 		}
 
-		console.log($('#ingredient_additional_nutritional_header'));
-		console.log($('#ingredient_nutrients_form'));
-		$('#ingredient_nutrients_form').empty();
-		$('#ingredient_nutrients_form').prepend('<input type="hidden" name="ingredient_id" value="'+ingredientId+'"/>');
-		$('#ingredient_nutrients_form').prepend('<input type="hidden" name="edit_type" value="edit_nutrients"/>');
-		//$('#ingredient_nutrients_form').append(createNutrientRow(' ', '', ''));
-		console.log($('#ingredient_nutrients_form'));
-		var div = $('<div id="nutrient_add_inputs"></div>').appendTo('#ingredient_nutrients_form');
+		$('#ingredient_nutrients').empty();
+		$('#nutrientEditOuterTemplate').tmpl({id: ingredientId, type: 'edit_nutrients'}).appendTo('#ingredient_nutrients');
+
 		if (ingredient.nutrients.length > 0) {
-		    for (var i in ingredient.nutrients) {
-			div.append(createNutrientRow(ingredient.nutrients[i].qty, ingredient.nutrients[i].unit, ingredient.nutrients[i].Nutrient.name));
-		    }
+		    $('#nutrientEditTemplate').tmpl(ingredient).appendTo('#nutrient_add_inputs');
 		}
 		$( "#nutrient_add_inputs" ).sortable({
 			placeholder: "sortable-placeholder"
 		});
 		$( "#nutrient_add_inputs" ).disableSelection();
-		var div = $('<div class="row"></div>').appendTo('#ingredient_nutrients_form');
-		var a = $('<a class="boring" href="javascript:void(0);"></a>').appendTo(div);
-		a.click(function() {
-		    $('#nutrient_add_inputs').append(createNutrientRow(' ', '', ''));
-		    return false;
-		});
-		a.append('<img class="boring" src="icons/add.png" width="16" height="16" alt="add ingredient field">');
+		$('#divRowTemplate').tmpl({id: 'editsection-additional-nutritional-add-row'}).appendTo('#ingredient_nutrients_form');
+		$('#iconTemplate').tmpl({id: 'editsection-additional-nutritional-add', title: 'Add a row', src: 'icons/add.png'}).appendTo('#editsection-additional-nutritional-add-row');
 
-
-		var a = $('<a class="boring editsection" id="ingredient_additional_nutritional_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#ingredient_additional_nutritional_header');
-		a.click(function() {
-		    // Save
-		    $('#nutrient_add_inputs').find('.error-field').removeClass('error-field');
-		    $('.error-nutrients-tooltip').each(function() {
-			$(this).data('tooltip').hide();
-			$(this).data('tooltip', null);
-			$(this).removeClass('error-nutrients-tooltip');
-		    });
-		    console.log($('#ingredient_nutrients_form'));
-		    console.log($('#ingredient_nutrients_form').serialize());
-		    $.ajax({
-			"dataType": 'json',
-			"type": "GET",
-			"url": "ajax_editable.php",
-			"data": $('#ingredient_nutrients_form').serialize(),
-			"success": function(data) {
-			    //console.log(data);
-    
-			    if (data.error == 0) {
-				switchNutrientsToNormal();
-			    } else {
-				if (data.errorRow < 0) {
-				    alert(data.errmsg);
-				    return;
-				}
-
-				$('#nutrient_add_inputs').children().eq(data.errorRow).addClass('error-field');
-				input = $('#nutrient_add_inputs').children().eq(data.errorRow).find('input[name^=nut_name]');
-				console.log(input);
-
-				input.attr('title', data.errmsg);
-				input.addClass('error-nutrients-tooltip');
-				input.tooltip({
-					position: "top center",
-					//offset: [10, 150],
-					events: {
-					    def: ',',
-					    input: ',',
-					    widget: ',',
-					    tooltip: ','
-					    
-					},
-					effect: "fade",
-					tipClass: "tooltip-arrow-black",
-					opacity: 1
-				});
-				input.data('tooltip').show();
-				//console.log(data.errorRow);
-				//console.log(oTable.fnGetNodes(data.errorRow));
-			    }
-			    
-			}
-		    });
-		    return false;  
-		});
-		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
-
-		var a = $('<a class="boring editsection" id="ingredient_additional_nutritional_header2" href="javascript:void(0);" title="Finish editing without saving"></a>').insertBefore('#ingredient_additional_nutritional_header');
-		a.click(function() {
-		    // Cancel
-		    switchNutrientsToNormal();
-		    return false;
-		});
-		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
-		
+		$('#editsection-additional-nutritional').empty();
+		$('#iconTemplate').tmpl({id: 'editsection-additional-nutritional-cancel', classes: 'editsection', title: 'Finish editing without saving', src: 'icons/cancel.png'}).appendTo('#editsection-additional-nutritional');
+		$('#iconTemplate').tmpl({id: 'editsection-additional-nutritional-save', classes: 'editsection', title: 'Finish editing', src: 'icons/accept.png'}).appendTo('#editsection-additional-nutritional');
 
 	    });
 	}
@@ -462,13 +303,9 @@ function createNutrientRow(qty, unit, name) {
 
 	    $('#ingredient_nutri_form').find('input').remove();
 
-	    var a = $('<a class="boring editsection" id="ingredient_nutritional_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#ingredient_nutritional_header');
-	    a.click(function() {
-	        switchNutritionalToEdit();
-		return false;
-	    });
-	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
-	    $('#ingredient_nutritional_header2').remove();
+	    $('#editsection-nutri').empty();
+	    $('#iconTemplate').tmpl({id: 'editsection-nutri-edit', classes: 'editsection', title: 'Edit', src: 'icons/table_edit.png'}).appendTo('#editsection-nutri');
+
 	    isNutritionalEditing = 0;
 	    populatePage();
 	}
@@ -492,95 +329,40 @@ function createNutrientRow(qty, unit, name) {
 		console.log($('#ingredient_nutritional_information'));
 
 		$('#ingredient_nutri_form').find('input').remove();
-		$('#ingredient_nutri_form').prepend('<input type="hidden" name="ingredient_id" value="'+ingredientId+'"/>');
-		$('#ingredient_nutri_form').prepend('<input type="hidden" name="edit_type" value="edit_nutritional"/>');
+		$('#hiddenFieldTemplate').tmpl({id: ingredientId, type: 'edit_nutritional'}).appendTo('#ingredient_nutri_form');
 
 		for (var i in fields) {
 		    $('#'+fields[i]).empty();
 		    $('#'+fields[i]).append('<input name="field_'+fields[i]+'" id="field_'+fields[i]+'" type="text" size="5" value="'+ingredient[fields[i]]+'"/>');
 		}
 
-		var a = $('<a class="boring editsection" id="ingredient_nutritional_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#ingredient_nutritional_header');
-		a.click(function() {
-		    // Save
-		    $('#ingredient_nutritional_information').find('.error-field').removeClass('error-field');
-		    $('.error-nutri-tooltip').each(function() {
-			$(this).data('tooltip').hide();
-			$(this).data('tooltip', null);
-			$(this).removeClass('error-nutri-tooltip');
-		    });
-		    console.log($('#ingredient_nutri_form'));
-		    console.log($('#ingredient_nutri_form').serialize());
-		    $.ajax({
-			"dataType": 'json',
-			"type": "GET",
-			"url": "ajax_editable.php",
-			"data": $('#ingredient_nutri_form').serialize(),
-			"success": function(data) {
-			    //console.log(data);
-    
-			    if (data.error == 0) {
-				switchNutritionalToNormal();
-			    } else {
-				if ((data.errorRow == '') || (data.errorRow == -1)) {
-				    alert(data.errmsg);
-				    return;
-				}
-				
-				$('#'+data.errorRow).addClass('error-field');
-				
 
-				input = $('#field_'+data.errorRow).filter('input');
-
-				input.attr('title', data.errmsg);
-				input.addClass('error-nutri-tooltip');
-				input.tooltip({
-					position: "top center",
-					//offset: [10, 150],
-					events: {
-					    def: ',',
-					    input: ',',
-					    widget: ',',
-					    tooltip: ','
-					    
-					},
-					effect: "fade",
-					tipClass: "tooltip-arrow-black",
-					opacity: 1
-				});
-				input.data('tooltip').show();
-				//console.log(data.errorRow);
-				//console.log(oTable.fnGetNodes(data.errorRow));
-			    }
-			    
-			}
-		    });
-		    return false;  
-		});
-		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
-
-		var a = $('<a class="boring editsection" id="ingredient_nutritional_header2" href="javascript:void(0);" title="Finish editing without saving"></a>').insertBefore('#ingredient_nutritional_header');
-		a.click(function() {
-		    // Cancel
-		    switchNutritionalToNormal();
-		    return false;
-		});
-		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
-		
-
+		$('#editsection-nutri').empty();
+		$('#iconTemplate').tmpl({id: 'editsection-nutri-cancel', classes: 'editsection', title: 'Finish editing without saving', src: 'icons/cancel.png'}).appendTo('#editsection-nutri');
+		$('#iconTemplate').tmpl({id: 'editsection-nutri-save', classes: 'editsection', title: 'Finish editing', src: 'icons/accept.png'}).appendTo('#editsection-nutri');
 	    });
 	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	function switchPhotosToNormal() {
 	    if (isPhotoEditing == 0)
 		return;
-	    var a = $('<a class="boring editsection" id="ingredient_photo_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#ingredient_photo_header');
-	    a.click(function() {
-	        switchPhotosToEdit();
-		return false;
-	    });
-	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
+	    
+	    $('#editsection-photos').empty();
+	    $('#iconTemplate').tmpl({id: 'editsection-photos-edit', classes: 'editsection', title: 'Edit', src: 'icons/table_edit.png'}).appendTo('#editsection-photos');
+
 	    isPhotoEditing = 0;
 	    populatePage();
 	    return false;
@@ -617,14 +399,8 @@ function createNutrientRow(qty, unit, name) {
 		});
 		a.append('<img class="boring" src="icons/add.png" width="16" height="16" alt="add photo field">');
 
-
-		var a = $('<a class="boring editsection" id="ingredient_photo_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#ingredient_photo_header');
-		a.click(function() {
-		    switchPhotosToNormal();
-		    return false;
-		});
-		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
-
+		$('#editsection-photos').empty();
+		$('#iconTemplate').tmpl({id: 'editsection-photos-done', classes: 'editsection', title: 'Edit', src: 'icons/accept.png'}).appendTo('#editsection-photos');
 	    },
 	    'json');
 
@@ -653,7 +429,7 @@ function createNutrientRow(qty, unit, name) {
 		$('#ingredient_photos').empty();
 		$('#ingredient_info').empty();
 		$('#ingredient_qtys').empty();
-		$('#ingredient_nutrients_form').empty();
+		$('#ingredient_nutrients').empty();
 		$('#ingredient_nutrilabel').empty();
 		$('#kcal').empty();
 		$('#carb').empty();
@@ -678,7 +454,7 @@ function createNutrientRow(qty, unit, name) {
 		$('#sodium').text(ingredient.sodium);
 		$('#cholesterol').text(ingredient.cholesterol);
 
-		$('#nutrientTemplate').tmpl(ingredient).appendTo('#ingredient_nutrients_form');
+		$('#nutrientTemplate').tmpl(ingredient).appendTo('#ingredient_nutrients');
 
 		$('#ingredient_info').append(ingredient.info);
 
@@ -896,6 +672,260 @@ function createNutrientRow(qty, unit, name) {
 
 
 	$(function() {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*XXXX */
+
+	$('#editsection-photos-edit').live('click', function() {
+	    switchPhotosToEdit();
+	    return false;
+	});
+	$('#editsection-photos-done').live('click', function() {
+	    switchPhotosToNormal();
+	    return false;
+	});
+
+
+
+
+
+
+
+	$('#editsection-nutri-edit').live('click', function() {
+	    switchNutritionalToEdit();
+	    return false;
+	});
+	$('#editsection-nutri-cancel').live('click', function() {
+	    switchNutritionalToNormal();
+	    return false;
+	});
+	$('#editsection-nutri-save').live('click', function() {
+		    // Save
+		    $('#ingredient_nutritional_information').find('.error-field').removeClass('error-field');
+		    $('.error-nutri-tooltip').each(function() {
+			$(this).data('tooltip').hide();
+			$(this).data('tooltip', null);
+			$(this).removeClass('error-nutri-tooltip');
+		    });
+		    console.log($('#ingredient_nutri_form'));
+		    console.log($('#ingredient_nutri_form').serialize());
+		    $.ajax({
+			"dataType": 'json',
+			"type": "GET",
+			"url": "ajax_editable.php",
+			"data": $('#ingredient_nutri_form').serialize(),
+			"success": function(data) {
+			    //console.log(data);
+    
+			    if (data.error == 0) {
+				switchNutritionalToNormal();
+			    } else {
+				if ((data.errorRow == '') || (data.errorRow == -1)) {
+				    alert(data.errmsg);
+				    return;
+				}
+				
+				$('#'+data.errorRow).addClass('error-field');
+				
+
+				input = $('#field_'+data.errorRow).filter('input');
+
+				input.attr('title', data.errmsg);
+				input.addClass('error-nutri-tooltip');
+				input.tooltip({
+					position: "top center",
+					//offset: [10, 150],
+					events: {
+					    def: ',',
+					    input: ',',
+					    widget: ',',
+					    tooltip: ','
+					    
+					},
+					effect: "fade",
+					tipClass: "tooltip-arrow-black",
+					opacity: 1
+				});
+				input.data('tooltip').show();
+				//console.log(data.errorRow);
+				//console.log(oTable.fnGetNodes(data.errorRow));
+			    }
+			    
+			}
+		    });
+		    return false;
+	});
+	
+	
+	
+	
+	
+	
+	
+	
+	$('.remove-nutrient-field').live('click', function() {
+	    $(this).parent().parent().remove();
+	});
+	$('.add-nutrient-field').live('click', function() {
+	    $('#nutrientEditTemplate').tmpl({nutrients : [{qty: '', unit: '', Nutrient: {name: ''}}]}).insertAfter($(this).parent().parent());
+	    return false;
+	});
+	$('#editsection-additional-nutritional-edit').live('click', function() {
+	    switchNutrientsToEdit();
+	    return false;
+	});
+	$('#editsection-additional-nutritional-add').live('click', function() {
+	    $('#nutrientEditTemplate').tmpl({nutrients : [{qty: '', unit: '', Nutrient: {name: ''}}]}).appendTo('#nutrient_add_inputs');
+	    return false;
+	});
+	$('#editsection-additional-nutritional-cancel').live('click', function() {
+	    switchNutrientsToNormal();
+	    return false;
+	});
+	$('#editsection-additional-nutritional-save').live('click', function() {
+		    // Save
+		    $('#nutrient_add_inputs').find('.error-field').removeClass('error-field');
+		    $('.error-nutrients-tooltip').each(function() {
+			$(this).data('tooltip').hide();
+			$(this).data('tooltip', null);
+			$(this).removeClass('error-nutrients-tooltip');
+		    });
+		    console.log($('#ingredient_nutrients_form'));
+		    console.log($('#ingredient_nutrients_form').serialize());
+		    $.ajax({
+			"dataType": 'json',
+			"type": "GET",
+			"url": "ajax_editable.php",
+			"data": $('#ingredient_nutrients_form').serialize(),
+			"success": function(data) {
+			    //console.log(data);
+    
+			    if (data.error == 0) {
+				switchNutrientsToNormal();
+			    } else {
+				if (data.errorRow < 0) {
+				    alert(data.errmsg);
+				    return;
+				}
+
+				$('#nutrient_add_inputs').children().eq(data.errorRow).addClass('error-field');
+				input = $('#nutrient_add_inputs').children().eq(data.errorRow).find('input[name^=nut_name]');
+				console.log(input);
+
+				input.attr('title', data.errmsg);
+				input.addClass('error-nutrients-tooltip');
+				input.tooltip({
+					position: "top center",
+					//offset: [10, 150],
+					events: {
+					    def: ',',
+					    input: ',',
+					    widget: ',',
+					    tooltip: ','
+					    
+					},
+					effect: "fade",
+					tipClass: "tooltip-arrow-black",
+					opacity: 1
+				});
+				input.data('tooltip').show();
+				//console.log(data.errorRow);
+				//console.log(oTable.fnGetNodes(data.errorRow));
+			    }
+			    
+			}
+		    });
+		    return false;  
+	});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	    $('form').submit(function() {
 		$.ajax({
 		    type: "POST",
@@ -1066,7 +1096,7 @@ function createNutrientRow(qty, unit, name) {
 	<div class="container_16 clearfix">
 	    <div class="grid_11">
 		<h2 style="margin-bottom: 0px;">
-		    <span class="editsection">
+		    <span id="editsection-qty" class="editsection">
 			<a class="boring editsection" href="#" id="ingredient_qtys_header" onclick="switchQtyToEdit();" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
@@ -1093,7 +1123,7 @@ function createNutrientRow(qty, unit, name) {
 		</script>
 
 		<h2 style="margin-bottom: 0px;">
-		    <span class="editsection">
+		    <span id="editsection-nutri" class="editsection">
 			<a class="boring editsection" href="#" id="ingredient_nutritional_header" onclick="switchNutritionalToEdit();" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
@@ -1156,8 +1186,8 @@ function createNutrientRow(qty, unit, name) {
 		</div>
 
 		<h2 style="margin-bottom: 0px;">
-		    <span class="editsection">
-			<a class="boring editsection" href="#" id="ingredient_additional_nutritional_header"  onclick="switchNutrientsToEdit();" title="Edit">
+		    <span id="editsection-additional-nutritional" class="editsection">
+			<a class="boring editsection" href="#" id="editsection-additional-nutritional-edit"  onclick="switchNutrientsToEdit();" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
 		    </span>
@@ -1165,8 +1195,6 @@ function createNutrientRow(qty, unit, name) {
 		</h2>
 
 		<div id="ingredient_nutrients" class="row clearfix">
-		    <form id="ingredient_nutrients_form" name="ingredient_nutrients_form" method="post" action="ajax_editable.php">
-		    </form>
 		</div>
 		    <script id="nutrientTemplate" type="text/x-jquery-tmpl">
 			<div class="leftfixed">
@@ -1188,9 +1216,37 @@ function createNutrientRow(qty, unit, name) {
 			    {{/if}}
 			</div>			
 		    </script>
-		
+		    <script id="nutrientEditOuterTemplate" type="text/x-jquery-tmpl">
+			<form id="ingredient_nutrients_form" name="ingredient_nutrients_form" method="post" action="ajax_editable.php">
+			    {{tmpl '#hiddenFieldTemplate'}}
+			    <div id="nutrient_add_inputs">
+			    </div>
+			</form>
+		    </script>
+		    <script id="hiddenFieldTemplate" type="text/x-jquery-tmpl">
+			<input type="hidden" name="ingredient_id" value="${id}"/>
+			<input type="hidden" name="edit_type" value="${type}"/>
+		    </script>
+		    <script id="nutrientEditTemplate" type="text/x-jquery-tmpl">
+			{{each nutrients}}
+			    <div class="row sortable-outline clearfix">
+				<span class="labelfullleft">
+				    <input type="text" size="5" name="nut_qty[]" value="${$value.qty}"/>
+				    <span class="nut-unit">${$value.unit}</span>
+				</span>
+				
+				<span class="formfull">
+				    <input style="margin-left: 15px;" type="text" size="30" name="nut_name[]" value="${$value.Nutrient.name}"/>
+				    
+				    {{tmpl({classes: 'remove-nutrient-field', src: 'icons/cross.png', title: 'Add a nutrient'}) "#iconTemplate"}}
+				    {{tmpl({classes: 'add-nutrient-field', src: 'icons/add.png', title: 'Remove this nutrient'}) "#iconTemplate"}}
+				</span>
+			    </div>
+			{{/each}}
+		    </script>
+
 		<h2>
-		    <span class="editsection">
+		    <span id="editsection-info" class="editsection">
 			<a class="boring editsection" href="#" id="ingredient_info_header" title="Edit">
 			    <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 			</a>
@@ -1212,7 +1268,7 @@ function createNutrientRow(qty, unit, name) {
 
 	<div class="container_16 clearfix">
 	    <h2>
-	    	<span class="editsection">
+	    	<span id="editsection-photos" class="editsection">
 		    <a class="boring editsection" href="#" id="ingredient_photo_header" onclick="switchPhotosToEdit();" title="Edit">
 		        <img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)"/>
 		    </a>
@@ -1236,9 +1292,19 @@ function createNutrientRow(qty, unit, name) {
 	    </script>
 	</div>
 
-
-
     </div>
+
+
+
+    <script id="iconTemplate" type="text/x-jquery-tmpl">
+	<a class="boring ${classes}" href="javascript:void(0);" id="${id}" title="${title}"> <!-- XXX:  onclick="switchNutrientsToEdit();"  -->
+	    <img class="boring" src="${src}" width="16" height="16" alt="(edit)"/>
+	</a>
+    </script>
+    <script id="divRowTemplate" type="text/x-jquery-tmpl">
+	<div id="${id}" class="row ${classes}"></div>
+    </script>
+
 
     <div class="spacer container_16"></div>
     <?php print_footer(); ?>

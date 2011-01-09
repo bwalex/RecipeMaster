@@ -847,6 +847,7 @@ TODO: add print stuff
 				return(value);
 			    },
 			    {
+				onblur : "submit",
 				type      : "text",
 				tooltip   : 'Click to edit...'
 			    }

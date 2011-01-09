@@ -322,6 +322,8 @@ class Ingredient {
                     
                 }
                 if ($unit == '' && $this->unit != '') {
+                    if ($this->typical_qty == 0)
+                        throw new Exception('A unit must be specified as the ingredient has no typical weight');
                     $qty = $qty * $this->typical_qty;
                     $unit = $this->typical_unit;
                     //echo $this->name ." : $qty : $unit";
