@@ -55,7 +55,13 @@ try {
                 array_push($deleted_rows, $idx);
                 continue;
             }
-            list($qty, $unit) = split(' ', $row[1]);
+            preg_match ('/(\d+(\.\d+)?)\s*([^\d].*)?/', $row[1], $matches);
+            print_r($matches);
+            $qty = $matches[1];
+            $unit = $matches[3];
+            //list($qty, $unit) = split(' ', $row[1]);
+            // (\d+(\.\d+)?)\s*([^\d]*)
+            // (\d+(\.\d+)?)\s*([^\d].*)
             //0null b (diced) <-- null
             $elem = $recipe->addIngredient($qty, $unit, ($row[2] != NULL)?($row[2]):'', -1, $row[0], 0 /* don't validate units */);
             $error_col = 1;
