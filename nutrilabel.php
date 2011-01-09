@@ -9,6 +9,10 @@ $cholesterol = intval($_GET['cholesterol']);
 $sodium = intval($_GET['sodium']);
 $fibre = $_GET['fibre'];
 $sugars = $_GET['sugar'];
+if (!empty($_GET['amount_per']))
+	$amount_per = $_GET['amount_per'];
+else
+	$amount_per = 'Serving';
 
 /* nutrilabel.php?carbs=74&protein=45&fat=27&sat_fat=6&calories=720&cholesterol=90&sodium=1790&fibre=5&sugars=16 */
 
@@ -86,10 +90,10 @@ $y += 10;
 imagefilledrectangle($im, $side_margin, $y, $width-$side_margin, $y+8, $text_color);
 $y += 12;
 
-$bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Amount Per Serving');
+$bbox = imagettfbbox($font_size_normal, 0, $file_font_bold, 'Amount Per '.$amount_per);
 $y += bbox_get_height($bbox);
 $normal_height = bbox_get_height($bbox);
-imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_bold, 'Amount Per Serving');
+imagettftext($im, $font_size_normal, 0, $side_margin, $y, $text_color, $file_font_bold, 'Amount Per '.$amount_per);
 
 $y += 4;
 imageline($im, $side_margin, $y, $width-$side_margin, $y, $text_color);

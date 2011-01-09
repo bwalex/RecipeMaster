@@ -685,7 +685,7 @@ function createNutrientRow(qty, unit, name) {
 		galleryId = 1;
 		$('#photoGalleryTemplate').tmpl(ingredient, {galleryId: ((RMConfig.photoViewer == 'prettyPhoto')?'prettyPhoto[gallery_'+galleryId+']':'gallery_'+galleryId)}).appendTo('#ingredient_photos');
 		enableLightbox($('#ingredient_photos a'));
-
+		ingredient.nutri_info_keyval.push({"name" : "amount_per", "value" : "Specified Quantity"});
 		$('#ingredient_nutrilabel').append('<img src="nutrilabel.php?'+ $.param(ingredient.nutri_info_keyval) +'" alt="Nutritional Information Label">');
 
 

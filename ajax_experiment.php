@@ -55,8 +55,12 @@ try {
                 array_push($deleted_rows, $idx);
                 continue;
             }
-            preg_match ('/(\d+(\.\d+)?)\s*([^\d].*)?/', $row[1], $matches);
-            print_r($matches);
+            $n = preg_match ('/(\d+(\.\d+)?)\s*([^\d].*)?/', $row[1], $matches);
+            if ($n < 1) {
+                $error_col = 1;
+                throw new Exception('The quantity and unit are incorrect');
+            }
+            //print_r($matches);
             $qty = $matches[1];
             $unit = $matches[3];
             //list($qty, $unit) = split(' ', $row[1]);
