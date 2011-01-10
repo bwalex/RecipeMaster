@@ -154,6 +154,7 @@ include('functions.php');
 
 		if (ingredient.nutrients.length > 0) {
 		    $('#nutrientEditTemplate').tmpl(ingredient).appendTo('#nutrient_add_inputs');
+		    nutrientEditTemplateEnableAutocomplete();
 		}
 		$( "#nutrient_add_inputs" ).sortable({
 			placeholder: "sortable-placeholder"
@@ -170,7 +171,43 @@ include('functions.php');
 	}
 
 
+	function nutrientEditTemplateEnableAutocomplete() {
+	    $('input[name^=nut_name]').autocomplete( "destroy" );
+	    $('input[name^=nut_name]').autocomplete({
+		source: function(request, response) {
+		    $.ajax({
+			url: "ajax_autocomplete.php",
+			dataType: "json",
+			data: {
+			    type: "nutrients",
+			    maxRows: 12,
+			    term: request.term
+			},
+			success: function(data) {
+			    if (data.exception) {
+				response([]);
+				alert(data.exception);
+				return;
+			    }
+			    console.log(data.objects);
+			    response(data.objects);
+			}
+		    });
+		},
+		select: function(event, ui) {
+		    var val = ui.item.value;
+		    console.log(val);
+		    var idx = val.lastIndexOf('(');
+		    var unit = val.substr(idx+1, val.length-2-idx);
+		    console.log(unit);
+		    ui.item.value = val.substr(0, idx -1);
+		    console.log(ui.item.value);
+		    $(this).parent().parent().find('.nut-unit').text(unit);
+		},
+		minLength: 1
+	    });
 
+	}
 
 
 
@@ -607,6 +644,7 @@ include('functions.php');
 	    });
 	    $('.add-nutrient-field').live('click', function() {
 		$('#nutrientEditTemplate').tmpl({nutrients : [{qty: '', unit: '', Nutrient: {name: ''}}]}).insertAfter($(this).parent().parent());
+		nutrientEditTemplateEnableAutocomplete();
 		return false;
 	    });
 	    $('#editsection-additional-nutritional-edit').live('click', function() {
@@ -615,6 +653,7 @@ include('functions.php');
 	    });
 	    $('#editsection-additional-nutritional-add').live('click', function() {
 		$('#nutrientEditTemplate').tmpl({nutrients : [{qty: '', unit: '', Nutrient: {name: ''}}]}).appendTo('#nutrient_add_inputs');
+		nutrientEditTemplateEnableAutocomplete();
 		return false;
 	    });
 	    $('#editsection-additional-nutritional-cancel').live('click', function() {
@@ -913,8 +952,8 @@ include('functions.php');
 				<span class="formfull">
 				    <input style="margin-left: 15px;" type="text" size="30" name="nut_name[]" value="${$value.Nutrient.name}"/>
 				    
-				    {{tmpl({classes: 'remove-nutrient-field', src: 'icons/cross.png', title: 'Add a nutrient'}) "#iconTemplate"}}
-				    {{tmpl({classes: 'add-nutrient-field', src: 'icons/add.png', title: 'Remove this nutrient'}) "#iconTemplate"}}
+				    {{tmpl({classes: 'remove-nutrient-field', src: 'icons/cross.png', title: 'Remove this nutrient'}) "#iconTemplate"}}
+				    {{tmpl({classes: 'add-nutrient-field', src: 'icons/add.png', title: 'Add a nutrient'}) "#iconTemplate"}}
 				</span>
 			    </div>
 			{{/each}}

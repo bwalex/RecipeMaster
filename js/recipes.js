@@ -12,6 +12,7 @@ function createselect(name, options) {
     return select;
 }
 
+
 function createIngredientRow(qty, unit, name, method) {
     var row = $('<div class="row sortable-outline"></div>');
 

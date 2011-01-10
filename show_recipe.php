@@ -815,6 +815,32 @@ include('functions.php');
 			    {{/if}}
 			</div>			
 		    </script>
+		    <script id="ingredientEditOuterTemplate" type="text/x-jquery-tmpl">
+			<form id="recipe_ingredients_form" name="recipe_ingredients_form" method="post" action="ajax_editable.php">
+			    <div id="ingredient_add_inputs">
+			    </div>
+			</form>
+		    </script>
+		    <script id="ingredientEditTemplate" type="text/x-jquery-tmpl">
+			{{each ingredients}}
+			    <div class="row sortable-outline clearfix">
+				<input type="text" size="5" name="ing_qty[]" value="${$value.qty}"/>
+				<select name="ing_unit[]" value="${$value.unit}">
+				    <option></option>
+				    <option>g</option>
+				    <option>ml</option>
+				    <option>mg</option>
+				    <option>kg</option>
+				    <option>l</option>
+				</select>
+				<input type="text" size="30" name="ing_name[]" value="${$value.Ingredient.name}">
+				<input type="text" size="15" name="ing_method[]" value="${$value.method}">
+				{{tmpl({classes: 'remove-ingredient-field', src: 'icons/cross.png', title: 'Remove this ingredient'}) "#iconTemplate"}}
+				{{tmpl({classes: 'add-ingredient-field', src: 'icons/add.png', title: 'Add an ingredient'}) "#iconTemplate"}}
+			    </div>
+			{{/each}}
+		    </script>
+
 
 		<!--<h2 id="recipe_preparation_header" style="clear: left; padding-top: 15px;">Preparation</h2>-->
 		<h2>
