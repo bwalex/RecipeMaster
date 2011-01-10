@@ -67,23 +67,12 @@ include('functions.php');
 
 
 
-
-	
-
-
-
-
-
-
 	function switchQtyToNormal() {
 	    if (isQtyEditing == 0)
 		return;
 
 	    $('#ingredient_qtys').find('.error-field').removeClass('error-field');
-	    $('.error-qtys-tooltip').each(function() {
-		$(this).qtip("destroy");
-		$(this).removeClass('error-qtys-tooltip');
-	    });
+	    delToolTip(null, 'error-qtys-tooltip');
 
 	    $('#ingredient_qtys').empty();
 
@@ -135,11 +124,7 @@ include('functions.php');
 		a.click(function() {
 		    // Save
 		    $('#ingredient_qtys').find('.error-field').removeClass('error-field');
-		    $('.error-qtys-tooltip').each(function() {
-			$(this).data('tooltip').hide();
-			$(this).data('tooltip', null);
-			$(this).removeClass('error-qtys-tooltip');
-		    });
+		    delToolTip(null, 'error-qtys-tooltip');
 
 		    $.ajax({
 			"dataType": 'json',
@@ -158,54 +143,7 @@ include('functions.php');
 				}
 				
 				$('#field_'+data.errorRow).parent().addClass('error-field');
-
-				input = $('#field_'+data.errorRow).filter('input');
-
-				input.attr('title', data.errmsg);
-				input.addClass('error-qtys-tooltip');
-				input.qtip({
-					//content: 'Stems are great for indicating the context of the tooltip.',
-					show: {
-					    when: false, // Don't specify a show event
-					    ready: true // Show the tooltip when ready
-					 },
-					 hide: false, // Don't specify a hide event
-					position: {
-					    corner: {
-						tooltip: 'bottomMiddle',
-						target: 'topLeft'
-					    }
-					},
-					style: {
-					    'font-weight': 'bold',
-					    'font-size': '14px',
-					    background: '#ffAAAA',
-					    color: 'black',
-					    border: {
-					       width: 7,
-					       radius: 5,
-					       color: '#ffAAAA'
-					    },
-					    tip: 'bottomMiddle' // Notice the corner value is identical to the previously mentioned positioning corners
-					}
-				});
-				/*input.tooltip({
-					position: "top center",
-					//offset: [10, 150],
-					events: {
-					    def: ',',
-					    input: ',',
-					    widget: ',',
-					    tooltip: ','
-					    
-					},
-					effect: "fade",
-					tipClass: "tooltip-arrow-black",
-					opacity: 1
-				});
-				
-				input.data('tooltip').show();*/
-				
+				addToolTip($('#field_'+data.errorRow).filter('input'), data.errmsg, 'error-qtys-tooltip');
 			    }
 			    
 			}
@@ -237,11 +175,7 @@ include('functions.php');
 		return;
 
 	    $('#nutrient_add_inputs').find('.error-field').removeClass('error-field');
-	    $('.error-nutrients-tooltip').each(function() {
-		$(this).data('tooltip').hide();
-		$(this).data('tooltip', null);
-		$(this).removeClass('error-nutrients-tooltip');
-	    });
+	    delToolTip(null, 'error-nutrients-tooltip');
 
 	    $('#ingredient_nutrients').empty();
 
@@ -329,11 +263,7 @@ include('functions.php');
 		return;
 
 	    $('#ingredient_nutritional_information').find('.error-field').removeClass('error-field');
-	    $('.error-nutri-tooltip').each(function() {
-		$(this).data('tooltip').hide();
-		$(this).data('tooltip', null);
-		$(this).removeClass('error-nutri-tooltip');
-	    });
+	    delToolTip(null, 'error-nutri-tooltip');
 
 	    $('#ingredient_nutri_form').find('input').remove();
 
@@ -456,6 +386,7 @@ include('functions.php');
 		// format and output result
 		if (ingredient.exception) {
 		    alert(ingredient.exception);
+		    $('#loading-screen').data('overlay').close();
 		    return;
 		}
 
@@ -755,11 +686,7 @@ include('functions.php');
 	$('#editsection-nutri-save').live('click', function() {
 		    // Save
 		    $('#ingredient_nutritional_information').find('.error-field').removeClass('error-field');
-		    $('.error-nutri-tooltip').each(function() {
-			$(this).data('tooltip').hide();
-			$(this).data('tooltip', null);
-			$(this).removeClass('error-nutri-tooltip');
-		    });
+		    delToolTip(null, 'error-nutri-tooltip');
 		    console.log($('#ingredient_nutri_form'));
 		    console.log($('#ingredient_nutri_form').serialize());
 		    $.ajax({
@@ -779,29 +706,8 @@ include('functions.php');
 				}
 				
 				$('#'+data.errorRow).addClass('error-field');
-				
 
-				input = $('#field_'+data.errorRow).filter('input');
-
-				input.attr('title', data.errmsg);
-				input.addClass('error-nutri-tooltip');
-				input.tooltip({
-					position: "top center",
-					//offset: [10, 150],
-					events: {
-					    def: ',',
-					    input: ',',
-					    widget: ',',
-					    tooltip: ','
-					    
-					},
-					effect: "fade",
-					tipClass: "tooltip-arrow-black",
-					opacity: 1
-				});
-				input.data('tooltip').show();
-				//console.log(data.errorRow);
-				//console.log(oTable.fnGetNodes(data.errorRow));
+				addToolTip($('#field_'+data.errorRow).filter('input'), data.errmsg, 'error-nutri-tooltip');
 			    }
 			    
 			}
@@ -838,13 +744,9 @@ include('functions.php');
 	$('#editsection-additional-nutritional-save').live('click', function() {
 		    // Save
 		    $('#nutrient_add_inputs').find('.error-field').removeClass('error-field');
-		    $('.error-nutrients-tooltip').each(function() {
-			$(this).data('tooltip').hide();
-			$(this).data('tooltip', null);
-			$(this).removeClass('error-nutrients-tooltip');
-		    });
-		    console.log($('#ingredient_nutrients_form'));
-		    console.log($('#ingredient_nutrients_form').serialize());
+
+		    delToolTip(null, 'error-nutrients-tooltip');
+
 		    $.ajax({
 			"dataType": 'json',
 			"type": "GET",
@@ -863,27 +765,7 @@ include('functions.php');
 
 				$('#nutrient_add_inputs').children().eq(data.errorRow).addClass('error-field');
 				input = $('#nutrient_add_inputs').children().eq(data.errorRow).find('input[name^=nut_name]');
-				console.log(input);
-
-				input.attr('title', data.errmsg);
-				input.addClass('error-nutrients-tooltip');
-				input.tooltip({
-					position: "top center",
-					//offset: [10, 150],
-					events: {
-					    def: ',',
-					    input: ',',
-					    widget: ',',
-					    tooltip: ','
-					    
-					},
-					effect: "fade",
-					tipClass: "tooltip-arrow-black",
-					opacity: 1
-				});
-				input.data('tooltip').show();
-				//console.log(data.errorRow);
-				//console.log(oTable.fnGetNodes(data.errorRow));
+				addToolTip(input, data.errmsg, 'error-nutrients-tooltip');
 			    }
 			    
 			}
@@ -1010,8 +892,7 @@ include('functions.php');
 	    $('#ingredient_name').editable(
 		function(value, settings) {
     		    /* Clear errors */
-		    if ($('#ingredient_name').data("qtip"))
-			$('#ingredient_name').qtip("destroy");
+		    delToolTip($('#ingredient_name'));
 
 		    $('.error-field').removeClass('error-field');
 		    
@@ -1034,35 +915,7 @@ include('functions.php');
 			    } else {
 				$('#ingredient_name').addClass('error-field');
 
-				$('#ingredient_name').attr('title', data.errmsg);
-				$('#ingredient_name').qtip({
-					//content: 'Stems are great for indicating the context of the tooltip.',
-					show: {
-					    when: false, // Don't specify a show event
-					    ready: true // Show the tooltip when ready
-					 },
-					 hide: false, // Don't specify a hide event
-					position: {
-					    corner: {
-						tooltip: 'bottomMiddle',
-						target: 'topMiddle'
-					    }
-					},
-					style: {
-					    'font-weight': 'bold',
-					    'font-size': '14px',
-					    background: '#ffAAAA',
-					    color: 'black',
-					    border: {
-					       width: 7,
-					       radius: 5,
-					       color: '#ffAAAA'
-					    },
-					    tip: 'bottomMiddle' // Notice the corner value is identical to the previously mentioned positioning corners
-					}
-				});
-				//console.log(data.errorRow);
-				//console.log(oTable.fnGetNodes(data.errorRow));
+				addToolTip($('#ingredient_name'), data.errmsg);
 			    }
 			    
 			}
@@ -1332,11 +1185,34 @@ include('functions.php');
 		    </ul>
 		</div>
 	    </script>
+	    <!--
+	    				<a class="highslide" {{if ${$item.galleryId}}}rel="gallery_${$item.galleryId}"{{/if}} title="${$value.caption}" href="${$value.photo}" id="${$value.id}">
+				    <img alt="${$value.caption}" src="${$value.thumb}"/>
+				</a>
+	    -->
+	    <script id="photoGalleryEditTemplate" type="text/x-jquery-tmpl">
+		{{each photos}}
+		    <div class="row clearfix">
+			<span>
+			    ....createphoto....
+			</span>
+			<span id="photo_${$value.type}_${$value.id}">
+			    ${$value.qty}.caption;
+			</span>
+			<span>
+			    {{tmpl({id: ${$value.id}, classes: 'remove-photo-field', src: 'icons/cross.png', title: 'Remove this photo'}) "#iconTemplate"}}
+			</span>
+		{{/each}}
+	    </script>
 	</div>
 
     </div>
 
-
+    <script id="photoTemplate" type="text/x-jquery-tmpl">
+	<a class="highslide" {{if galleryId}}rel="gallery_${galleryId}"{{/if}} title="${caption}" href="${photo}" {{if id}}id="${id}"{{/if}}>
+	    <img alt="${caption}" src="${thumb}"/>
+	</a>
+    </script>
 
     <script id="iconTemplate" type="text/x-jquery-tmpl">
 	<a class="boring ${classes}" href="javascript:void(0);" id="${id}" title="${title}"> <!-- XXX:  onclick="switchNutrientsToEdit();"  -->

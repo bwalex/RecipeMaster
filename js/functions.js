@@ -1,5 +1,138 @@
 var seq = 0;
 
+
+editableConnector({
+    type: 'ingredient',
+    id: ingredientId,
+    editType: 'edit_info',
+    sendNow: true,
+    success: function() {
+	
+    },
+    error: function() {
+	
+    }
+})
+
+function editableConnector(settings) {
+    this.id = settings.id;
+    this.editType = settings.type;
+    this.type = settings.type;
+    this.success = settings.success;
+    this.error = settings.error;
+    this.privateData = {};
+
+    this.data = function(key, val) {
+	if (val) {
+	    this.privateData[key] = val;
+	    return null;
+	} else {
+	    return this.privateData[key];
+	}
+    }
+
+    this.send = function() {
+	if ($.isFunction(settings.data)) {
+	    this.sendData = settings.data(this.privateData);
+	} else if ($.isPlainObject(settings.data)) {
+	    this.sendData = settings.data;
+	} else {
+	    this.sendData = {};
+	}
+
+	this.sendData.type = this.type;
+	this.sendData.id = this.id;
+	this.sendData.edit_type = this.editType;
+
+	$.ajax({
+	    "dataType": 'json',
+	    "type": "GET",
+	    "url": "ajax_editable.php",
+	    "data": this.sendData,
+	    "success": function(data) {
+		if (data.error) {
+		    if ($.isFunction(this.error))
+			this.error(data);
+		} else {
+		    if ($.isFunction(this.success))
+			this.success(data);
+		}
+	    }
+	});
+    }
+
+    if (settings.sendNow == true)
+	this.send();
+}
+
+
+
+
+
+
+var qtipSettings = {
+    show: {
+	when: false, // Don't specify a show event
+	ready: true // Show the tooltip when ready
+     },
+     hide: false, // Don't specify a hide event
+    position: {
+	corner: {
+	    tooltip: 'bottomMiddle',
+	    target: 'topMiddle'
+	}
+    },
+    style: {
+	'font-weight': 'bold',
+	'font-size': '14px',
+	background: '#ffAAAA',
+	color: 'black',
+	border: {
+	   width: 7,
+	   radius: 5,
+	   color: '#ffAAAA'
+	},
+	tip: 'bottomMiddle' // Notice the corner value is identical to the previously mentioned positioning corners
+    }
+};
+
+
+
+function addToolTip(jqi, msg, className, settings) {
+    jqi.attr('title', msg);
+    if (className != null)
+	jqi.addClass(className);
+    if (settings == null)
+	jqi.qtip(qtipSettings);
+    else
+	jqi.qtip(settings);
+}
+
+function delToolTip(jqi, className) {
+    var e;
+    if (jqi != null) {
+	e = jqi;
+    } else {
+	e = $('.'+className);
+	e.removeClass(className);
+    }
+    e.each(function() {
+	if ($(this).data('qtip'))
+	    $(this).qtip('destroy');
+    });
+
+}
+
+
+
+
+
+
+
+
+
+
+
 function createPhoto(photo, thumb, caption) {
     var a = $('<a href="'+ photo +'" title="'+ caption +'" class="highslide">');
     if (thumb != null) {
@@ -115,7 +248,7 @@ function addUpload(container, parentType, parentId) {
     var form = $('<form name="photo_form" target="upload_target_'+seq+'" action="ajax_form_photos.php" method="post" enctype="multipart/form-data">').appendTo(div);
     var input = $('<input type="file" name="'+parentType+'_photo">').appendTo(form);
     input.data('seq', seq);
-    input.change(function() {
+    input.change(function() {	
 	var id = $(this).data('seq');
 	$('#process-div-'+id).css({'visibility' : 'visible', 'height' : 'auto'});
 	$('#input-div-'+id).css({'visibility' : 'hidden', 'height' : '0px'});
