@@ -1,22 +1,10 @@
 var seq = 0;
 
 
-editableConnector({
-    type: 'ingredient',
-    id: ingredientId,
-    editType: 'edit_info',
-    sendNow: true,
-    success: function() {
-	
-    },
-    error: function() {
-	
-    }
-})
 
 function editableConnector(settings) {
     this.id = settings.id;
-    this.editType = settings.type;
+    this.editType = settings.editType;
     this.type = settings.type;
     this.success = settings.success;
     this.error = settings.error;
@@ -32,30 +20,51 @@ function editableConnector(settings) {
     }
 
     this.send = function() {
-	if ($.isFunction(settings.data)) {
+	if (typeof(settings.data) == 'function') {
 	    this.sendData = settings.data(this.privateData);
-	} else if ($.isPlainObject(settings.data)) {
+	} else if (typeof(settings.data) == 'object') {
+	    this.sendData = settings.data;
+	} else if (typeof(settings.data) == 'string') {
 	    this.sendData = settings.data;
 	} else {
 	    this.sendData = {};
 	}
 
-	this.sendData.type = this.type;
-	this.sendData.id = this.id;
-	this.sendData.edit_type = this.editType;
-
+	if (typeof(this.sendData) == 'string') {
+	    if (this.sendData.length > 0)
+		this.sendData = this.sendData + '&';
+	    this.sendData = this.sendData + $.param({
+		type: this.type,
+		id : this.id,
+		edit_type: this.editType
+	    });
+	} else {
+	    this.sendData.type = this.type;
+	    this.sendData.id = this.id;
+	    this.sendData.edit_type = this.editType;
+	}
+	console.log(this);
 	$.ajax({
 	    "dataType": 'json',
 	    "type": "GET",
 	    "url": "ajax_editable.php",
 	    "data": this.sendData,
+	    "context": this,
 	    "success": function(data) {
-		if (data.error) {
-		    if ($.isFunction(this.error))
-			this.error(data);
+		console.log(this);
+		if (data.error != 0) {
+		    var r = false;
+		    if (typeof(this.error) == 'function')
+			r = this.error(data);
+		    else if (typeof(this.error) == 'string')
+			r = window[this.error]();
+		    if (r == false)
+			alert(data.errmsg);
 		} else {
-		    if ($.isFunction(this.success))
+		    if (typeof(this.success) == 'function')
 			this.success(data);
+		    else if (typeof(this.success) == 'string')
+			window[this.success]();
 		}
 	    }
 	});

@@ -2,14 +2,16 @@
 include('functions.php');
 ?>
 
+<!--
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+-->
+<!DOCTYPE HTML>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta name="generator" content="HTML Tidy for Windows (vers 11 August 2008), see www.w3.org" />
-    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
 
     <title>Show Ingredient : RecipeMaster</title>
     <style type="text/css" title="currentStyle">
@@ -76,13 +78,9 @@ include('functions.php');
 
 	    $('#ingredient_qtys').empty();
 
-	    var a = $('<a class="boring editsection" id="ingredient_qtys_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#ingredient_qtys_header');
-	    a.click(function() {
-	        switchQtyToEdit();
-		return false;
-	    });
-	    a.append('<img class="boring" src="icons/table_edit.png" width="16" height="16" alt="(edit)">');
-	    $('#ingredient_qtys_header2').remove();
+	    $('#editsection-qty').empty();
+	    $('#iconTemplate').tmpl({id: 'editsection-qty-edit', classes: 'editsection', title: 'Edit', src: 'icons/table_edit.png'}).appendTo('#editsection-qty');
+
 	    isQtyEditing = 0;
 	    populatePage();
 	}
@@ -104,63 +102,13 @@ include('functions.php');
 
 		$('#ingredient_qtys').empty();
 		
-		var form = $('<form id="ingredient_qty_form" action="ajax_editable.php" method="post"></form>').appendTo('#ingredient_qtys');
-		form.append('<input type="hidden" name="ingredient_id" value="'+ingredientId+'"/>');
-		form.append('<input type="hidden" name="edit_type" value="edit_qtys"/>');
-		
-		var div = $('<div id="ingredient_qtyunit" class="leftfixed"></div>').appendTo(form);
-		div.append('<label for="field_qty">Quantity: </label>');
-		div.append('<input type="text" size="5" name="field_qty" id="field_qty" value="'+ingredient.qty+'">');
-		div.append('<select name="field_unit" id="field_unit"><option></option><option>g</option><option>ml</option><option>mg</option><option>kg</option><option>l</option></select>');
+		$('#ingredientQtysEditTemplate').tmpl(ingredient).appendTo('#ingredient_qtys');
 		$('#field_unit').val(ingredient.unit);
-		
-		var div = $('<div id="ingredient_typical_qtyunit" class="rightfixed"></div>').appendTo(form);
-		div.append('<label for="field_typical_qty">Typical unit weight: </label>');
-		div.append('<input type="text" size="5" name="field_typical_qty" id="field_typical_qty" value="'+ingredient.typical_qty+'">');
-		div.append('<select name="field_typical_unit" id="field_typical_unit"><option>g</option><option>mg</option><option>kg</option></select>');
 		$('#field_typical_unit').val(ingredient.typical_unit);
 
-		var a = $('<a class="boring editsection" id="ingredient_qtys_header" href="javascript:void(0);" title="Finish editing"></a>').replaceAll('#ingredient_qtys_header');
-		a.click(function() {
-		    // Save
-		    $('#ingredient_qtys').find('.error-field').removeClass('error-field');
-		    delToolTip(null, 'error-qtys-tooltip');
-
-		    $.ajax({
-			"dataType": 'json',
-			"type": "GET",
-			"url": "ajax_editable.php",
-			"data": $('#ingredient_qty_form').serialize(),
-			"success": function(data) {
-			    //console.log(data);
-    
-			    if (data.error == 0) {
-				switchQtyToNormal();
-			    } else {
-				if ((data.errorRow == '') || (data.errorRow == -1)) {
-				    alert(data.errmsg);
-				    return;
-				}
-				
-				$('#field_'+data.errorRow).parent().addClass('error-field');
-				addToolTip($('#field_'+data.errorRow).filter('input'), data.errmsg, 'error-qtys-tooltip');
-			    }
-			    
-			}
-		    });
-		    return false;  
-		});
-		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
-
-		var a = $('<a class="boring editsection" id="ingredient_qtys_header2" href="javascript:void(0);" title="Finish editing without saving"></a>').insertBefore('#ingredient_qtys_header');
-		a.click(function() {
-		    // Cancel
-		    switchQtyToNormal();
-		    return false;
-		});
-		a.append('<img class="boring" src="icons/cancel.png" width="16" height="16" alt="Finish Editing without save">');
-		
-
+		$('#editsection-qty').empty();
+		$('#iconTemplate').tmpl({id: 'editsection-qty-cancel', classes: 'editsection', title: 'Finish editing without saving', src: 'icons/cancel.png'}).appendTo('#editsection-qty');
+		$('#iconTemplate').tmpl({id: 'editsection-qty-save', classes: 'editsection', title: 'Finish editing', src: 'icons/accept.png'}).appendTo('#editsection-qty');		
 	    });
 	}
 
@@ -220,38 +168,6 @@ include('functions.php');
 
 	    });
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -441,44 +357,14 @@ include('functions.php');
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	function saveInfo(data) {
 	    if (data != null) {
-		var sendData = {
-		    "ingredient_id": ingredientId,
-		    "edit_type": "edit_info",
-		    "edit_val" : data
-		};
-	    
-		$.ajax({
-		    "dataType": 'json',
-		    "type": "GET",
-		    "url": "ajax_editable.php",
-		    "data": sendData,
-		    "success": function(data) {
-			if (data.error == 0) {
-			} else {
-			    alert(data.errmsg);
-			}
-		    }
+		new editableConnector({
+		    sendNow: true,
+		    type: 'ingredient',
+		    id: ingredientId,
+		    editType: 'edit_info',
+		    data: { 'edit_val' : data }
 		});
 	    }
 
@@ -638,230 +524,126 @@ include('functions.php');
 
 	$(function() {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/*XXXX */
-
-	$('#editsection-photos-edit').live('click', function() {
-	    switchPhotosToEdit();
-	    return false;
-	});
-	$('#editsection-photos-done').live('click', function() {
-	    switchPhotosToNormal();
-	    return false;
-	});
-
-
-
-
-
-
-
-	$('#editsection-nutri-edit').live('click', function() {
-	    switchNutritionalToEdit();
-	    return false;
-	});
-	$('#editsection-nutri-cancel').live('click', function() {
-	    switchNutritionalToNormal();
-	    return false;
-	});
-	$('#editsection-nutri-save').live('click', function() {
-		    // Save
-		    $('#ingredient_nutritional_information').find('.error-field').removeClass('error-field');
-		    delToolTip(null, 'error-nutri-tooltip');
-		    console.log($('#ingredient_nutri_form'));
-		    console.log($('#ingredient_nutri_form').serialize());
-		    $.ajax({
-			"dataType": 'json',
-			"type": "GET",
-			"url": "ajax_editable.php",
-			"data": $('#ingredient_nutri_form').serialize(),
-			"success": function(data) {
-			    //console.log(data);
+	    /*XXXX */
     
-			    if (data.error == 0) {
-				switchNutritionalToNormal();
-			    } else {
-				if ((data.errorRow == '') || (data.errorRow == -1)) {
-				    alert(data.errmsg);
-				    return;
-				}
-				
-				$('#'+data.errorRow).addClass('error-field');
-
-				addToolTip($('#field_'+data.errorRow).filter('input'), data.errmsg, 'error-nutri-tooltip');
-			    }
-			    
-			}
-		    });
-		    return false;
-	});
-	
-	
-	
-	
-	
-	
-	
-	
-	$('.remove-nutrient-field').live('click', function() {
-	    $(this).parent().parent().remove();
-	});
-	$('.add-nutrient-field').live('click', function() {
-	    $('#nutrientEditTemplate').tmpl({nutrients : [{qty: '', unit: '', Nutrient: {name: ''}}]}).insertAfter($(this).parent().parent());
-	    return false;
-	});
-	$('#editsection-additional-nutritional-edit').live('click', function() {
-	    switchNutrientsToEdit();
-	    return false;
-	});
-	$('#editsection-additional-nutritional-add').live('click', function() {
-	    $('#nutrientEditTemplate').tmpl({nutrients : [{qty: '', unit: '', Nutrient: {name: ''}}]}).appendTo('#nutrient_add_inputs');
-	    return false;
-	});
-	$('#editsection-additional-nutritional-cancel').live('click', function() {
-	    switchNutrientsToNormal();
-	    return false;
-	});
-	$('#editsection-additional-nutritional-save').live('click', function() {
-		    // Save
-		    $('#nutrient_add_inputs').find('.error-field').removeClass('error-field');
-
-		    delToolTip(null, 'error-nutrients-tooltip');
-
-		    $.ajax({
-			"dataType": 'json',
-			"type": "GET",
-			"url": "ajax_editable.php",
-			"data": $('#ingredient_nutrients_form').serialize(),
-			"success": function(data) {
-			    //console.log(data);
-    
-			    if (data.error == 0) {
-				switchNutrientsToNormal();
-			    } else {
-				if (data.errorRow < 0) {
-				    alert(data.errmsg);
-				    return;
-				}
-
-				$('#nutrient_add_inputs').children().eq(data.errorRow).addClass('error-field');
-				input = $('#nutrient_add_inputs').children().eq(data.errorRow).find('input[name^=nut_name]');
-				addToolTip(input, data.errmsg, 'error-nutrients-tooltip');
-			    }
-			    
-			}
-		    });
-		    return false;  
-	});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	    $('form').submit(function() {
-		$.ajax({
-		    type: "POST",
-		    timeout: 30000,
-		    /* in ms */
-		    url: this.action/* "ajax_form_ingredients.php" */,
-		    dataType: "json",
-		    data: $(this).serialize(),
-		    success: function(data) {
-			if (data.error == 0) {
-			} else {
-			    // ingredientId = -1;
-			    // printMsgs(data, 'error');
-			}
-		    },
-		    error: function(req, textstatus) {
-			alert('Request failed: ' + textstatus);
-		    }
-		});
+	    $('#editsection-photos-edit').live('click', function() {
+		switchPhotosToEdit();
 		return false;
+	    });
+	    $('#editsection-photos-done').live('click', function() {
+		switchPhotosToNormal();
+		return false;
+	    });
+    
+    
+    
+	    $('#editsection-qty-edit').live('click', function() {
+		switchQtyToEdit();
+		return false;
+	    });
+	    $('#editsection-qty-cancel').live('click', function() {
+		switchQtyToNormal();
+		return false;
+	    });
+	    $('#editsection-qty-save').live('click', function() {
+			// Save
+			$('#ingredient_qtys').find('.error-field').removeClass('error-field');
+			delToolTip(null, 'error-qtys-tooltip');
+			new editableConnector({
+			    sendNow: true,
+			    type: 'ingredient',
+			    id: ingredientId,
+			    editType: 'edit_qtys',
+			    data: $('#ingredient_qty_form').serialize(),
+			    success: 'switchQtyToNormal',
+			    error: function(data) {
+				if (data.errorRow != '') {
+				    $('#field_'+data.errorRow).parent().addClass('error-field');
+				    addToolTip($('#field_'+data.errorRow).filter('input'), data.errmsg, 'error-qtys-tooltip');
+				    return true;
+				}
+			    }
+			});
+    
+			return false;
+	    });
+    
+    
+    
+	    $('#editsection-nutri-edit').live('click', function() {
+		switchNutritionalToEdit();
+		return false;
+	    });
+	    $('#editsection-nutri-cancel').live('click', function() {
+		switchNutritionalToNormal();
+		return false;
+	    });
+	    $('#editsection-nutri-save').live('click', function() {
+			// Save
+			$('#ingredient_nutritional_information').find('.error-field').removeClass('error-field');
+			delToolTip(null, 'error-nutri-tooltip');
+			new editableConnector({
+			    sendNow: true,
+			    type: 'ingredient',
+			    id: ingredientId,
+			    editType: 'edit_nutritional',
+			    data: $('#ingredient_nutri_form').serialize(),
+			    success: 'switchNutritionalToNormal',
+			    error: function(data) {
+				if (data.errorRow != '') {
+				    $('#'+data.errorRow).addClass('error-field');
+				    addToolTip($('#field_'+data.errorRow).filter('input'), data.errmsg, 'error-nutri-tooltip');
+				    return true;
+				}
+			    }
+			});
+    
+			return false;
+	    });
+	    
+	    
+	    $('.remove-nutrient-field').live('click', function() {
+		$(this).parent().parent().remove();
+	    });
+	    $('.add-nutrient-field').live('click', function() {
+		$('#nutrientEditTemplate').tmpl({nutrients : [{qty: '', unit: '', Nutrient: {name: ''}}]}).insertAfter($(this).parent().parent());
+		return false;
+	    });
+	    $('#editsection-additional-nutritional-edit').live('click', function() {
+		switchNutrientsToEdit();
+		return false;
+	    });
+	    $('#editsection-additional-nutritional-add').live('click', function() {
+		$('#nutrientEditTemplate').tmpl({nutrients : [{qty: '', unit: '', Nutrient: {name: ''}}]}).appendTo('#nutrient_add_inputs');
+		return false;
+	    });
+	    $('#editsection-additional-nutritional-cancel').live('click', function() {
+		switchNutrientsToNormal();
+		return false;
+	    });
+	    $('#editsection-additional-nutritional-save').live('click', function() {
+			// Save
+			$('#nutrient_add_inputs').find('.error-field').removeClass('error-field');
+    
+			delToolTip(null, 'error-nutrients-tooltip');
+			new editableConnector({
+			    sendNow: true,
+			    type: 'ingredient',
+			    id: ingredientId,
+			    editType: 'edit_nutrients',
+			    data: $('#ingredient_nutrients_form').serialize(),
+			    success: 'switchNutrientsToNormal',
+			    error: function(data) {
+				if (data.errorRow >= 0) {
+				    $('#nutrient_add_inputs').children().eq(data.errorRow).addClass('error-field');
+				    input = $('#nutrient_add_inputs').children().eq(data.errorRow).find('input[name^=nut_name]');
+				    addToolTip(input, data.errmsg, 'error-nutrients-tooltip');
+				    return true;
+				}
+			    }
+			});
+    
+			return false;  
 	    });
 
 	    $('#loading-screen').overlay({
@@ -883,59 +665,31 @@ include('functions.php');
 	    $('#ingredient_info_header').click(activateEditor);
 
 
-
-
-
-
-
 	    // make other stuff editable
 	    $('#ingredient_name').editable(
 		function(value, settings) {
-    		    /* Clear errors */
 		    delToolTip($('#ingredient_name'));
-
 		    $('.error-field').removeClass('error-field');
 		    
-		    var sendData = {
-			"ingredient_id": ingredientId,
-			"edit_type": "edit_name",
-			"edit_val" : value
-		    };
-
-		    $.ajax( {
-			"dataType": 'json',
-			"type": "GET",
-			"url": "ajax_editable.php",
-			"data": sendData,
-			"success": function(data) {
-			    //console.log(data);
-    
-			    if (data.error == 0) {
-
-			    } else {
-				$('#ingredient_name').addClass('error-field');
-
-				addToolTip($('#ingredient_name'), data.errmsg);
-			    }
-			    
+		    new editableConnector({
+			sendNow: true,
+			type: 'ingredient',
+			id: ingredientId,
+			editType: 'edit_name',
+			data: { 'edit_val': value },
+			error: function(data) {
+			    $('#ingredient_name').addClass('error-field');
+			    addToolTip($('#ingredient_name'), data.errmsg);
+			    return true;
 			}
-		    } );
+		    });
+
 		    return(value);
 		},
 		{
-		    //onblur : 'ignore',
 		    tooltip   : 'Click to edit...'
 		}
 	    );
-
-
-
-
-
-
-
-
-
 
 
 	});
@@ -999,22 +753,47 @@ include('functions.php');
 		    <span>Quantities</span>
 		</h2>
 		<div id="ingredient_qtys" class="row clearfix">
-		    <div id="ingredient_qtyunit" class="leftfixed">
+		    <div class="leftfixed">
 			Quantity: 100g
 		    </div>
 
-		    <div id="ingredient_typical_qtyunit" class="rightfixed">
+		    <div class="rightfixed">
 			Typical unit weight: 550g
 		    </div>
 		</div>
 		<script id="ingredientQtysTemplate" type="text/x-jquery-tmpl">
-		    <div id="ingredient_qtyunit" class="leftfixed">
+		    <div class="leftfixed">
 			Quantity: ${qty}${unit}
 		    </div>
 
-		    <div id="ingredient_typical_qtyunit" class="rightfixed">
+		    <div class="rightfixed">
 			Typical unit weight: ${typical_qty}${typical_unit}
 		    </div>
+		</script>
+		<script id="ingredientQtysEditTemplate" type="text/x-jquery-tmpl">
+		    <form id="ingredient_qty_form" action="ajax_editable.php">
+			<div class="leftfixed">
+			    <label for="field_qty">Quantity: </label>
+			    <input type="text" size="5" name="field_qty" id="field_qty" value="${qty}"/>
+			    <select name="field_unit" id="field_unit" value="${unit}">
+				<option></option>
+				<option>g</option>
+				<option>ml</option>
+				<option>mg</option>
+				<option>kg</option>
+				<option>l</option>
+			    </select>
+			</div>
+			<div class="rightfixed">
+			    <label for="field_typical_qty">Typical unit weight: </label>
+			    <input type="text" size="5" name="field_typical_qty" id="field_typical_qty" value="${typical_qty}"/>
+			    <select name="field_typical_unit" id="field_typical_unit" value="${typical_unit}">
+				<option>g</option>
+				<option>mg</option>
+				<option>kg</option>
+			    </select>
+			</div>
+		    </form>
 		</script>
 
 		<h2 style="margin-bottom: 0px;">
@@ -1064,8 +843,8 @@ include('functions.php');
 			<div class="rightfixed">
 			    <table>
 				<tr>
-				    <td>&nbsp;</td>
-				    <td>&nbsp;</td>
+				    <td>&#160;</td>
+				    <td>&#160;</td>
 				</tr>
 				<tr>
 				    <td>of which sugars:</td>
@@ -1113,11 +892,12 @@ include('functions.php');
 		    </script>
 		    <script id="nutrientEditOuterTemplate" type="text/x-jquery-tmpl">
 			<form id="ingredient_nutrients_form" name="ingredient_nutrients_form" method="post" action="ajax_editable.php">
-			    {{tmpl '#hiddenFieldTemplate'}}
+			    
 			    <div id="nutrient_add_inputs">
 			    </div>
 			</form>
 		    </script>
+		    <!-- {{tmpl '#hiddenFieldTemplate'}} -->
 		    <script id="hiddenFieldTemplate" type="text/x-jquery-tmpl">
 			<input type="hidden" name="ingredient_id" value="${id}"/>
 			<input type="hidden" name="edit_type" value="${type}"/>
@@ -1202,6 +982,7 @@ include('functions.php');
 			<span>
 			    {{tmpl({id: ${$value.id}, classes: 'remove-photo-field', src: 'icons/cross.png', title: 'Remove this photo'}) "#iconTemplate"}}
 			</span>
+		    </div>
 		{{/each}}
 	    </script>
 	</div>

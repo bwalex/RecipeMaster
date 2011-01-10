@@ -229,10 +229,10 @@ function print_footer() {
 	echo '
 	<div id="footer" class="container_16 clearfix">
 	    <div style="text-align: left;" class="grid_2">
-		<a class="boring" href="http://validator.w3.org/check?uri=referer"><img class="boring" src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Transitional" height="31" width="88"/></a>
+		<a style="display: block;" class="boring" href="http://validator.w3.org/check?uri=referer"><img class="boring" src="icons/valid-html5.png" alt="Valid HTML 5" height="31" width="88"/></a>
 	    </div>
 	    <div class="grid_14">
-		<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br/>&copy; <span xmlns:cc="http://creativecommons.org/ns#">Alex Hornung</span> <!-- span: property="cc:attributionName" -->
+		<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br/>&copy; <span>Alex Hornung</span> <!-- span: property="cc:attributionName" -->
 		<!--<h4>&copy; 2010, 2011 Alex Hornung</h4>-->
 	    </div>
 	    <div id="lastfooter" class="container_16">

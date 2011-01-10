@@ -14,8 +14,8 @@ $output['errorRow'] = -1;
 
 try {
     $edit_type = $_REQUEST['edit_type'];
-    if ($_REQUEST['recipe_id']) {
-        $recipe_id = $_REQUEST['recipe_id'];
+    if ($_REQUEST['type'] == 'recipe') {
+        $recipe_id = $_REQUEST['id'];
     
         $recipe = new Recipe($recipe_id);
     
@@ -55,8 +55,8 @@ try {
         }
     
         $output['rowsaffected'] = $recipe->save(1);
-    } else if($_REQUEST['ingredient_id']) {
-        $ingredient_id = $_REQUEST['ingredient_id'];
+    } else if($_REQUEST['type'] == 'ingredient') {
+        $ingredient_id = $_REQUEST['id'];
     
         $ingredient = new Ingredient($ingredient_id);
 
