@@ -2,29 +2,16 @@
 include('functions.php');
 ?>
 
+<!--
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<!--
-TODO: font? http://en.wikipedia.org/wiki/Droid_(font)
-TODO: chart
-TODO: login
-TODO: load jquery via google APIs CDN
-TODO: use jqueryUI-only-necessary
-TODO: add serves N field
-TODO: add time estimate field
-TODO: add copy button
-
-
-TODO: Ketchup validation
-TODO: tesupload or so
-TODO: config file for db and thumb size, paths, etc
-TODO: replace jquery ui dialog with jquery tools overlay thingie?
-TODO: ajaxify show ingredients
 -->
+<!DOCTYPE HTML>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii"/>
+    <meta name="generator" content="HTML Tidy for Windows (vers 11 August 2008), see www.w3.org" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
 
     <title>Recipes : RecipeMaster</title>
     <style type="text/css" title="currentStyle">
@@ -240,7 +227,7 @@ TODO: ajaxify show ingredients
 
 
 	<div id="demo">
-	    <table cellpadding="0" cellspacing="0" border="0" class="display" id="recipe_data">
+	    <table class="tdatatable display" id="recipe_data">
 		<thead>
 		    <tr>
 			<th>Recipe</th>

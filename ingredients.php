@@ -2,17 +2,16 @@
 include('functions.php');
 ?>
 
+<!--
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<!--
-TODO: add a show ingredient page, possibly with some photos, etc
-TODO: add per-ingredient custom units (i.e. 1 glass) (XXX: probably not)
-TODO: add optional ingredients as dynamic list of extras, like ingredients in a recipe
- -->
- 
+-->
+<!DOCTYPE HTML>
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii"/>
+    <meta name="generator" content="HTML Tidy for Windows (vers 11 August 2008), see www.w3.org" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
 
     <title>Ingredients : RecipeMaster</title>
     <style type="text/css" title="currentStyle">
@@ -260,7 +259,7 @@ TODO: add optional ingredients as dynamic list of extras, like ingredients in a 
 	</div>
 
 	<div id="demo">
-	    <table cellpadding="0" cellspacing="0" border="0" class="display" id="ingredients_data">
+	    <table class="tdatatable display" id="ingredients_data">
 		<thead>
 		    <tr>
 			<th>Ingredient</th>

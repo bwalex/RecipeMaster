@@ -19,20 +19,6 @@ include('functions.php');
 			@import "css/demo_table.css";
     /*]]>*/
     </style>
-    
-    
-    
-    
-    
-    
-    
-
-
-
-
-
-
-
 
 
     <link type="text/css" href="css/style.css" rel="stylesheet"/>
@@ -816,7 +802,7 @@ include('functions.php');
 			</div>			
 		    </script>
 		    <script id="ingredientEditOuterTemplate" type="text/x-jquery-tmpl">
-			<form id="recipe_ingredients_form" name="recipe_ingredients_form" method="post" action="ajax_editable.php">
+			<form id="ingredients_edit_form" name="ingredients_edit_form" method="post" action="ajax_editable.php">
 			    <div id="ingredient_add_inputs">
 			    </div>
 			</form>
@@ -1013,6 +999,15 @@ include('functions.php');
 	    </div>
 	</div>
     </div>
+
+    <script id="iconTemplate" type="text/x-jquery-tmpl">
+	<a class="boring ${classes}" href="javascript:void(0);" id="${id}" title="${title}"> <!-- XXX:  onclick="switchNutrientsToEdit();"  -->
+	    <img class="boring" src="${src}" width="16" height="16" alt="(edit)"/>
+	</a>
+    </script>
+    <script id="divRowTemplate" type="text/x-jquery-tmpl">
+	<div id="${id}" class="row ${classes}"></div>
+    </script>
 
     <div class="spacer container_16"></div>
     <?php print_footer(); ?>
