@@ -835,7 +835,7 @@ include('functions.php');
 		<div id="recipe_nutrilabel">
 		    DUMMY_RECIPE_NUTRI_LABEL
 		</div>
-		<p class="noprint" align="center"><a href="#detailednutri" class="recipe detailed_nutri_link">View detailed nutritional information</a></p>
+		<p class="noprint" style="text-align: center;"><a href="#acc_content" class="recipe detailed_nutri_link">View detailed nutritional information</a></p>
 	    </div>
 	</div>
 
@@ -903,17 +903,16 @@ include('functions.php');
 
 
 	<div class="container_16 clearfix noprint">
-	    <a name="detailednutri" id="detailednutri"></a>
 	    <h2>
 		    <span class="editsection">
-			<a class="boring" href="#detailednutri" onclick="fnClickAddRow();" title="Add a row">
+			<a class="boring" href="javascript:void(0);" onclick="fnClickAddRow();" title="Add a row">
 			    <img class="boring" src="icons/add.png" alt="add a row"/>
 			</a>
 			<a class="boring" href="javascript:void(0);" onclick="saveChanges(1);" title="Save Changes">
 			    <img class="boring" src="icons/table_save.png" alt="save changes"/>
 			</a>
 		    </span>
-		    <span id="acc_head"><a style="text-decoration: none; color: #000000;" href="#detailednutri">Detailed Nutrition Facts and Sandbox</a></span>
+		    <span id="acc_head"><a style="text-decoration: none; color: #000000;" href="javascript:void(0);">Detailed Nutrition Facts and Sandbox</a></span>
 	    </h2>
 	    <div id="acc_content">
 		<!--
@@ -922,7 +921,7 @@ include('functions.php');
 		-->
 		<div id="nutri_info"></div>
 		<div id="demo">
-		    <table cellpadding="0" cellspacing="0" border="0" class="display" id="ingredients_data">
+		    <table class="tdatatable display" id="ingredients_data">
 			<thead>
 			    <tr>
 				<th>Ingredient</th>

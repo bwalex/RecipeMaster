@@ -19,6 +19,11 @@ input {
 	padding-left: 10px;
 }
 
+.tdatatable {
+	padding: 0;
+	border-spacing: 0;
+	border: none;
+}
 
 .photo-gallery ul {
 	list-style-type: none;
