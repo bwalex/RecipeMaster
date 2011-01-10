@@ -2,20 +2,16 @@
 include('functions.php');
 ?>
 
+<!--
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<!--
-TODO: add edit recipe button
-TODO: split ingredients into two columns
-inspiration: http://www.flickr.com/photos/87116893@N00/5292842186/ http://www.flickr.com/photos/87116893@N00/5292842186/sizes/o/in/photostream/
-TODO: add bullet points
-TODO: add print stuff
 -->
+<!DOCTYPE HTML>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta name="generator" content="HTML Tidy for Windows (vers 11 August 2008), see www.w3.org" />
-    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
 
     <title>Show Recipe : RecipeMaster</title>
     <style type="text/css" title="currentStyle">
@@ -57,6 +53,8 @@ TODO: add print stuff
     <script type="text/javascript" language="javascript" src="js/jquery.jeditable.mini.js">
     </script>
     <script type="text/javascript" language="javascript" src="jquery-tmpl/jquery.tmpl.min.js"></script>
+    <script type="text/javascript" language="javascript" src="qTip/jquery.qtip-1.0.0-rc3.min.js"></script>
+    <link type="text/css" href="qTip/jquery.qtip.css" rel="stylesheet"/>
 
     <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript" src="js/recipes.js">
@@ -81,11 +79,7 @@ TODO: add print stuff
 		return;
 
 	    $('#ingredient_add_inputs').children().filter('.error-field').removeClass('error-field');
-	    $('.error-ingredients-tooltip').each(function() {
-		$(this).data('tooltip').hide();
-		$(this).data('tooltip', null);
-		$(this).removeClass('error-ingredients-tooltip');
-	    });
+	    delToolTip(null, 'error-ingredients-tooltip');
 
 	    var a = $('<a class="boring editsection" id="recipe_ingredients_header" href="javascript:void(0);" title="Edit"></a>').replaceAll('#recipe_ingredients_header');
 	    a.click(function() {
@@ -115,8 +109,7 @@ TODO: add print stuff
 
 		$('#recipe_ingredients').empty();
 		var form = $('<form id="ingredients_edit_form" action="ajax_editable.php" method="post"></form>').appendTo('#recipe_ingredients');
-		form.append('<input type="hidden" name="recipe_id" value="'+recipeId+'"/>');
-		form.append('<input type="hidden" name="edit_type" value="edit_ingredients"/>');
+
 		var div = $('<div id="ingredient_add_inputs"></div>').appendTo(form);
 		if (recipe.ingredients.length > 0) {
 		    //$('#recipe_photos').append('<h2>Photos</h2>');
@@ -142,28 +135,18 @@ TODO: add print stuff
 		a.click(function() {
 		    // Save
 		    $('#ingredient_add_inputs').children().filter('.error-field').removeClass('error-field');
-		    $('.error-ingredients-tooltip').each(function() {
-			$(this).data('tooltip').hide();
-			$(this).data('tooltip', null);
-			$(this).removeClass('error-ingredients-tooltip');
-		    });
+		    delToolTip(null, 'error-ingredients-tooltip');
 		    $('input[name^="ing_method"]').trigger('focus');
-		    $.ajax({
-			"dataType": 'json',
-			"type": "GET",
-			"url": "ajax_editable.php",
-			"data": $('#ingredients_edit_form').serialize(),
-			"success": function(data) {
-			    //console.log(data);
-    
-			    if (data.error == 0) {
-				switchIngredientsToNormal();
-			    } else {
-				if (data.errorRow < 0) {
-				    alert(data.errmsg);
-				    return;
-				}
-				console.log($('#ingredient_add_inputs').children());
+
+		    new editableConnector({
+			sendNow: true,
+			type: 'recipe',
+			id: recipeId,
+			editType: 'edit_ingredients',
+			data: $('#ingredients_edit_form').serialize(),
+			success: 'switchIngredientsToNormal',
+			error: function(data) {
+			    if (data.errorRow >= 0) {
 				$('#ingredient_add_inputs').children().eq(data.errorRow).addClass('error-field');
 				
 				var input;
@@ -171,30 +154,13 @@ TODO: add print stuff
 				    input = $('#ingredient_add_inputs').children().eq(data.errorRow).children().filter('input[name^=ing_qty]');
 				else
 				    input = $('#ingredient_add_inputs').children().eq(data.errorRow).children().filter('input[name^=ing_name]');
-
-				input.attr('title', data.errmsg);
-				input.addClass('error-ingredients-tooltip');
-				input.tooltip({
-					position: "top center",
-					//offset: [10, 150],
-					events: {
-					    def: ',',
-					    input: ',',
-					    widget: ',',
-					    tooltip: ','
-					    
-					},
-					effect: "fade",
-					tipClass: "tooltip-arrow-black",
-					opacity: 1
-				});
-				input.data('tooltip').show();
-				//console.log(data.errorRow);
-				//console.log(oTable.fnGetNodes(data.errorRow));
+				
+				addToolTip(input, data.errmsg, 'error-ingredients-tooltip');
+				return true;
 			    }
-			    
 			}
 		    });
+
 		    return false;  
 		});
 		a.append('<img class="boring" src="icons/accept.png" width="16" height="16" alt="Finish Editing">');
@@ -341,10 +307,7 @@ TODO: add print stuff
 	    /* Clear errors */
 	    $(oTable.fnGetNodes()).filter('.error-row').each(function() {
 		$('td', this).slice(0, 2).each(function() {
-		    if ($(this).data('tooltip')) {
-			$(this).data('tooltip').hide();
-			$(this).data('tooltip', null);
-		    }
+		    delToolTip($(this));
 		});
 	    });
 	    $(oTable.fnGetNodes()).filter('.error-row').removeClass('error-row');
@@ -382,23 +345,7 @@ TODO: add print stuff
 		    } else {
 			$(oTable.fnGetNodes(data.errorRow)).addClass('error-row');
 			errorCol = data.errorCol;
-			$('td', oTable.fnGetNodes(data.errorRow)).slice(errorCol, errorCol + 1).attr('title', data.errmsg);
-			$('td', oTable.fnGetNodes(data.errorRow)).slice(errorCol, errorCol + 1).tooltip({
-			    position: "top center",
-			    events: {
-				def: ',',
-				input: ',',
-				widget: ',',
-				tooltip: ','
-
-			    },
-			    effect: "fade",
-			    tipClass: "tooltip-arrow-black",
-			    opacity: 1
-			});
-			$('td', oTable.fnGetNodes(data.errorRow)).slice(errorCol, errorCol + 1).data('tooltip').show();
-			//console.log(data.errorRow);
-			//console.log(oTable.fnGetNodes(data.errorRow));
+			addToolTip($('td', oTable.fnGetNodes(data.errorRow)).slice(errorCol, errorCol + 1), data.errmsg);
 		    }
 
 		}
@@ -434,23 +381,12 @@ TODO: add print stuff
 
 	function savePreparation(data) {
 	    if (data != null) {
-		var sendData = {
-		    "recipe_id": recipeId,
-		    "edit_type": "edit_preparation",
-		    "edit_val" : data
-		};
-	    
-		$.ajax({
-		    "dataType": 'json',
-		    "type": "GET",
-		    "url": "ajax_editable.php",
-		    "data": sendData,
-		    "success": function(data) {
-			if (data.error == 0) {
-			} else {
-			    alert(data.errmsg);
-			}
-		    }
+		new editableConnector({
+		    sendNow: true,
+		    type: 'recipe',
+		    id: recipeId,
+		    editType: 'edit_preparation',
+		    data: { 'edit_val' : data }
 		});
 	    }
 
@@ -630,59 +566,24 @@ TODO: add print stuff
 	    $('#recipe_name').editable(
 		function(value, settings) {
     		    /* Clear errors */
-
-		    if ($('#recipe_name').data('tooltip')) {
-			$('#recipe_name').data('tooltip').hide();
-			$('#recipe_name').data('tooltip', null);
-		    }
-
+		    delToolTip($('#recipe_name'));
 		    $('.error-field').removeClass('error-field');
-		    
-		    var sendData = {
-			"recipe_id": recipeId,
-			"edit_type": "edit_name",
-			"edit_val" : value
-		    };
-
-		    $.ajax( {
-			"dataType": 'json',
-			"type": "GET",
-			"url": "ajax_editable.php",
-			"data": sendData,
-			"success": function(data) {
-			    //console.log(data);
-    
-			    if (data.error == 0) {
-
-			    } else {
-				$('#recipe_name').addClass('error-field');
-
-				$('#recipe_name').attr('title', data.errmsg);
-				$('#recipe_name').tooltip({
-					position: "top left",
-					offset: [10, 150],
-					events: {
-					    def: ',',
-					    input: ',',
-					    widget: ',',
-					    tooltip: ','
-					    
-					},
-					effect: "fade",
-					tipClass: "tooltip-arrow-black",
-					opacity: 1
-				});
-				$('#recipe_name').data('tooltip').show();
-				//console.log(data.errorRow);
-				//console.log(oTable.fnGetNodes(data.errorRow));
-			    }
-			    
+		    new editableConnector({
+			sendNow: true,
+			type: 'recipe',
+			id: recipeId,
+			editType: 'edit_name',
+			data: { 'edit_val': value },
+			error: function(data) {
+			    $('#recipe_name').addClass('error-field');
+			    addToolTip($('#recipe_name'), data.errmsg);
+			    return true;
 			}
-		    } );
+		    });
+
 		    return(value);
 		},
 		{
-		    //onblur : 'ignore',
 		    tooltip   : 'Click to edit...'
 		}
 	    );
@@ -690,62 +591,28 @@ TODO: add print stuff
 	    $('#recipe_serves').editable(
 		function(value, settings) {
     		    /* Clear errors */
-
-		    if ($('#recipe_serves').data('tooltip')) {
-			$('#recipe_serves').data('tooltip').hide();
-			$('#recipe_serves').data('tooltip', null);
-		    }
-
+		    delToolTip($('#recipe_serves'));
 		    $('.error-field').removeClass('error-field');
-		    
-		    var sendData = {
-			"recipe_id": recipeId,
-			"edit_type": "edit_serves",
-			"edit_val" : value
-		    };
-
-		    $.ajax( {
-			"dataType": 'json',
-			"type": "GET",
-			"url": "ajax_editable.php",
-			"data": sendData,
-			"success": function(data) {
-			    //console.log(data);
-    
-			    if (data.error == 0) {
-				populatePage();
-			    } else {
-				$('#recipe_serves').addClass('error-field');
-
-				$('#recipe_serves').attr('title', data.errmsg);
-				$('#recipe_serves').tooltip({
-					position: "top left",
-					offset: [0, 150],
-					events: {
-					    def: ',',
-					    input: ',',
-					    widget: ',',
-					    tooltip: ','
-					    
-					},
-					effect: "fade",
-					tipClass: "tooltip-arrow-black",
-					opacity: 1
-				});
-				$('#recipe_serves').data('tooltip').show();
-				//console.log(data.errorRow);
-				//console.log(oTable.fnGetNodes(data.errorRow));
-			    }
-			    
+		    new editableConnector({
+			sendNow: true,
+			type: 'recipe',
+			id: recipeId,
+			editType: 'edit_serves',
+			data: { 'edit_val': value },
+			success: 'populatePage',
+			error: function(data) {
+			    $('#recipe_serves').addClass('error-field');
+			    addToolTip($('#recipe_serves'), data.errmsg);
+			    return true;
 			}
-		    } );
+		    });
+
 		    return 'Serves ' + value;
 		},
 		{
 		    //onblur : 'ignore',
 		    tooltip   : 'Click to edit...',
 		        data: function(value, settings) {
-			    /* Convert <br> to newline. */
 			    return value.replace('Serves ', '');
 			}
 		}

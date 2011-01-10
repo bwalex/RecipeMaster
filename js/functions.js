@@ -125,10 +125,12 @@ function delToolTip(jqi, className) {
 	e = $('.'+className);
 	e.removeClass(className);
     }
-    e.each(function() {
-	if ($(this).data('qtip'))
-	    $(this).qtip('destroy');
-    });
+    if (e) {
+	e.each(function() {
+	    if ($(this).data('qtip'))
+		$(this).qtip('destroy');
+	});
+    }
 
 }
 
