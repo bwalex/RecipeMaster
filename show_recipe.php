@@ -56,7 +56,7 @@ include('functions.php');
 	var origHTML = '';
 	var RMConfig = {
 	    photoViewer : "<?php echo $globalConfig['photo']['Viewer'] ?>",
-	    richEditor : "<?php echo $globalConfig['text']['richEditor'] ?>",
+	    richEditor : "<?php echo $globalConfig['text']['richEditor'] ?>"
 	}
 
 
@@ -316,11 +316,11 @@ include('functions.php');
 		    //console.log(data);
 		    if (data.error == 0) {
 			/* Update the table, row by row */
-			console.log(data.deletedRows);
+			//console.log(data.deletedRows);
 			for (var i in data.deletedRows) {
 			    oTable.fnDeleteRow(data.deletedRows[i]-i);
 			}
-			console.log(data.aaData);
+			//console.log(data.aaData);
 			for (var i in data.aaData) {
 			    oTable.fnUpdate(data.aaData[i], i);
 			}
@@ -445,7 +445,7 @@ include('functions.php');
 				    //image : 'themes/default/img/icons/save.gif',
 				    image : 'icons/page_save.png',
 				    onclick : function() {
-					    console.debug($(this).html());
+					    //console.debug($(this).html());
 					    html = $(this).html();
 					    this.remove();
 					    savePreparation(html);
@@ -483,7 +483,7 @@ include('functions.php');
 			html = editor.getData();
 			editor.destroy();
 		    }
-		    console.log(html);
+		    //console.log(html);
 		    savePreparation(html);
 		    return false;
 		});

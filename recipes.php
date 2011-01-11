@@ -42,7 +42,7 @@ include('functions.php');
 	var api;
 	var recipeId = -1;
 	var RMConfig = {
-	    photoViewer : "<?php echo $globalConfig['photo']['Viewer'] ?>",
+	    photoViewer : "<?php echo $globalConfig['photo']['Viewer'] ?>"
 	}
 	hs.showCredits = false;
 	hs.zIndexCounter = 2000;

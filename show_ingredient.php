@@ -60,7 +60,7 @@ include('functions.php');
 	var origHTML = '';
 	var RMConfig = {
 	    photoViewer : "<?php echo $globalConfig['photo']['Viewer'] ?>",
-	    richEditor : "<?php echo $globalConfig['text']['richEditor'] ?>",
+	    richEditor : "<?php echo $globalConfig['text']['richEditor'] ?>"
 	}
 
 
@@ -189,19 +189,19 @@ include('functions.php');
 				alert(data.exception);
 				return;
 			    }
-			    console.log(data.objects);
+			    //console.log(data.objects);
 			    response(data.objects);
 			}
 		    });
 		},
 		select: function(event, ui) {
 		    var val = ui.item.value;
-		    console.log(val);
+		    //console.log(val);
 		    var idx = val.lastIndexOf('(');
 		    var unit = val.substr(idx+1, val.length-2-idx);
-		    console.log(unit);
+		    //console.log(unit);
 		    ui.item.value = val.substr(0, idx -1);
-		    console.log(ui.item.value);
+		    //console.log(ui.item.value);
 		    $(this).parent().parent().find('.nut-unit').text(unit);
 		},
 		minLength: 1
@@ -243,7 +243,7 @@ include('functions.php');
 		    return;
 		}
 
-		console.log($('#ingredient_nutritional_information'));
+		//console.log($('#ingredient_nutritional_information'));
 
 		$('#ingredient_nutri_form').find('input').remove();
 		$('#hiddenFieldTemplate').tmpl({id: ingredientId, type: 'edit_nutritional'}).appendTo('#ingredient_nutri_form');
@@ -474,7 +474,7 @@ include('functions.php');
 				    //image : 'themes/default/img/icons/save.gif',
 				    image : 'icons/page_save.png',
 				    onclick : function() {
-					    console.debug($(this).html());
+					    //console.debug($(this).html());
 					    html = $(this).html();
 					    this.remove();
 					    saveInfo(html);
@@ -512,7 +512,7 @@ include('functions.php');
 			html = editor.getData();
 			editor.destroy();
 		    }
-		    console.log(html);
+		    //console.log(html);
 		    saveInfo(html);
 		    return false;
 		});

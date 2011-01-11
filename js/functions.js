@@ -43,7 +43,7 @@ function editableConnector(settings) {
 	    this.sendData.id = this.id;
 	    this.sendData.edit_type = this.editType;
 	}
-	console.log(this);
+	//console.log(this);
 	$.ajax({
 	    "dataType": 'json',
 	    "type": "GET",
@@ -51,7 +51,7 @@ function editableConnector(settings) {
 	    "data": this.sendData,
 	    "context": this,
 	    "success": function(data) {
-		console.log(this);
+		//console.log(this);
 		if (data.error != 0) {
 		    var r = false;
 		    if (typeof(this.error) == 'function')
@@ -170,7 +170,7 @@ function createPhoto(photo, thumb, caption) {
 }
 
 function enableLightbox(jqi) {
-    console.log(jqi);
+    //console.log(jqi);
     if (RMConfig.photoViewer == 'fancybox') {
 	jqi.fancybox();
     } else if (RMConfig.photoViewer == 'colorbox') {
@@ -216,7 +216,7 @@ function createPhotoRow(parentType, parentId, photoId, photo, thumb, caption) {
 		"url": "ajax_form_photos.php",
 		"data": sendData,
 		"success": function(data) {
-		    console.log(this);
+		    //console.log(this);
 		    if (data.error == 0) {
 		    } else {
 			alert(data.errmsg);
