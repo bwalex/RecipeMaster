@@ -1,3 +1,11 @@
+#recipe_ingredients ul li {
+	padding-top: 10px;
+}
+
+#recipe_preparation ol li {
+	padding-top: 10px;
+}
+
 input {
 	background-color: white;
 	border-color: #666;
