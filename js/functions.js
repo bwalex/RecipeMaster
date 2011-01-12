@@ -46,7 +46,7 @@ function editableConnector(settings) {
 	//console.log(this);
 	$.ajax({
 	    "dataType": 'json',
-	    "type": "GET",
+	    "type": "POST",
 	    "url": "ajax_editable.php",
 	    "data": this.sendData,
 	    "context": this,
