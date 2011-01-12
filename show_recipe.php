@@ -851,7 +851,7 @@ include('functions.php');
 	    </div>
 	</div>
 
-	<div class="container_16 clearfix">
+	<div class="container_16 clearfix noprint">
 	    <h2>
 	    	<span class="editsection">
 		    <a class="boring editsection" href="javascript:void(0);" id="recipe_photo_header" onclick="switchPhotosToEdit();" title="Edit">

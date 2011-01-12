@@ -84,10 +84,10 @@ div#lastfooter {
 
 body {
 	
-	font: 80.5% "Trebuchet MS", sans-serif;
+	/* font: 100.5% "Trebuchet MS", sans-serif; */
 	
-	/*font-family: Cantarell,"Droid Sans",Verdana,sans-serif;
-	font-size: 75.5%;*/
+	font-family: Cantarell,"Droid Sans",Verdana,sans-serif;
+	font-size: 115.5%;
 	/*margin: 50px;*/
 	background-color: #CCCCCC;
 }
