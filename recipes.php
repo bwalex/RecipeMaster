@@ -130,7 +130,7 @@ include('functions.php');
 
 	    $('#dialog').dialog({
 		autoOpen: false,
-		width: 625,
+		width: 625
 	    });
 
 	    // Dialog Link
