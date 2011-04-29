@@ -159,7 +159,6 @@ include('functions.php');
 		$( "#nutrient_add_inputs" ).sortable({
 			placeholder: "sortable-placeholder"
 		});
-		$( "#nutrient_add_inputs" ).disableSelection();
 		$('#divRowTemplate').tmpl({id: 'editsection-additional-nutritional-add-row'}).appendTo('#ingredient_nutrients_form');
 		$('#iconTemplate').tmpl({id: 'editsection-additional-nutritional-add', title: 'Add a row', src: 'icons/add.png'}).appendTo('#editsection-additional-nutritional-add-row');
 

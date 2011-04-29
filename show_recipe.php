@@ -106,7 +106,6 @@ include('functions.php');
 		$( "#ingredient_add_inputs" ).sortable({
 			placeholder: "sortable-placeholder"
 		});
-		$( "#ingredient_add_inputs" ).disableSelection();
 
 		var div = $('<div class="row"></div>').appendTo('#recipe_ingredients');
 		var a = $('<a class="boring" href="javascript:void(0);"></a>').appendTo(div);
