@@ -112,6 +112,7 @@ include('functions.php');
 
 	    oTable = $('#recipe_data').dataTable({
 		//"bJQueryUI": true,
+		"iDisplayLength": '25',
 		"sPaginationType": "full_numbers",
 		//"bServerSide": true, /* XXX: temporary workaround, since ordering is broken on serverside */
 		"bProcessing": true,

@@ -149,6 +149,7 @@ include('functions.php');
 
 	    oTable = $('#ingredients_data').dataTable({
 		//"bJQueryUI": true,
+		"iDisplayLength": '25',
 		"sPaginationType": "full_numbers",
 		"bServerSide": true,
 		"bProcessing": true,
